@@ -19,6 +19,19 @@
         });
       }
 
+      function errMsg(e) {
+        if (e.message) {
+          return e.message;
+        } else if (e instanceof pyodide.FS.ErrnoError) {
+          const code = Object.entries(pyodide.ERRNO_CODES).find(
+            ([_, c]) => c == e.errno);
+          if (code) {
+            return `File system error code: ${code[0]}`;
+          }
+        }
+        return e.toString();
+      }
+
       const shared = { inFileName: null, outFileName: null };
       const scriptPane = document.getElementById('script-pane');
       scriptPane.value = [
@@ -58,11 +71,10 @@
           elem.click();        
           document.body.removeChild(elem);
         } catch (e) {
-          // TODO: Figure out how errno errors work from the memfs and get the'
-          // actual error messages instead of a useless generic error.
+          const msg = errMsg(e);
           console.error(e);
-          console.error(e.stack);
-          outputPane.value = e.message;
+          console.error(msg);
+          outputPane.value = msg;
         }
       }
 

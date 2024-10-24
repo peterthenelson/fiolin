@@ -1,7 +1,6 @@
 This is very partial; I have a running notes google doc that has more stuff, but
 these are more concrete programming tasks:
 
-- Properly display errors from the filesystem.
 - Move script to a worker (also unsure how CSPs interact with that and if so, if
   there's any advantage to making it a worker within a child frame). I think I
   need to migrate to WORKERFS or something if that's the case? Maybe?
