@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.3/full/pyodide.js"></script>
+  </head>
+  <body>
+    <div style="display: flex; flex-direction: column; justify-content: center; ">
+      <textarea id="script-pane" style="font-family: monospace; width: 48em;" rows="10"></textarea>
+      <input type="file" id="file-chooser" disabled />
+      <textarea id="output-pane" style="font-family: monospace; width: 48em;" rows="10" disabled></textarea>
+    </div>
+    <script type="text/javascript">
+      const scriptPane = document.getElementById('script-pane');
+      scriptPane.value = [
+        "import js",
+        "import os",
+        "import os.path",
+        "infname = os.path.join('/input', js.inFileName)",
+        "js.outFileName = js.inFileName + '-copy'",
+        "outfname = os.path.join('/output', js.outFileName)",
+        "for filename in os.listdir('/input'):",
+        "  print('/input', filename)",
+        "for filename in os.listdir('/output'):",
+        "  print('/output', filename)",
+        "with open(infname, 'rb') as infile:",
+        "  print(f'opened {infname} (to read)')",
+        "  with open(outfname, 'wb') as outfile:",
+        "    print(f'opened {outfname} (to write)')",
+        "    outfile.write(infile.read())",
+        "  print('copied input to output')",
+      ].join('\n');
+      const fileChooser = document.getElementById('file-chooser');
+      const outputPane = document.getElementById('output-pane');
+      outputPane.value = 'Loading...';
+      const worker = new Worker('./worker.js');
+
+      function run() {
+        outputPane.value = '';
+        const file = fileChooser.files[0];
+        worker.postMessage({ type: 'RUN', file, script: scriptPane.value });
+      }
+
+      worker.onerror = (e) => {
+        // WTF type is e?
+        console.error(e);
+        outputPane.value = e.toString();
+      };
+
+      worker.onmessage = (e) => {
+        if (e.data.type === 'LOADED') {
+          outputPane.value = 'Loaded';
+          fileChooser.disabled = false;
+          fileChooser.onchange = run;
+        } else if (e.data.type === 'STDOUT') {
+          outputPane.value += e.data.value + '\n';
+        } else if (e.data.type === 'STDERR') {
+          console.warn(e.data.value);
+          outputPane.value += e.data.value + '\n';
+        } else if (e.data.type === 'SUCCESS') {
+          const elem = window.document.createElement('a');
+          elem.href = window.URL.createObjectURL(e.data.file);
+          elem.download = e.data.fileName;
+          document.body.appendChild(elem);
+          elem.click();        
+          document.body.removeChild(elem);
+        } else if (e.data.type === 'ERROR') {
+          console.warn(e.data.error);
+          outputPane.value = e.data.error.toString();
+        } else {
+          const msg = `Unexpected event data: ${e.data}`;
+          outputPane.value = msg;
+          console.error(msg);
+        }
+      };
+    </script>
+  </body>
+</html>
