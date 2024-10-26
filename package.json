@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "nitro build",
+    "dev": "nitro dev",
+    "fake3p": "cross-env PORT=3001 nitro dev --dir fake3p",
+    "prepare": "nitro prepare",
+    "preview": "node .output/server/index.mjs"
+  },
+  "devDependencies": {
+    "nitropack": "latest"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3"
+  }
+}

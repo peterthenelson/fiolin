@@ -43,9 +43,13 @@ self.onmessage = async (e) => {
     self.pyodide.FS.writeFile(`/input/${shared.inFileName}`, inBytes);
     await self.pyodide.loadPackagesFromImports(script);
     await self.pyodide.runPythonAsync(script);
-    const outBytes = self.pyodide.FS.readFile(`/output/${shared.outFileName}`);
-    const blob = new Blob([outBytes], {type: 'application/octet-stream'});
-    postMessage({ type: 'SUCCESS', file: blob, fileName: shared.outFileName });
+    if (shared.outFileName) {
+      const outBytes = self.pyodide.FS.readFile(`/output/${shared.outFileName}`);
+      const blob = new Blob([outBytes], {type: 'application/octet-stream'});
+      postMessage({ type: 'SUCCESS', file: blob, fileName: shared.outFileName });
+    } else {
+      postMessage({ type: 'SUCCESS', file: null, fileName: null });
+    }
   } catch (e) {
     postMessage({ type: 'ERROR', error: e });
   }

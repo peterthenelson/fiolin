@@ -1,0 +1,5 @@
+{
+  "title": "Example Script",
+  "description": "Prints \"hello world!\" and ignores the file input.",
+  "py": "print('hello world!')"
+}
