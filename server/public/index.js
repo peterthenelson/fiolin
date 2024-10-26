@@ -5,25 +5,28 @@ const fileChooser = document.getElementById('file-chooser');
 const outputPane = document.getElementById('output-pane');
 outputPane.value = 'Loading...';
 const worker = new Worker('./worker.js');
+const defaultScript = `# Basic script that copies input to output
+import js
+import os.path
+
+infname = os.path.join('/input', js.inFileName)
+stem, ext = os.path.splitext(js.inFileName)
+js.outFileName = stem + '-copy' + ext
+outfname = os.path.join('/output', js.outFileName)
+
+with open(infname, 'rb') as infile:
+  print(f'opened {infname} (to read)')
+  with open(outfname, 'wb') as outfile:
+    print(f'opened {outfname} (to write)')
+    outfile.write(infile.read())
+  print('copied input to output')
+`;
 
 async function fetchScript() {
   const s = (new URLSearchParams(window.location.search)).get('s');
   if (s === null) {
     scriptSrc.textContent = 'Script playground:';
-    scriptPane.value = [
-      "# Basic script that copies input to output",
-      "import js",
-      "import os.path",
-      "infname = os.path.join('/input', js.inFileName)",
-      "js.outFileName = js.inFileName + '-copy'",
-      "outfname = os.path.join('/output', js.outFileName)",
-      "with open(infname, 'rb') as infile:",
-      "  print(f'opened {infname} (to read)')",
-      "  with open(outfname, 'wb') as outfile:",
-      "    print(f'opened {outfname} (to write)')",
-      "    outfile.write(infile.read())",
-      "  print('copied input to output')",
-    ].join('\n');
+    scriptPane.value = defaultScript;
     return;
   }
   try {
