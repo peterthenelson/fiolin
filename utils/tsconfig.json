@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist"
+  },
+  "extends": "../tsconfig.fiolin-base.json",
+  "include": ["**/*"],
+  "references": [
+    {
+      "path": "../common"
+    }
+  ]
+}
