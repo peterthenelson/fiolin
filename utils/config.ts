@@ -4,26 +4,21 @@ import { readdirSync, readFileSync } from 'node:fs';
 // TODO: Use __dirname or import.meta.dirname instead of assuming the current
 // working directory is the project root.
 
-export async function loadScript(name: string): Promise<FiolinScript> {
+export function loadScript(name: string): FiolinScript {
   // TODO: Better 'not found' error message.
-  const module = await import(`../fiols/${name}.ts`);
+  // TODO: Validate
+  const template = (JSON.parse(readFileSync(`fiols/${name}.fiol`, 'utf-8')) as FiolinScriptTemplate);
   const python = readFileSync(`fiols/${name}.py`, 'utf-8');
-  if (Object.hasOwn(module, 'config')) {
-    // TODO: Validate
-    const template: FiolinScriptTemplate = (module.config as FiolinScriptTemplate);
-    return { python, ...template };
-  } else {
-    throw new Error(`Expected ../fiols/${name}.ts to export config`)
-  }
+  return { python, ...template };
 }
 
 export async function loadAll(): Promise<Record<string, FiolinScript>> {
   const files = readdirSync('fiols');
   const scripts: Record<string, FiolinScript> = {};
   for (const f of files) {
-    if (f.endsWith('.ts') && !f.endsWith('.test.ts')) {
-      const name = f.substring(0, f.length - 3);
-      scripts[name] = await loadScript(name);
+    if (f.endsWith('.fiol')) {
+      const name = f.substring(0, f.length - 5);
+      scripts[name] = loadScript(name);
     }
   }
   return scripts;

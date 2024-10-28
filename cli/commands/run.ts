@@ -44,7 +44,7 @@ export default defineCommand({
     }
   },
   async run({ args }) {
-    const script = await loadScript(args.name);
+    const script = loadScript(args.name);
     const runner = new PyodideRunner(script, console);
     const inputs = validateInputs(args.input);
     const { outputDir, argv } = args;

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022", "webworker"],
+    "rootDir": ".",
+    "outDir": "./dist",
+    "skipLibCheck": true,
+  },
+  "extends": "../tsconfig.fiolin-base.json",
+  "include": ["worker.ts"],
+  "references": [
+    {
+      "path": "../common"
+    },
+    {
+      "path": "../web-utils"
+    }
+  ]
+}

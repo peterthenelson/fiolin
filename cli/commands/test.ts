@@ -22,7 +22,7 @@ export default defineCommand({
   async run({ args }) {
     let scripts: Record<string, FiolinScript> = {};
     if (args.name) {
-      const script = await loadScript(args.name);
+      const script = loadScript(args.name);
       scripts = { [args.name]: script };
     } else {
       scripts = await loadAll();
