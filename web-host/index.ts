@@ -1,5 +1,7 @@
 import { RunMessage, WorkerMessage } from '../web-utils/types';
 import { getErrMsg, toErr } from '../web-utils/errors';
+import { asFiolinScript } from '../common/parse';
+import { FiolinScript } from '../common/types';
 
 function getElementByIdAs<T extends HTMLElement>(id: string, cls: new (...args: any[])=> T): T {
   const elem = document.getElementById(id);
@@ -56,9 +58,10 @@ async function fetchScript() {
     const resp = await fetch(s);
     const parsed = await resp.json();
     console.log(parsed);
-    scriptSrc.textContent = parsed['title'];
-    scriptSrc.title = parsed['description'];
-    scriptPane.value = parsed['py'];
+    const script: FiolinScript = asFiolinScript(parsed);
+    scriptSrc.textContent = script.meta.title;
+    scriptSrc.title = script.meta.description;
+    scriptPane.value = script.code.python;
   } catch (e) {
     console.log('Failed to fetch script!');
     const err = toErr(e);

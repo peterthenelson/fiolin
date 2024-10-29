@@ -18,7 +18,7 @@ export interface FiolinScriptMeta {
 }
 
 // How the fiolin UI is meant to communicate with the embedded script.
-export interface FiolinScriptUi {
+export interface FiolinScriptInterface {
   // Does the script take 0, 1, or >=1 files as input?
   inputFiles: 'NONE' | 'SINGLE' | 'MULTI';
   // Does the script produce 0, 1, or >=1 files as input?
@@ -32,21 +32,28 @@ export interface FiolinScriptRuntime {
   // TODO: extend w/stuff about wasm, utilities, libraries, etc.
 }
 
+// The actual script to run. Currently just a string with python, but leaving it
+// as an object in case I want to give multiple options or extend it.
+export interface FiolinScriptCode {
+  // Python script contents.
+  python: string;
+}
+
 // The JSON format that defines a fiolin script. This is the object type meant
 // to be served on your github.io site.
 export interface FiolinScript {
   // Metadata (some user-visible).
   meta: FiolinScriptMeta;
-  // Defines the IO for the script.
-  interface: FiolinScriptUi;
+  // Defines the UI and IO for the script.
+  interface: FiolinScriptInterface;
   // Defines the python/wasm setup for the script.
   runtime: FiolinScriptRuntime;
-  // The actual python script to run.
-  python: string;
+  // The actual script to run.
+  code: FiolinScriptCode;
 }
 
 // Used internally to allow putting the python in a separate file.
-export type FiolinScriptTemplate = Omit<FiolinScript, 'python'>;
+export type FiolinScriptTemplate = Omit<FiolinScript, 'code'>;
 
 // Used for encapsulating running a script (either for use w/run-fiolin or for
 // the testing framework).

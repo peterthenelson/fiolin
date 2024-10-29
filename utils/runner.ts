@@ -48,8 +48,8 @@ export class PyodideRunner implements FiolinRunner {
         const inBytes = readFileSync(request.inputs[0]);
         this._pyodide!.FS.writeFile(`/input/${this._shared.inFileName}`, inBytes);
       }
-      await this._pyodide!.loadPackagesFromImports(this._script.python);
-      await this._pyodide!.runPythonAsync(this._script.python);
+      await this._pyodide!.loadPackagesFromImports(this._script.code.python);
+      await this._pyodide!.runPythonAsync(this._script.code.python);
       const response: FiolinRunResponse = {
         outputs: [],
         stdout: this._stdout,

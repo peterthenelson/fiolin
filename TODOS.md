@@ -1,6 +1,5 @@
 This is very partial; I have a running notes google doc that has more stuff, but
-these are more concrete programming tasks:
-
+these are more concrete programming TODOs:
 - Get unjs/nitro#2814 merged/released and then revert my local changes to nitro
 - Get some other emscripten binary working in the same file-system as pyodide.
   (xpdf? imagemagick?)

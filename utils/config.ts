@@ -1,13 +1,14 @@
 import { FiolinScript, FiolinScriptTemplate } from '../common/types';
 import { readdirSync, readFileSync } from 'node:fs';
 import { pkgPath } from './pkg-path';
+import { asFiolinScript } from '../common/parse';
 
 export function loadScript(name: string): FiolinScript {
   const templatePath = pkgPath(`fiols/${name}.fiol`);
-  // TODO: Validate that it's a FiolinScriptTemplate.
-  const template = (JSON.parse(readFileSync(templatePath, 'utf-8')) as FiolinScriptTemplate);
+  const template = JSON.parse(readFileSync(templatePath, 'utf-8'));
   const python = readFileSync(pkgPath(`fiols/${name}.py`), 'utf-8');
-  return { python, ...template };
+  const script = { code: { python }, ...template };
+  return asFiolinScript(script);
 }
 
 export async function loadAll(): Promise<Record<string, FiolinScript>> {
