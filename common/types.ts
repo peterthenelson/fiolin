@@ -77,7 +77,7 @@ export interface FiolinJsGlobal {
 }
 
 export interface FiolinRunner {
-  run(request: FiolinRunRequest, onComplete: (response: FiolinRunResponse) => void): Promise<void>;
+  run(request: FiolinRunRequest): Promise<FiolinRunResponse>;
 }
 
 // Used for testing the scripts that ship w/Fiolin itself.

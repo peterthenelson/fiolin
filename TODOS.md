@@ -3,8 +3,8 @@ these are more concrete programming TODOs:
 - Get unjs/nitro#2814 merged/released and then revert my local changes to nitro
 - Get some other emscripten binary working in the same file-system as pyodide.
   (xpdf? imagemagick?)
-- Set up tests involving the web server(s) and selenium or something along those
-  lines to check that the security properties hold.
+- Set up tests involving the web server(s) and playwright to check that the
+  security properties hold.
 - Get regular jest tests setup using the PyodideRunner (and more specifically
   add a test for unlock-ppt)
 - Add minification to the rollup config

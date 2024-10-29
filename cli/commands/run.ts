@@ -3,7 +3,7 @@
 // $ npx jiti cli/cli.ts run unlock-ppt --input locked.ppt --outputDir .
 import { loadScript } from '../../utils/config';
 import { PyodideRunner } from '../../utils/runner';
-import { FiolinRunRequest } from '../../common/types';
+import { FiolinRunRequest, FiolinRunResponse } from '../../common/types';
 import { defineCommand } from 'citty';
 
 function validateInputs(inputs: undefined | string | boolean | string[]): string[] {
@@ -49,10 +49,9 @@ export default defineCommand({
     const inputs = validateInputs(args.input);
     const { outputDir, argv } = args;
     const request: FiolinRunRequest = { inputs, outputDir, argv };
-    await runner.run(request, (response) => {
-      if (response.error) {
-        console.error(response.error.message);
-      }
-    });
+    const response: FiolinRunResponse = await runner.run(request);
+    if (response.error) {
+      console.error(response.error.message);
+    }
   },
 });

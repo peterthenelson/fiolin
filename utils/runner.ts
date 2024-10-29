@@ -34,13 +34,18 @@ export class PyodideRunner implements FiolinRunner {
     this._pyodide.FS.mkdir('/output');
   }
 
-  async run(request: FiolinRunRequest, onComplete: (response: FiolinRunResponse) => void) {
+  resetFs() {
+    // TODO: delete the contents of /**
+  }
+
+  async run(request: FiolinRunRequest): Promise<FiolinRunResponse> {
     await this._loaded;
     this._stdout = '';
     this._stderr = '';
     resetShared(this._shared);
     this._shared.argv = request.argv;
     try {
+      this.resetFs();
       if (request.inputs.length > 1) {
         throw new Error(`Expected at most one input; got ${request.inputs}`);
       } else if (request.inputs.length === 1) {
@@ -60,10 +65,10 @@ export class PyodideRunner implements FiolinRunner {
         const outBytes = this._pyodide!.FS.readFile(`/output/${this._shared.outFileName}`);
         writeFileSync(path.join(request.outputDir, this._shared.outFileName), outBytes);
       }
-      onComplete(response);
+      return response;
     } catch (e) {
       let err: Error | undefined = e instanceof Error ? e : undefined;
-      onComplete({ outputs: [], stdout: this._stdout, stderr: this._stderr, error: err });
+      return { outputs: [], stdout: this._stdout, stderr: this._stderr, error: err };
     }
   }
 }
