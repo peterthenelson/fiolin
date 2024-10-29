@@ -1,19 +1,20 @@
 import { loadAll, loadScript } from '../../utils/config';
 import { defineCommand } from 'citty';
 import { existsSync, mkdirSync, rmSync, watch, writeFileSync } from 'node:fs';
-import path from 'node:path';
 import { FiolinScript } from '../../common/types';
+import { pkgPath } from '../../utils/pkg-path';
 
 async function tryReloadFiol(name: string) {
+  const jsonPath = pkgPath(`server/public/s/${name}.json`);
   try {
     const script = loadScript(name);
-    console.log(`Generating server/s/${name}.json`);
+    console.log(`Generating json for ${name}.fiol`);
     const json = JSON.stringify(script, null, 2);
-    writeFileSync(`server/public/s/${name}.json`, json);
+    writeFileSync(jsonPath, json);
   } catch (e) {
-    console.error(`Failed to generate json for fiol ${name}`);
+    console.error(`Failed to generate json for ${name}.fiol`);
     console.error(e);
-    rmSync(`server/public/s/${name}.json`, { force: true });
+    rmSync(jsonPath, { force: true });
   }
 }
 
@@ -29,18 +30,18 @@ export default defineCommand({
     },
   },
   async run({ args }) {
-    console.log('Recreating server/public/s');
-    rmSync('server/public/s', { force: true, recursive: true });
-    mkdirSync('server/public/s');
+    const fiolOutputDir = pkgPath('server/public/s');
+    console.log('Recreating directory of generated fiol json');
+    rmSync(fiolOutputDir, { force: true, recursive: true });
+    mkdirSync(fiolOutputDir);
     const scripts: Record<string, FiolinScript> = await loadAll();
     for (const [name, script] of Object.entries(scripts)) {
-      console.log(`Generating server/s/${name}.json`);
+      console.log(`Generating json for ${name}.fiol`);
       const json = JSON.stringify(script, null, 2);
-      writeFileSync(`server/public/s/${name}.json`, json);
+      writeFileSync(pkgPath(`server/public/s/${name}.json`), json);
     }
     if (args.watch) {
-      // TODO: use __dirname or whatever to make this cwd agnostic
-      watch('fiols', { persistent: true, recursive: false }, (type, fileName) => {
+      watch(pkgPath('fiols'), { persistent: true, recursive: false }, (type, fileName) => {
         if (!fileName) return;
         if (fileName === 'js.py') return;
         let name = '';
@@ -52,12 +53,12 @@ export default defineCommand({
           return;
         }
         if (type === 'rename') {
-          if (existsSync(path.join('fiols', fileName))) {
+          if (existsSync(pkgPath(`fiols/${fileName}`))) {
             console.log(`Fiol added: ${name}`)
             tryReloadFiol(name);
           } else {
             console.log(`Fiol removed: ${name}; removing generated json`);
-            rmSync(`server/public/s/${name}.json`, { force: true });
+            rmSync(pkgPath(`server/public/s/${name}.json`), { force: true });
           }
         } else if (type === 'change') {
           tryReloadFiol(name);
