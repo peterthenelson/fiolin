@@ -15,6 +15,8 @@ with open('/tmp.xml', 'w') as outfile:
   with open('/ppt-tmp/ppt/presentation.xml') as infile:
     for line in infile:
       outfile.write(re.sub(r'<p:modifyVerifier [^>]+>', '', line))
+os.remove('/ppt-tmp/ppt/presentation.xml')
+os.rename('/tmp.xml', '/ppt-tmp/ppt/presentation.xml')
 
 print(f'Zipping /ppt-tmp up as {js.outFileName}...')
 with zipfile.ZipFile(os.path.join('/output', js.outFileName), 'w', zipfile.ZIP_DEFLATED) as zf:
