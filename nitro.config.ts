@@ -1,3 +1,5 @@
+import { defineNitroConfig } from 'nitropack/config';
+
 const noneCsp = "default-src 'none'";
 
 const indexCsp = [

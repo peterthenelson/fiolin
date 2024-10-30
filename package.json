@@ -18,7 +18,6 @@
     "nitropack": "latest"
   },
   "dependencies": {
-    "@rollup/plugin-replace": "^6.0.1",
     "@rollup/plugin-typescript": "^12.1.1",
     "@types/jest": "^29.5.14",
     "citty": "^0.1.6",

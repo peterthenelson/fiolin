@@ -1,3 +1,5 @@
+import { defineNitroConfig } from 'nitropack/config';
+
 export default defineNitroConfig({
   srcDir: 'fake3p/server',
   routeRules: {
