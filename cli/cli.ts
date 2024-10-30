@@ -9,7 +9,6 @@ const main = defineCommand({
   subCommands: {
     gen: () => import('./commands/gen').then((r) => r.default),
     run: () => import('./commands/run').then((r) => r.default),
-    test: () => import('./commands/test').then((r) => r.default),
   }
 })
 

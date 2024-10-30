@@ -3,6 +3,7 @@ import { resetShared } from '../common/shared';
 import { FiolinJsGlobal, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../common/types';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { pkgPath } from './pkg-path';
 
 interface FakeConsole { log(s: string): void, error(s: string): void };
 
@@ -26,7 +27,12 @@ export class PyodideRunner implements FiolinRunner {
   }
 
   async load() {
-    this._pyodide = await loadPyodide({ jsglobals: this._shared });
+    this._pyodide = await loadPyodide({
+      // For some mysterious reason this is needed but only in tests. But it
+      // doesn't seem to break the run command, so whatever.
+      indexURL: pkgPath('node_modules/pyodide'),
+      jsglobals: this._shared,
+    });
     this._pyodide.setStdout({ batched: (s) => { this._console.log(s); this._stdout += s + '\n' } });
     this._pyodide.setStderr({ batched: (s) => { this._console.error(s); this._stderr += s + '\n' } });
     // TODO: Where should I be dealing w/errno codes?

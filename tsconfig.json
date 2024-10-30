@@ -1,4 +1,16 @@
-// https://nitro.unjs.io/guide/typescript
 {
-  "extends": "./.nitro/types/tsconfig.json"
+  "extends": "./tsconfig.fiolin-base.json",
+  "compilerOptions": { "outDir": "./dist" },
+  "include": [],
+  "references": [
+    { "path": "cli" },
+    { "path": "common" },
+    { "path": "fake3p" },
+    { "path": "fiols" },
+    { "path": "server" },
+    { "path": "utils" },
+    { "path": "web-host" },
+    { "path": "web-utils" },
+    { "path": "web-worker" }
+  ]
 }

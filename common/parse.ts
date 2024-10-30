@@ -1,4 +1,4 @@
-import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface } from "./types";
+import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface } from './types';
 
 // Half-assed validation/parsing library for FiolinScript objects.
 export function asFiolinScript(o: object): FiolinScript {
