@@ -1,16 +1,24 @@
+import { FiolinJsGlobal } from '../common/types';
 import { toErr } from '../web-utils/errors';
 import { WorkerMessage } from '../web-utils/types';
 import { loadPyodide, PyodideInterface } from 'pyodide';
 
-const shared = {
+// TODO: Refactoring to make more use of the shared types.
+const shared: FiolinJsGlobal = {
   inFileName: null,
   outFileName: null,
   argv: null,
 };
 let pyodide: PyodideInterface | null = null;
 
-function post(msg: WorkerMessage) {
-  postMessage(msg);
+// Typed messaging
+const _rawPost = self.postMessage;
+function postMessage(msg: WorkerMessage) {
+  _rawPost(msg);
+}
+self.onmessage = async (e) => {
+  const msg: WorkerMessage = (e.data as WorkerMessage);
+  await onMessage(msg);
 }
 
 function readFile(file: File): Promise<ArrayBuffer> {
@@ -35,43 +43,46 @@ function readFile(file: File): Promise<ArrayBuffer> {
 async function load() {
   try {
     pyodide = await loadPyodide({ jsglobals: shared });
-    pyodide.setStdout({ batched: (s: string) => post({ type: 'STDOUT', value: s }) });
-    pyodide.setStderr({ batched: (s: string) => post({ type: 'STDERR', value: s }) });
+    pyodide.setStdout({ batched: (s: string) => postMessage({ type: 'STDOUT', value: s }) });
+    pyodide.setStderr({ batched: (s: string) => postMessage({ type: 'STDERR', value: s }) });
     // TODO: Where should I be dealing w/errno codes?
     pyodide.FS.mkdir('/input');
     pyodide.FS.mkdir('/output');
-    post({ type: 'LOADED' })
+    postMessage({ type: 'LOADED' })
   } catch (e) {
-    post({ type: 'ERROR', error: toErr(e) });
+    postMessage({ type: 'ERROR', error: toErr(e) });
   }
 }
 let loaded = load();
 
-self.onmessage = async (e) => {
+async function onMessage(msg: WorkerMessage) {
   await loaded;
   if (!pyodide) {
-    post({ type: 'ERROR', error: new Error('pyodide did not load') });
+    postMessage({ type: 'ERROR', error: new Error('pyodide did not load') });
     return;
   }
-  if (e.data.type !== 'RUN') {
-    throw new Error(`Expected RUN message; got ${e.data}`);
+  if (msg.type !== 'RUN') {
+    throw new Error(`Expected RUN message; got ${msg}`);
   }
   try {
-    const { file, script } = e.data;
-    const buf = await readFile(file);
-    const inBytes = new Uint8Array(buf);
-    shared.inFileName = file.name;
-    pyodide.FS.writeFile(`/input/${shared.inFileName}`, inBytes);
-    await pyodide.loadPackagesFromImports(script);
-    await pyodide.runPythonAsync(script);
+    // TODO: Should be resetting the file system before running.
+    const { file, script } = msg;
+    if (file) {
+      const buf = await readFile(file);
+      const inBytes = new Uint8Array(buf);
+      shared.inFileName = file.name;
+      pyodide.FS.writeFile(`/input/${shared.inFileName}`, inBytes);
+    }
+    await pyodide.loadPackagesFromImports(script.code.python);
+    await pyodide.runPythonAsync(script.code.python);
     if (shared.outFileName) {
       const outBytes = pyodide.FS.readFile(`/output/${shared.outFileName}`);
       const blob = new Blob([outBytes], {type: 'application/octet-stream'});
-      post({ type: 'SUCCESS', file: blob, fileName: shared.outFileName });
+      postMessage({ type: 'SUCCESS', file: blob, fileName: shared.outFileName });
     } else {
-      post({ type: 'SUCCESS' });
+      postMessage({ type: 'SUCCESS' });
     }
   } catch (e) {
-    post({ type: 'ERROR', error: toErr(e) });
+    postMessage({ type: 'ERROR', error: toErr(e) });
   }
 };

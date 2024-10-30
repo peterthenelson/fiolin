@@ -5,8 +5,6 @@ these are more concrete programming TODOs:
   (xpdf? imagemagick?)
 - Set up tests involving the web server(s) and playwright to check that the
   security properties hold.
-- Get regular jest tests setup using the PyodideRunner (and more specifically
-  add a test for unlock-ppt)
 - Add minification to the rollup config
 - Utility for wrapping those errno errors that the wasm filesystem throws
 - More file-conversion example scripts

@@ -1,3 +1,5 @@
+import { FiolinScript } from "../common/types";
+
 export type WorkerMessage = (
   LoadedMessage | StdoutMessage | StderrMessage | RunMessage | SuccessMessage |
   ErrorMessage
@@ -18,7 +20,7 @@ export interface StderrMessage {
 export interface RunMessage {
   type: 'RUN';
   file?: File;
-  script: string;
+  script: FiolinScript;
 }
 
 export interface SuccessMessage {

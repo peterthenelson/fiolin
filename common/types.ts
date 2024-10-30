@@ -57,10 +57,14 @@ export type FiolinScriptTemplate = Omit<FiolinScript, 'code'>;
 
 // Used for encapsulating running a script (either for use w/run-fiolin or for
 // the testing framework).
+// TODO: In order to unify the node-based PyodideRunner and the worker in any
+// meaningful way, I have to change how file IO is working in both of them.
+// Also, both runners should be enforcing stuff around NONE/SINGLE/MULTI.
 export interface FiolinRunRequest {
   inputs: string[];
   argv: string;
   outputDir: string;
+  // TODO: Add a debug section
 }
 
 export interface FiolinRunResponse {
@@ -70,6 +74,7 @@ export interface FiolinRunResponse {
   error?: Error;
 }
 
+// TODO: Refactor to use the request and response in some way
 export interface FiolinJsGlobal {
   inFileName: string | null;
   outFileName: string | null;
@@ -79,7 +84,3 @@ export interface FiolinJsGlobal {
 export interface FiolinRunner {
   run(request: FiolinRunRequest): Promise<FiolinRunResponse>;
 }
-
-// Used for testing the scripts that ship w/Fiolin itself.
-// TODO: Make this work properly with jest or something.
-export type FiolinTest = (runner: FiolinRunner) => boolean

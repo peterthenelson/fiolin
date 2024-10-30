@@ -14,21 +14,33 @@ function getElementByIdAs<T extends HTMLElement>(id: string, cls: new (...args: 
   }
 }
 
-const scriptSrc = getElementByIdAs('script-src', HTMLSpanElement);
-const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
-scriptPane.value = 'Loading...';
-const fileChooser = getElementByIdAs('file-chooser', HTMLInputElement);
-const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
-outputPane.value = 'Loading...';
+class TypedWorker {
+  private readonly worker: Worker;
+  public onmessage: ((msg: WorkerMessage) => void) | null;
+  public onerror: ((ev: ErrorEvent) => void) | null;
 
-const worker = new Worker('./worker.js', { type: 'classic' });
+  constructor(scriptURL: string | URL, options?: WorkerOptions) {
+    this.worker = new Worker(scriptURL, options);
+    this.onmessage = null;
+    this.worker.onmessage = (ev) => {
+      if (this.onmessage) {
+        this.onmessage(ev.data as WorkerMessage);
+      }
+    }
+    this.onerror = null;
+    this.worker.onerror = (ev) => {
+      if (this.onerror) {
+        this.onerror(ev);
+      }
+    }
+  }
 
-worker.onerror = (e) => {
-  console.error(getErrMsg(e));
-  outputPane.value = getErrMsg(e);
-};
+  postMessage(msg: WorkerMessage) {
+    this.worker.postMessage(msg);
+  }
+}
 
-const defaultScript: string = `# Basic script that copies input to output
+const defaultPy: string = `# Basic script that copies input to output
 import js
 import os.path
 
@@ -44,43 +56,66 @@ with open(infname, 'rb') as infile:
     outfile.write(infile.read())
   print('copied input to output')
 `;
+let script: FiolinScript = {
+  meta: {
+    title: 'Example Script',
+    description: 'Copies input to output'
+  },
+  interface: {
+    inputFiles: 'SINGLE',
+    outputFiles: 'SINGLE'
+  },
+  runtime: {},
+  code: { python: defaultPy }
+};
+
+const scriptSrc = getElementByIdAs('script-src', HTMLSpanElement);
+const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
+scriptPane.value = 'Loading...';
+const fileChooser = getElementByIdAs('file-chooser', HTMLInputElement);
+const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
+outputPane.value = 'Loading...';
+
+const worker = new TypedWorker('./worker.js', { type: 'classic' });
+
+worker.onerror = (e) => {
+  console.error(getErrMsg(e));
+  outputPane.value = getErrMsg(e);
+};
 
 async function fetchScript() {
   const s = (new URLSearchParams(window.location.search)).get('s');
-  if (s === null) {
-    scriptSrc.textContent = 'Script playground:';
-    scriptPane.value = defaultScript;
-    return;
+  if (s !== null) {
+    try {
+      scriptSrc.textContent = s;
+      scriptPane.value = `Fetching script from\n${s}`;
+      const resp = await fetch(s);
+      const parsed = await resp.json();
+      console.log(parsed);
+      script = asFiolinScript(parsed);
+    } catch (e) {
+      console.log('Failed to fetch script!');
+      const err = toErr(e);
+      console.error(err);
+      scriptPane.value = (
+        `Failed to fetch script from\n${s}\n${err.message}`);
+    }
   }
-  try {
-    scriptSrc.textContent = s;
-    scriptPane.value = `Fetching script from\n${s}`;
-    const resp = await fetch(s);
-    const parsed = await resp.json();
-    console.log(parsed);
-    const script: FiolinScript = asFiolinScript(parsed);
-    scriptSrc.textContent = script.meta.title;
-    scriptSrc.title = script.meta.description;
-    scriptPane.value = script.code.python;
-  } catch (e) {
-    console.log('Failed to fetch script!');
-    const err = toErr(e);
-    console.error(err);
-    scriptPane.value = (
-      `Failed to fetch script from\n${s}\n${err.message}`);
-  }
+  scriptSrc.textContent = script.meta.title;
+  scriptSrc.title = script.meta.description;
+  scriptPane.value = script.code.python;
 }
 const fetched = fetchScript();
 
 function runScript() {
   outputPane.value = '';
   const file = fileChooser.files![0];
-  const msg: RunMessage = { type: 'RUN', file, script: scriptPane.value };
+  script.code.python = scriptPane.value;
+  const msg: RunMessage = { type: 'RUN', file, script };
   worker.postMessage(msg);
 }
 
-worker.onmessage = async (e) => {
-  const msg: WorkerMessage = e.data as WorkerMessage;
+worker.onmessage = async (msg: WorkerMessage) => {
   if (msg.type === 'LOADED') {
     outputPane.value = 'Pyodide Loaded';
     await fetched;
