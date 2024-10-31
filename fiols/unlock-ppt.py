@@ -3,12 +3,14 @@ import os.path
 import re
 import zipfile
 
-stem, ext = os.path.splitext(js.inFileName)
-js.outFileName = stem + '-unlocked' + ext
+input = js.inputs[0]
+stem, ext = os.path.splitext(input)
+output = stem + '-unlocked' + ext
+js.outputs = [output]
 
-print(f'Unzipping {js.inFileName} to /ppt-tmp...')
+print(f'Unzipping {input} to /ppt-tmp...')
 os.mkdir('/ppt-tmp')
-zipfile.ZipFile(os.path.join('/input', js.inFileName)).extractall('/ppt-tmp')
+zipfile.ZipFile(os.path.join('/input', input)).extractall('/ppt-tmp')
 
 print('Rewriting ppt/presentation.xml...')
 with open('/tmp.xml', 'w') as outfile:
@@ -18,8 +20,8 @@ with open('/tmp.xml', 'w') as outfile:
 os.remove('/ppt-tmp/ppt/presentation.xml')
 os.rename('/tmp.xml', '/ppt-tmp/ppt/presentation.xml')
 
-print(f'Zipping /ppt-tmp up as {js.outFileName}...')
-with zipfile.ZipFile(os.path.join('/output', js.outFileName), 'w', zipfile.ZIP_DEFLATED) as zf:
+print(f'Zipping /ppt-tmp up as {output}...')
+with zipfile.ZipFile(os.path.join('/output', output), 'w', zipfile.ZIP_DEFLATED) as zf:
   for root, dirs, files in os.walk('/ppt-tmp'):
     for file in files:
       path = os.path.join(root, file)

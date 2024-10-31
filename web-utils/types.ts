@@ -1,4 +1,4 @@
-import { FiolinScript } from "../common/types";
+import { FiolinRunRequest, FiolinRunResponse, FiolinScript } from "../common/types";
 
 export type WorkerMessage = (
   LoadedMessage | StdoutMessage | StderrMessage | RunMessage | SuccessMessage |
@@ -19,14 +19,13 @@ export interface StderrMessage {
 
 export interface RunMessage {
   type: 'RUN';
-  file?: File;
   script: FiolinScript;
+  request: FiolinRunRequest;
 }
 
 export interface SuccessMessage {
   type: 'SUCCESS';
-  file?: Blob;
-  fileName?: string;
+  response: FiolinRunResponse;
 }
 
 export interface ErrorMessage {

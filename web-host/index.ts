@@ -1,5 +1,5 @@
 import { RunMessage, WorkerMessage } from '../web-utils/types';
-import { getErrMsg, toErr } from '../web-utils/errors';
+import { getErrMsg, toErr } from '../common/errors';
 import { asFiolinScript } from '../common/parse';
 import { FiolinScript } from '../common/types';
 
@@ -44,10 +44,10 @@ const defaultPy: string = `# Basic script that copies input to output
 import js
 import os.path
 
-infname = os.path.join('/input', js.inFileName)
-stem, ext = os.path.splitext(js.inFileName)
-js.outFileName = stem + '-copy' + ext
-outfname = os.path.join('/output', js.outFileName)
+infname = os.path.join('/input', js.inputs[0])
+stem, ext = os.path.splitext(js.inputs[0])
+js.outputs = [stem + '-copy' + ext]
+outfname = os.path.join('/output', js.outputs[0])
 
 with open(infname, 'rb') as infile:
   print(f'opened {infname} (to read)')
@@ -111,7 +111,7 @@ function runScript() {
   outputPane.value = '';
   const file = fileChooser.files![0];
   script.code.python = scriptPane.value;
-  const msg: RunMessage = { type: 'RUN', file, script };
+  const msg: RunMessage = { type: 'RUN', script, request: { inputs: [file], argv: '' } };
   worker.postMessage(msg);
 }
 
@@ -127,13 +127,15 @@ worker.onmessage = async (msg: WorkerMessage) => {
     console.warn(msg.value);
     outputPane.value += msg.value + '\n';
   } else if (msg.type === 'SUCCESS') {
-    if (msg.fileName && msg.file) {
-      const elem = window.document.createElement('a');
-      elem.href = window.URL.createObjectURL(msg.file);
-      elem.download = msg.fileName;
-      document.body.appendChild(elem);
-      elem.click();        
-      document.body.removeChild(elem);
+    if (msg.response.outputs.length > 0) {
+      for (const f of msg.response.outputs) {
+        const elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(f);
+        elem.download = f.name;
+        document.body.appendChild(elem);
+        elem.click();        
+        document.body.removeChild(elem);
+      }
     } else {
       outputPane.value += (
           '='.repeat(30) + '\nScript did not produce an output file.\n');

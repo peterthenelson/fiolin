@@ -55,32 +55,27 @@ export interface FiolinScript {
 // Used internally to allow putting the python in a separate file.
 export type FiolinScriptTemplate = Omit<FiolinScript, 'code'>;
 
-// Used for encapsulating running a script (either for use w/run-fiolin or for
-// the testing framework).
-// TODO: In order to unify the node-based PyodideRunner and the worker in any
-// meaningful way, I have to change how file IO is working in both of them.
-// Also, both runners should be enforcing stuff around NONE/SINGLE/MULTI.
+// Used for encapsulating running a script.
 export interface FiolinRunRequest {
-  inputs: string[];
+  inputs: File[];
   argv: string;
-  outputDir: string;
   // TODO: Add a debug section
 }
 
 export interface FiolinRunResponse {
-  outputs: string[];
+  outputs: File[];
   stdout: string;
   stderr: string;
   error?: Error;
 }
 
-// TODO: Refactor to use the request and response in some way
-export interface FiolinJsGlobal {
-  inFileName: string | null;
-  outFileName: string | null;
-  argv: string | null;
+export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
+  // Inputs and outputs are filenames w/in /input and /output rather than File
+  // objects.
+  inputs: string[];
+  outputs: string[];
 }
 
 export interface FiolinRunner {
-  run(request: FiolinRunRequest): Promise<FiolinRunResponse>;
+  run(script: FiolinScript, request: FiolinRunRequest): Promise<FiolinRunResponse>;
 }

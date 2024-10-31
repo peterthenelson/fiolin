@@ -1,9 +1,7 @@
 // Example usages:
 // # Run unlock-ppt with one input file (locked.ppt) and outputs dumped in .
 // $ npx jiti cli/cli.ts run unlock-ppt --input locked.ppt --outputDir .
-import { loadScript } from '../../utils/config';
-import { PyodideRunner } from '../../utils/runner';
-import { FiolinRunRequest, FiolinRunResponse } from '../../common/types';
+import { NodeFiolinRunner } from '../../utils/runner';
 import { defineCommand } from 'citty';
 
 function validateInputs(inputs: undefined | string | boolean | string[]): string[] {
@@ -44,14 +42,9 @@ export default defineCommand({
     }
   },
   async run({ args }) {
-    const script = loadScript(args.name);
-    const runner = new PyodideRunner(script, console);
-    const inputs = validateInputs(args.input);
-    const { outputDir, argv } = args;
-    const request: FiolinRunRequest = { inputs, outputDir, argv };
-    const response: FiolinRunResponse = await runner.run(request);
-    if (response.error) {
-      console.error(response.error.message);
-    }
+    const inputPaths = validateInputs(args.input);
+    const runner = new NodeFiolinRunner(args.name, args.outputDir);
+    const { argv } = args;
+    await runner.runWithLocalFs(inputPaths, { argv });
   },
 });
