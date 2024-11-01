@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "title": "Extract attachments from Winmail.dat",
+    "author": "Peter Nelson",
+    "description": "Extract attachments from Outlook Winmail.dat files (i.e., TNEF files)",
+    "extensions": ["dat", "tnef"]
+  },
+  "interface": {
+    "inputFiles": "SINGLE",
+    "outputFiles": "MULTI"
+  },
+  "runtime": {
+    "pythonPkgs": [{ "type": "PYPI", "name": "tnefparse" }]
+  }
+}

@@ -1,5 +1,5 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript } from './types';
+import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript } from './types';
 import { toErr } from './errors';
 
 export interface ConsoleLike { log(s: string): void, error(s: string): void };
@@ -81,6 +81,39 @@ export class PyodideRunner implements FiolinRunner {
     });
   }
 
+  private async installPkgs(script: FiolinScript) {
+    if (!this._pyodide) {
+      throw new Error(`this._pyodide should be present after loading!`)
+    }
+    const pkgs: FiolinPyPackage[] = script.runtime.pythonPkgs || [];
+    if (pkgs.length === 0) {
+      this._console.log('No python packages to be installed');
+      return;
+    }
+    try {
+      this._console.log(`${pkgs.length} python packages to be installed`);
+      this._shared['Object'] = Object;
+      this._shared['fetch'] = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+        this._console.log(`micropip fetching ${input}`);
+        return fetch(input, init);
+      }
+      await this._pyodide.loadPackage('micropip');
+      const micropip = this._pyodide.pyimport('micropip');
+      for (const pkg of (script.runtime.pythonPkgs || [])) {
+        if (pkg.type === 'PYPI') {
+          this._console.log(`Installing package ${pkg.name}`);
+          await micropip.install(pkg.name, { deps: true });
+        } else {
+          throw new Error(`Unknown package type: ${pkg.type}`);
+        }
+      }
+      this._console.log(`Finished installing packages`);
+    } finally {
+      this._shared['Object'] = undefined;
+      this._shared['fetch'] = undefined;
+    }
+  }
+
   // TODO: Add checking for NONE/SINGLE/MULTI
   async run(script: FiolinScript, request: FiolinRunRequest): Promise<FiolinRunResponse> {
     await this.loaded;
@@ -94,6 +127,7 @@ export class PyodideRunner implements FiolinRunner {
     try {
       this.resetFs();
       await this.mountInputs(request.inputs);
+      await this.installPkgs(script);
       await this._pyodide.loadPackagesFromImports(script.code.python);
       await this._pyodide.runPythonAsync(script.code.python);
       const response: FiolinRunResponse = {

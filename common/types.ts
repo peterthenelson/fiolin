@@ -26,10 +26,17 @@ export interface FiolinScriptInterface {
   // TODO: extend w/stuff about flags, console output, and/or canvas
 }
 
+// A python package required by the script to run.
+export interface FiolinPyPackage {
+  type: 'PYPI';
+  name: string;
+}
+
 // How the fiolin runner is meant to setup the environment for the script.
 // By default, it runs pyodide and sets up libraries based on import statements.
 export interface FiolinScriptRuntime {
-  // TODO: extend w/stuff about wasm, utilities, libraries, etc.
+  pythonPkgs?: FiolinPyPackage[];
+  // TODO: extend w/stuff about wasm
 }
 
 // The actual script to run. Currently just a string with python, but leaving it
@@ -74,6 +81,9 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // objects.
   inputs: string[];
   outputs: string[];
+
+  // Other properties may be temporarily needed during the loading phase.
+  [key: string]: any;
 }
 
 export interface FiolinRunner {

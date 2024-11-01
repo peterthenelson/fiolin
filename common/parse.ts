@@ -1,4 +1,4 @@
-import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface } from './types';
+import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface, FiolinPyPackage } from './types';
 
 // Half-assed validation/parsing library for FiolinScript objects.
 export function asFiolinScript(o: object): FiolinScript {
@@ -46,11 +46,17 @@ function pStrA(p: ObjPath, v: unknown): string[] {
   throw p.err(`be a string[]; got ${v}`);
 }
 
-function orU<V>(val: Val<V>): Val<V | undefined> {
+function arr<V>(val: Val<V>): Val<V[]> {
   return (p: ObjPath, v: unknown) => {
-    if (typeof v === 'undefined') return v;
-    return val(p, v);
-  };
+    if (!Array.isArray(v)) {
+      throw new Error(`be an array; got ${v}`);
+    }
+    const vals: V[] = [];
+    for (const e of v) {
+      vals.push(val(p, e));
+    }
+    return vals;
+  }
 }
 
 function pFileEnum(p: ObjPath, v: unknown): 'NONE' | 'SINGLE' | 'MULTI' {
@@ -91,8 +97,8 @@ function pMeta(p: ObjPath, v: unknown): FiolinScriptMeta {
   return {
     ...pProp(p, o, 'title', pStr),
     ...pProp(p, o, 'description', pStr),
-    ...pPropU(p, o, 'author', orU(pStr)),
-    ...pPropU(p, o, 'extensions', orU(pStrA)),
+    ...pPropU(p, o, 'author', pStr),
+    ...pPropU(p, o, 'extensions', pStrA),
   };
 }
 
@@ -105,10 +111,24 @@ function pInterface(p: ObjPath, v: unknown): FiolinScriptInterface {
   };
 }
 
+function pPyPkg(p: ObjPath, v: unknown): FiolinPyPackage {
+  const o: object = pObj(p, v);
+  pOnlyKeys(p, o, ['type', 'name']);
+  return {
+    ...pProp(p, o, 'type', (p, v): 'PYPI' => {
+      if (v === 'PYPI') return v;
+      throw p.err(`be PYPI; got ${v}`);
+    }),
+    ...pProp(p, o, 'name', pStr),
+  }
+}
+
 function pRuntime(p: ObjPath, v: unknown): FiolinScriptRuntime {
   const o: object = pObj(p, v);
-  pOnlyKeys(p, o, []);
-  return {};
+  pOnlyKeys(p, o, ['pythonPkgs']);
+  return {
+    ...pPropU(p, o, 'pythonPkgs', arr(pPyPkg)),
+  };
 }
 
 function pCode(p: ObjPath, v: unknown): FiolinScriptCode {
