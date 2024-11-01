@@ -21,15 +21,11 @@ function csp(policy: string) {
 export default defineNitroConfig({
   srcDir: 'server',
   preset: 'cloudflare-pages-static',
-  // TODO: HSTS on prod?
   routeRules: {
     '': { cors: false, ...csp(indexCsp) },
     'index.html': { cors: false, ...csp(indexCsp) },
     'index.js': { cors: false, ...csp(indexCsp) },
     'worker.js': { cors: false, ...csp(workerCsp) },
     's/*': { cors: false, ...csp(noneCsp) },
-    // TODO: anything for the wasm files? Also, I expect that might affect the
-    // CSPs for the index and worker, depending on how I want the WASM loading
-    // to work.
   },
 });

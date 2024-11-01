@@ -17,7 +17,7 @@ const config: RollupOptions[] = [
     plugins: [typescript()]
   },
   {
-    // TODO: Not sure this is really the best way to swap the local import for
+    // NOTE: Not sure this is really the best way to swap the local import for
     // importScripts(cdnUrl), but... it works.
     input: 'web-worker/worker.ts',
     external: ['pyodide'],
