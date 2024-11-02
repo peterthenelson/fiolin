@@ -1,5 +1,4 @@
-This is very partial; I have a running notes google doc that has more stuff, but
-these are more concrete programming TODOs:
+A not-necessarily-exhaustive list of TODOs:
 - Documentation
   - Flesh out DESIGN
   - Add intro to README

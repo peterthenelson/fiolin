@@ -12,6 +12,7 @@ function makeFiolHtml(name: string) {
   return `<!DOCTYPE html>
 <html>
   <head>
+    <title>${name} - ƒiolin</title>
     <link rel="stylesheet" href="/index.css">
     <script src="/index.js" type="module" defer></script>
     <script type="module" defer>
@@ -40,6 +41,7 @@ function makeIndexHtml(names: Set<string>): string {
   return `<!DOCTYPE html>
 <html>
   <head>
+    <title>ƒiolin</title>
     <link rel="stylesheet" href="/index.css">
     <script src="/index.js" type="module" defer></script>
     <script type="text/javascript" defer>
@@ -48,7 +50,7 @@ function makeIndexHtml(names: Set<string>): string {
   </head>
   <body>
     <div id="container">
-      <h3>First-Party Fiolin Scripts:</h3>
+      <h3>First-Party ƒiolin Scripts:</h3>
       <ul>
         ${lis}
       </ul>
