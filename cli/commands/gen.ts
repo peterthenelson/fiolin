@@ -16,8 +16,8 @@ function makeFiolHtml(name: string) {
     <link rel="stylesheet" href="/index.css">
     <script src="/index.js" type="module" defer></script>
     <script type="module" defer>
-      import { fetchScript } from '/index.js';
-      fetchScript('/s/${name}/script.json');
+      import { initFiolin } from '/index.js';
+      initFiolin('/s/${name}/script.json');
     </script>
   </head>
   <body>

@@ -77,13 +77,14 @@ worker.onerror = (e) => {
   outputPane.value = getErrMsg(e);
 };
 
-let fetched: undefined | Promise<void>;
+let initialized: undefined | Promise<void>;
 
-export function fetchScript(scriptUrl: string) {
+export function initFiolin(scriptUrl: string) {
   const scriptSrc = getElementByIdAs('script-src', HTMLSpanElement);
   const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
-  fetched = (async () => {
+  initialized = (async () => {
     try {
+      worker.onmessage = handleMessage;
       scriptSrc.textContent = scriptUrl;
       scriptPane.value = `Fetching script from\n${scriptUrl}`;
       const resp = await fetch(scriptUrl);
@@ -109,7 +110,8 @@ export function initPlayground() {
   scriptSrc.textContent = script.meta.title;
   scriptSrc.title = script.meta.description;
   scriptPane.value = script.code.python;
-  fetched = (async () => {})();
+  worker.onmessage = handleMessage;
+  initialized = (async () => {})();
 }
 
 export function die(msg: string) {
@@ -128,15 +130,11 @@ function runScript() {
   worker.postMessage(msg);
 }
 
-worker.onmessage = async (msg: WorkerMessage) => {
-  if (!document.getElementById('output-pane')) {
-    console.log('Fiolin UI not found; ignoring messages from worker');
-    return;
-  }
+async function handleMessage(msg: WorkerMessage): Promise<void> {
   const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
   if (msg.type === 'LOADED') {
     outputPane.value = 'Pyodide Loaded';
-    await fetched;
+    await initialized;
     const fileChooser = getElementByIdAs('file-chooser', HTMLInputElement);
     fileChooser.disabled = false;
     fileChooser.onchange = runScript;
