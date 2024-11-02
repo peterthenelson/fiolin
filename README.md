@@ -16,7 +16,7 @@ through the fiolion website but hosted elsewhere.
 
 ```sh
 # Run dev server on http://localhost:3000 Also, a fake third-party server will
-# be run on port 3001; you can test script retrieval like this:
-# http://localhost:3000/?s=http%3A%2F%2Flocalhost%3A3001%2Fcors-3p-script.json
+# be run on port 3001; you can test script retrieval by entering this in the URL
+# field of the third-party form: http://localhost:3001/cors-3p-script.json
 $ npm run dev
 ```

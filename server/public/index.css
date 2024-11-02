@@ -17,3 +17,10 @@
   font-family: monospace;
   width: 48em;
 }
+
+#form-3p {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 30em;
+}

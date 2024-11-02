@@ -5,6 +5,7 @@ node_modules
 **/.cache
 **/.output
 **/.env
+server/public/index.html
 server/public/index.js
 server/public/worker.js
 server/public/s

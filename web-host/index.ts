@@ -69,56 +69,75 @@ let script: FiolinScript = {
   code: { python: defaultPy }
 };
 
-const scriptSrc = getElementByIdAs('script-src', HTMLSpanElement);
-const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
-scriptPane.value = 'Loading...';
-const fileChooser = getElementByIdAs('file-chooser', HTMLInputElement);
-const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
-outputPane.value = 'Loading...';
-
-const worker = new TypedWorker('./worker.js', { type: 'classic' });
+const worker = new TypedWorker('/worker.js', { type: 'classic' });
 
 worker.onerror = (e) => {
+  const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
   console.error(getErrMsg(e));
   outputPane.value = getErrMsg(e);
 };
 
-async function fetchScript() {
-  const s = (new URLSearchParams(window.location.search)).get('s');
-  if (s !== null) {
+let fetched: undefined | Promise<void>;
+
+export function fetchScript(scriptUrl: string) {
+  const scriptSrc = getElementByIdAs('script-src', HTMLSpanElement);
+  const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
+  fetched = (async () => {
     try {
-      scriptSrc.textContent = s;
-      scriptPane.value = `Fetching script from\n${s}`;
-      const resp = await fetch(s);
+      scriptSrc.textContent = scriptUrl;
+      scriptPane.value = `Fetching script from\n${scriptUrl}`;
+      const resp = await fetch(scriptUrl);
       const parsed = await resp.json();
       console.log(parsed);
       script = asFiolinScript(parsed);
+      scriptSrc.textContent = script.meta.title;
+      scriptSrc.title = script.meta.description;
+      scriptPane.value = script.code.python;
     } catch (e) {
       console.log('Failed to fetch script!');
       const err = toErr(e);
       console.error(err);
       scriptPane.value = (
-        `Failed to fetch script from\n${s}\n${err.message}`);
+        `Failed to fetch script from\n${scriptUrl}\n${err.message}`);
     }
-  }
+  })();
+}
+
+export function initPlayground() {
+  const scriptSrc = getElementByIdAs('script-src', HTMLSpanElement);
+  const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
   scriptSrc.textContent = script.meta.title;
   scriptSrc.title = script.meta.description;
   scriptPane.value = script.code.python;
+  fetched = (async () => {})();
 }
-const fetched = fetchScript();
+
+export function die(msg: string) {
+  const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
+  scriptPane.value = msg;
+  throw new Error(msg);
+}
 
 function runScript() {
+  const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
+  const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
   outputPane.value = '';
-  const file = fileChooser.files![0];
+  const file = getElementByIdAs('file-chooser', HTMLInputElement).files![0];
   script.code.python = scriptPane.value;
   const msg: RunMessage = { type: 'RUN', script, request: { inputs: [file], argv: '' } };
   worker.postMessage(msg);
 }
 
 worker.onmessage = async (msg: WorkerMessage) => {
+  if (!document.getElementById('output-pane')) {
+    console.log('Fiolin UI not found; ignoring messages from worker');
+    return;
+  }
+  const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
   if (msg.type === 'LOADED') {
     outputPane.value = 'Pyodide Loaded';
     await fetched;
+    const fileChooser = getElementByIdAs('file-chooser', HTMLInputElement);
     fileChooser.disabled = false;
     fileChooser.onchange = runScript;
   } else if (msg.type === 'STDOUT') {
