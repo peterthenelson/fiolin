@@ -8,8 +8,6 @@ A not-necessarily-exhaustive list of TODOs:
     nitro; alternately reimplement functionality I need w/o nitro.
   - Set up tests involving the web server(s) and playwright to check that the
     security properties hold.
-  - Replace rollup with webpack or at least get the stupid codicon font thing
-    working w/o stupid hackery.
   - Deployment setup for cloudflare pages and update README
   - HSTS for prod? Any updates to headers for wasm files?
 - Core functionality
@@ -41,7 +39,6 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert video ...
 - Frontend
   - Better UI for input / output filesystem to allow for multiple files
-  - Add minification to the rollup config
   - Autocomplete search for landing page.
   - Improve styling for all pages
   - Link to documentation on landing page

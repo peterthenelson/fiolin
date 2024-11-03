@@ -115,10 +115,6 @@ export default defineCommand({
     },
   },
   async run({ args }) {
-    // TODO: This is stupid
-    cpSync(
-      pkgPath('node_modules/monaco-editor/esm/vs/base/browser/ui/codicons/codicon/codicon.ttf'),
-      pubPath('bundle/codicon.ttf'));
     const fiolOutputDir = pubPath('s');
     console.log('Recreating directory of generated fiol json');
     rmSync(fiolOutputDir, { force: true, recursive: true });

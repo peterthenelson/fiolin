@@ -1,6 +1,6 @@
 import { RollupOptions } from 'rollup';
 import css from 'rollup-plugin-import-css';
-import cleaner from 'rollup-plugin-cleaner';
+import copy from 'rollup-plugin-copy';
 import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import nodeResolve from '@rollup/plugin-node-resolve';
@@ -17,8 +17,20 @@ function monacoWorker(path: string): RollupOptions {
   };
 }
 
-// TODO: Add minification
+function copyCodicons() {
+  return copy({
+    targets: [
+      {
+        src: 'node_modules/monaco-editor/esm/vs/base/browser/ui/codicons/codicon/codicon.ttf',
+        dest: 'server/public/bundle',
+      },
+    ],
+  });
+}
+
 const config: RollupOptions[] = [
+  monacoWorker('editor/editor.worker.js'),
+  // NOTE: I'm leaving out language/{css,html,json,typescript}/{css,html,json,ts}.worker.js
   {
     input: 'web-host/index.ts',
     output: {
@@ -27,15 +39,13 @@ const config: RollupOptions[] = [
       format: 'esm'
     },
     plugins: [
-      cleaner({ targets: ['server/public/bundle'] }),
       css({ output: 'included.css' }),
+      copyCodicons(),
       typescript(),
       nodeResolve(),
       terser(),
     ]
   },
-  monacoWorker('editor/editor.worker.js'),
-  // NOTE: I'm leaving out language/{css,html,json,typescript}/{css,html,json,ts}.worker.js
   {
     // NOTE: Not sure this is really the best way to swap the local import for
     // importScripts(cdnUrl), but... it works.

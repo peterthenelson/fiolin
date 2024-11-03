@@ -6,7 +6,7 @@
     "skipLibCheck": true,
   },
   "extends": "../tsconfig.fiolin-base.json",
-  "include": ["index.ts"],
+  "include": ["**/*.ts"],
   "references": [
     {
       "path": "../common"
