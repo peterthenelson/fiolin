@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es2022", "webworker"],
+    "lib": ["ES2022", "WebWorker"],
     "rootDir": ".",
     "outDir": "./dist",
     "skipLibCheck": true,

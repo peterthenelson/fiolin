@@ -1,21 +1,32 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ƒiolin playground</title>
+    <title>ƒɪᴏʟɪɴ playground</title>
     <link rel="stylesheet" href="/index.css">
-    <script src="/index.js" type="module" defer></script>
+    <link rel="stylesheet" href="/bundle/included.css">
+    <script src="/bundle/index.js" type="module" defer></script>
     <script type="module" defer>
-      import { initPlayground } from '/index.js';
+      import { initPlayground } from '/bundle/index.js';
       initPlayground();
     </script>
   </head>
   <body>
-    <!-- TODO: Work on playground -->
     <div id="container">
-      <span id="script-src"></span>
-      <textarea id="script-pane" rows="15">Loading...</textarea>
-      <input type="file" id="file-chooser" disabled />
-      <textarea id="output-pane" rows="10" disabled>Loading...</textarea>
+      <div id="script-header">
+        <div id="script-title"></div>
+        <div id="script-mode-button" title="Edit Script" class="hidden">✎</div>
+      </div>
+      <div id="script">
+        <pre id="script-desc">Loading...</pre>
+        <div id="script-editor" class="hidden"></div>
+      </div>
+      <div id="controls">
+        <input type="file" id="file-chooser" disabled />
+        <!-- TODO -->
+      </div>
+      <div id="output">
+        <pre id="output-term">Loading...</pre>
+      </div>
     </div>
   </body>
 </html>

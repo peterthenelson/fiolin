@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es2022", "dom"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "rootDir": ".",
     "outDir": "./dist",
     "skipLibCheck": true,

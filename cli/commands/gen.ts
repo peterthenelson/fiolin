@@ -1,6 +1,6 @@
 import { loadAll, loadScript } from '../../utils/config';
 import { defineCommand } from 'citty';
-import { existsSync, mkdirSync, rmSync, watch, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, rmSync, watch, writeFileSync } from 'node:fs';
 import { FiolinScript } from '../../common/types';
 import { pkgPath } from '../../utils/pkg-path';
 
@@ -8,24 +8,36 @@ function pubPath(path: string): string {
   return pkgPath(`server/public/${path}`);
 }
 
-function makeFiolHtml(name: string) {
+function makeFiolHtml(name: string, script: FiolinScript) {
   return `<!DOCTYPE html>
 <html>
   <head>
-    <title>${name} - ƒiolin</title>
+    <title>${name} - ƒɪᴏʟɪɴ</title>
     <link rel="stylesheet" href="/index.css">
-    <script src="/index.js" type="module" defer></script>
+    <link rel="stylesheet" href="/bundle/included.css">
+    <script src="/bundle/index.js" type="module" defer></script>
     <script type="module" defer>
-      import { initFiolin } from '/index.js';
+      import { initFiolin } from '/bundle/index.js';
       initFiolin('/s/${name}/script.json');
     </script>
   </head>
   <body>
     <div id="container">
-      <span id="script-src"></span>
-      <textarea id="script-pane" rows="15">Loading...</textarea>
-      <input type="file" id="file-chooser" disabled />
-      <textarea id="output-pane" rows="10" disabled>Loading...</textarea>
+      <div id="script-header">
+        <div id="script-title">${script.meta.title}</div>
+        <div id="script-mode-button" title="Edit Script">✎</div>
+      </div>
+      <div id="script">
+        <pre id="script-desc">${script.meta.description}</pre>
+        <div id="script-editor" class="hidden"></div>
+      </div>
+      <div id="controls">
+        <input type="file" id="file-chooser" disabled />
+        <!-- TODO -->
+      </div>
+      <div id="output">
+        <pre id="output-term">Loading...</pre>
+      </div>
     </div>
   </body>
 </html>
@@ -41,16 +53,17 @@ function makeIndexHtml(names: Set<string>): string {
   return `<!DOCTYPE html>
 <html>
   <head>
-    <title>ƒiolin</title>
+    <title>ƒɪᴏʟɪɴ</title>
     <link rel="stylesheet" href="/index.css">
-    <script src="/index.js" type="module" defer></script>
-    <script type="text/javascript" defer>
+    <link rel="stylesheet" href="/bundle/included.css">
+    <script src="/bundle/index.js" type="module" defer></script>
+    <script type="module" defer>
       // TODO: Invoke autocomplete when that exists
     </script>
   </head>
   <body>
     <div id="container">
-      <h3>First-Party ƒiolin Scripts:</h3>
+      <h3>First-Party ƒɪᴏʟɪɴ Scripts</h3>
       <ul>
         ${lis}
       </ul>
@@ -81,7 +94,7 @@ function genFiol(name: string, options?: { script?: FiolinScript, strict?: boole
     console.log(`Generating html/json for ${name}.fiol`);
     mkdirSync(dir, { recursive: true });
     writeFileSync(jsonPath, JSON.stringify(script, null, 2));
-    writeFileSync(htmlPath, makeFiolHtml(name));
+    writeFileSync(htmlPath, makeFiolHtml(name, script));
   } catch (e) {
     if (options?.strict) throw e;
     console.error(`Failed to generate json for ${name}.fiol`);
@@ -102,6 +115,10 @@ export default defineCommand({
     },
   },
   async run({ args }) {
+    // TODO: This is stupid
+    cpSync(
+      pkgPath('node_modules/monaco-editor/esm/vs/base/browser/ui/codicons/codicon/codicon.ttf'),
+      pubPath('bundle/codicon.ttf'));
     const fiolOutputDir = pubPath('s');
     console.log('Recreating directory of generated fiol json');
     rmSync(fiolOutputDir, { force: true, recursive: true });

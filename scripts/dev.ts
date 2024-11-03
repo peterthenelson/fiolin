@@ -5,7 +5,7 @@ function launch(cmd: string, args: string[]): [string, ChildProcess] {
   return [cmd, spawn(cmd, args, { shell: true })];
 }
 
-const children = ['watch:ts', 'watch:fiols', 'dev:server', 'dev:fake3p'].map((s) => {
+const children = ['watch:rollup', 'watch:fiols', 'dev:server', 'dev:fake3p'].map((s) => {
   return launch('npm', ['run', s]);
 });
 

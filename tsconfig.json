@@ -1,5 +1,6 @@
 {
   "extends": "./.nitro/types/tsconfig.json",
+  "exclude": ["server/**"]
   // TODO: Figure out how to get this file the way I want it without breaking
   // the rollup build.
   //"extends": "./tsconfig.fiolin-base.json",

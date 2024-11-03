@@ -2,6 +2,30 @@ import { RunMessage, WorkerMessage } from '../web-utils/types';
 import { getErrMsg, toErr } from '../common/errors';
 import { asFiolinScript } from '../common/parse';
 import { FiolinScript } from '../common/types';
+// Import all the editor features but only the python language support.
+import 'monaco-editor/esm/vs/editor/editor.all.js';
+import 'monaco-editor/esm/vs/basic-languages/python/python.contribution.js';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
+
+self.MonacoEnvironment = {
+  getWorkerUrl: function (moduleId, label) {
+    // We only need the editor.worker.js right now, but I'm leaving these other
+    // branches in so that the resulting error is obvious instead of baffling.
+		if (label === 'json') {
+			return '/bundle/json.worker.js';
+		}
+		if (label === 'css' || label === 'scss' || label === 'less') {
+			return '/bundle/css.worker.js';
+		}
+		if (label === 'html' || label === 'handlebars' || label === 'razor') {
+			return '/bundle/html.worker.js';
+		}
+		if (label === 'typescript' || label === 'javascript') {
+			return '/bundle/ts.worker.js';
+		}
+		return '/bundle/editor.worker.js';
+	}
+}
 
 function getElementByIdAs<T extends HTMLElement>(id: string, cls: new (...args: any[])=> T): T {
   const elem = document.getElementById(id);
@@ -58,8 +82,13 @@ with open(infname, 'rb') as infile:
 `;
 let script: FiolinScript = {
   meta: {
-    title: 'Example Script',
-    description: 'Copies input to output'
+    title: 'Fiolin Playground',
+    description: (
+      'Welcome to the Fiolin Playground!\n\nWe\'ve gotten you started by ' +
+      'a simple python script that copies a single input file into the ' +
+      'output folder. If you want more example scripts, you can click "Edit" ' +
+      'on any fiolin script to see the source code. Happy coding!'
+    ),
   },
   interface: {
     inputFiles: 'SINGLE',
@@ -69,80 +98,107 @@ let script: FiolinScript = {
   code: { python: defaultPy }
 };
 
-const worker = new TypedWorker('/worker.js', { type: 'classic' });
+const worker = new TypedWorker('/bundle/worker.js', { type: 'classic' });
 
 worker.onerror = (e) => {
-  const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
+  const term = getElementByIdAs('output-term', HTMLPreElement);
   console.error(getErrMsg(e));
-  outputPane.value = getErrMsg(e);
+  term.textContent = getErrMsg(e);
 };
 
 let initialized: undefined | Promise<void>;
 
-export function initFiolin(scriptUrl: string) {
-  const scriptSrc = getElementByIdAs('script-src', HTMLSpanElement);
-  const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
+function initMonaco(content: string) {
+  const scriptEditor = getElementByIdAs('script-editor', HTMLDivElement);
+  if (!scriptEditor) {
+    console.log('No #script-editor; skipping');
+    return;
+  }
+  const editor = monaco.editor.create(scriptEditor, {
+    language: 'python',
+    value: content,
+    theme: 'vs-dark',
+    automaticLayout: true,
+  });
+  editor.onDidChangeModelContent(() => {
+    script.code.python = editor.getValue();
+  });
+}
+
+export function initFiolin(scriptUrl: string, loading?: boolean) {
+  const scriptTitle = getElementByIdAs('script-title', HTMLDivElement);
+  const scriptDesc = getElementByIdAs('script-desc', HTMLPreElement);
   initialized = (async () => {
     try {
       worker.onmessage = handleMessage;
-      scriptSrc.textContent = scriptUrl;
-      scriptPane.value = `Fetching script from\n${scriptUrl}`;
+      if (loading) {
+        scriptTitle.textContent = scriptUrl;
+        scriptDesc.textContent = `Fetching script from\n${scriptUrl}`;
+      }
       const resp = await fetch(scriptUrl);
       const parsed = await resp.json();
       console.log(parsed);
       script = asFiolinScript(parsed);
-      scriptSrc.textContent = script.meta.title;
-      scriptSrc.title = script.meta.description;
-      scriptPane.value = script.code.python;
+      scriptTitle.textContent = script.meta.title;
+      scriptDesc.textContent = script.meta.description;
+      initMonaco(script.code.python);
+      const button = getElementByIdAs('script-mode-button', HTMLDivElement);
+      button.onclick = () => {
+        const editor = getElementByIdAs('script-editor', HTMLDivElement);
+        if (editor.classList.contains('hidden')) {
+          editor.classList.remove('hidden');
+        } else {
+          editor.classList.add('hidden');
+        }
+      };
     } catch (e) {
       console.log('Failed to fetch script!');
       const err = toErr(e);
       console.error(err);
-      scriptPane.value = (
+      scriptDesc.textContent = (
         `Failed to fetch script from\n${scriptUrl}\n${err.message}`);
     }
   })();
 }
 
 export function initPlayground() {
-  const scriptSrc = getElementByIdAs('script-src', HTMLSpanElement);
-  const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
-  scriptSrc.textContent = script.meta.title;
-  scriptSrc.title = script.meta.description;
-  scriptPane.value = script.code.python;
+  const scriptTitle = getElementByIdAs('script-title', HTMLDivElement);
+  const scriptDesc = getElementByIdAs('script-desc', HTMLPreElement);
+  scriptTitle.textContent = script.meta.title;
+  scriptDesc.textContent = script.meta.description;
+  getElementByIdAs('script-editor', HTMLDivElement).classList.remove('hidden');
+  initMonaco(script.code.python);
   worker.onmessage = handleMessage;
   initialized = (async () => {})();
 }
 
 export function die(msg: string) {
-  const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
-  scriptPane.value = msg;
+  const scriptDesc = getElementByIdAs('script-desc', HTMLPreElement);
+  scriptDesc.textContent = msg;
   throw new Error(msg);
 }
 
 function runScript() {
-  const scriptPane = getElementByIdAs('script-pane', HTMLTextAreaElement);
-  const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
-  outputPane.value = '';
+  const term = getElementByIdAs('output-term', HTMLPreElement);
+  term.textContent = '';
   const file = getElementByIdAs('file-chooser', HTMLInputElement).files![0];
-  script.code.python = scriptPane.value;
   const msg: RunMessage = { type: 'RUN', script, request: { inputs: [file], argv: '' } };
   worker.postMessage(msg);
 }
 
 async function handleMessage(msg: WorkerMessage): Promise<void> {
-  const outputPane = getElementByIdAs('output-pane', HTMLTextAreaElement);
+  const term = getElementByIdAs('output-term', HTMLPreElement);
   if (msg.type === 'LOADED') {
-    outputPane.value = 'Pyodide Loaded';
+    term.textContent = 'Pyodide Loaded';
     await initialized;
     const fileChooser = getElementByIdAs('file-chooser', HTMLInputElement);
     fileChooser.disabled = false;
     fileChooser.onchange = runScript;
   } else if (msg.type === 'STDOUT') {
-    outputPane.value += msg.value + '\n';
+    term.textContent += msg.value + '\n';
   } else if (msg.type === 'STDERR') {
     console.warn(msg.value);
-    outputPane.value += msg.value + '\n';
+    term.textContent += msg.value + '\n';
   } else if (msg.type === 'SUCCESS') {
     if (msg.response.outputs.length > 0) {
       for (const f of msg.response.outputs) {
@@ -154,14 +210,14 @@ async function handleMessage(msg: WorkerMessage): Promise<void> {
         document.body.removeChild(elem);
       }
     } else {
-      outputPane.value += (
+      term.textContent += (
           '='.repeat(30) + '\nScript did not produce an output file.\n');
     }
   } else if (msg.type === 'ERROR') {
     console.warn(msg.error);
-    outputPane.value = msg.error.toString();
+    term.textContent = msg.error.toString();
   } else {
-    outputPane.value = `Unexpected event data: ${msg}`;
+    term.textContent = `Unexpected event data: ${msg}`;
     console.error(`Unexpected event data: ${msg}`);
   }
 };

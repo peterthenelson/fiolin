@@ -1,26 +1,96 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: #d4d4d4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #303030;
+}
+
+body a {
+  color: #569cd6;
+}
+
+.hidden {
+  display: none;
+}
+
 #container {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  width: 55em;
+  background-color: #151515;
+  border-radius: 8px;
+  padding-top: .75em;
 }
 
-#script-src {
-  font-style: italic;
+#script-header {
+  width: 90%;
+  height: 2.4em;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
-#script-pane {
+#script-title {
+  align-content: center;
+  font-weight: bold;
+  font-size: larger;
+}
+
+#script-mode-button {
+  background-color: #8a8a8a;
+  align-content: center;
+  margin-left: auto;
+  border-radius: 8px;
+  padding: .4em;
+}
+
+#script {
+  width: 90%;
+}
+
+#script-desc {
+  background-color: #404040;
+  white-space: pre-wrap;
+  word-wrap: anywhere;
+  font-family: serif;
+  font-size: large;
+  padding: 1em;
+}
+
+#script-editor {
+  height: 25em;
+}
+
+#controls {
+  width: 90%;
+}
+
+#output {
+  width: 90%;
+}
+
+#output-term {
+  width: 100%;
+  height: 10em;
+  padding: 1em;
   font-family: monospace;
-  width: 48em;
-}
-
-#output-pane {
-  font-family: monospace;
-  width: 48em;
+  background-color: #404040;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #252525 #404040;
 }
 
 #form-3p {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 30em;
+  width: 25em;
 }
