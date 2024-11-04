@@ -23,12 +23,14 @@ self.MonacoEnvironment = {
 	}
 }
 
+let editor: undefined | monaco.editor.IStandaloneCodeEditor;
+
 export function initMonaco(elem?: HTMLElement, value?: string, onchange?: (value: string) => void) {
   if (!elem) {
     console.log('No element provided to monaco; skipping initialization');
     return;
   }
-  const editor = monaco.editor.create(elem, {
+  editor = monaco.editor.create(elem, {
     language: 'python',
     value,
     theme: 'vs-dark',
@@ -36,7 +38,44 @@ export function initMonaco(elem?: HTMLElement, value?: string, onchange?: (value
   });
   if (onchange) {
     editor.onDidChangeModelContent(() => {
-      onchange(editor.getValue());
+      onchange(editor!.getValue());
     });
   }
+}
+
+export function clearMonacoErrors() {
+  if (typeof editor === 'undefined') {
+    console.warn('No editor exists; skipping setting error');
+    return;
+  }
+  const model = editor.getModel();
+  if (model === null) {
+    console.warn('No model found; skipping setting error')
+    return;
+  }
+  monaco.editor.setModelMarkers(model, 'fiolin', []);
+}
+
+export function setMonacoError(lineno: number, msg: string) {
+  if (typeof editor === 'undefined') {
+    console.warn('No editor exists; skipping setting error');
+    return;
+  }
+  const model = editor.getModel();
+  if (model === null) {
+    console.warn('No model found; skipping setting error')
+    return;
+  }
+  const line = model.getLineContent(lineno);
+  const startCol = 1 + (line.match(/^\s*/)?.[0]?.length || 0);
+  const endCol = 1 + line.length - (line.match(/\s*$/)?.[0]?.length || 0);
+  console.log(line, startCol, endCol);
+  monaco.editor.setModelMarkers(model, 'fiolin', [{
+    severity: monaco.MarkerSeverity.Error,
+    message: msg,
+    startLineNumber: lineno,
+    endLineNumber: lineno,
+    startColumn: startCol,
+    endColumn: endCol,
+  }]);
 }

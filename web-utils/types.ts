@@ -31,4 +31,5 @@ export interface SuccessMessage {
 export interface ErrorMessage {
   type: 'ERROR';
   error: Error;
+  lineno?: number;
 }

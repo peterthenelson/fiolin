@@ -40,7 +40,7 @@ async function onMessage(msg: WorkerMessage) {
   try {
     const response = await runner.run(msg.script, msg.request);
     if (response.error) {
-      postMessage({ type: 'ERROR', error: response.error });
+      postMessage({ type: 'ERROR', error: response.error, lineno: response.lineno });
     } else {
       postMessage({ type: 'SUCCESS', response });
     }

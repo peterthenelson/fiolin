@@ -2,6 +2,7 @@ import { RunMessage, WorkerMessage } from '../web-utils/types';
 import { getErrMsg, toErr } from '../common/errors';
 import { asFiolinScript } from '../common/parse';
 import { FiolinScript } from '../common/types';
+const monaco = import('./monaco');
 
 function getElementByIdAs<T extends HTMLElement>(id: string, cls: new (...args: any[])=> T): T {
   const elem = document.getElementById(id);
@@ -84,12 +85,10 @@ worker.onerror = (e) => {
 
 let initialized: undefined | Promise<void>;
 
-async function initMonaco(content: string): Promise<void> {
+async function setupScriptEditor(content: string): Promise<void> {
   const scriptEditor = getElementByIdAs('script-editor', HTMLDivElement);
-  return import('./monaco').then((monaco) => {
-    monaco.initMonaco(scriptEditor, content, (value: string) => {
-      script.code.python = value;
-    });
+  (await monaco).initMonaco(scriptEditor, content, (value: string) => {
+    script.code.python = value;
   });
 }
 
@@ -109,7 +108,7 @@ export function initFiolin(scriptUrl: string, loading?: boolean) {
       script = asFiolinScript(parsed);
       scriptTitle.textContent = script.meta.title;
       scriptDesc.textContent = script.meta.description;
-      initMonaco(script.code.python);
+      setupScriptEditor(script.code.python);
       const button = getElementByIdAs('script-mode-button', HTMLDivElement);
       button.onclick = () => {
         const editor = getElementByIdAs('script-editor', HTMLDivElement);
@@ -135,7 +134,7 @@ export function initPlayground() {
   scriptTitle.textContent = script.meta.title;
   scriptDesc.textContent = script.meta.description;
   getElementByIdAs('script-editor', HTMLDivElement).classList.remove('hidden');
-  initMonaco(script.code.python);
+  setupScriptEditor(script.code.python);
   worker.onmessage = handleMessage;
   initialized = (async () => {})();
 }
@@ -146,9 +145,10 @@ export function die(msg: string) {
   throw new Error(msg);
 }
 
-function runScript() {
+async function runScript() {
   const term = getElementByIdAs('output-term', HTMLPreElement);
   term.textContent = '';
+  (await monaco).clearMonacoErrors();
   const file = getElementByIdAs('file-chooser', HTMLInputElement).files![0];
   const msg: RunMessage = { type: 'RUN', script, request: { inputs: [file], argv: '' } };
   worker.postMessage(msg);
@@ -182,7 +182,12 @@ async function handleMessage(msg: WorkerMessage): Promise<void> {
           '='.repeat(30) + '\nScript did not produce an output file.\n');
     }
   } else if (msg.type === 'ERROR') {
-    console.warn(msg.error);
+    if (typeof msg.lineno !== 'undefined') {
+      console.warn(msg.error.message);
+      (await monaco).setMonacoError(msg.lineno, msg.error.message);
+    } else {
+      console.warn(msg.error);
+    }
     term.textContent = msg.error.toString();
   } else {
     term.textContent = `Unexpected event data: ${msg}`;

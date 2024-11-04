@@ -12,8 +12,8 @@ A not-necessarily-exhaustive list of TODOs:
   - HSTS for prod? Any updates to headers for wasm files?
 - Core functionality
   - Utility for wrapping those errno errors that the wasm filesystem throws
-  - Better error reporting for errors in python
-  - Proper resetting of file system between runs
+  - Proper resetting of file system between runs (and avoiding re-importing or
+    whatever messes up re-runs).
   - Checking for none/single/multi
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)

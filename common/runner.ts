@@ -9,6 +9,25 @@ export interface PyodideRunnerOptions {
   indexUrl?: string;
 }
 
+const extractExc = `
+def _extract_exc():
+  import sys
+  import traceback
+  e = sys.last_exc
+  if not e:
+    return (-1, 'No exception')
+  # Skip the stackframes from pyodide wrapper code
+  tb = e.__traceback__
+  while tb:
+    if tb.tb_frame.f_code.co_filename == '<exec>':
+      break
+    tb = tb.tb_next
+  if not tb:
+    return (-1, 'No stack frames with <exec>!')
+  return (tb.tb_lineno, ''.join(traceback.format_exception(e.with_traceback(tb))))
+_extract_exc()
+`;
+
 export class PyodideRunner implements FiolinRunner {
   private _shared: FiolinJsGlobal;
   private _pyodide?: PyodideInterface;
@@ -114,6 +133,17 @@ export class PyodideRunner implements FiolinRunner {
     }
   }
 
+  private translateError(e: unknown): [Error, number | undefined] {
+    const err = toErr(e);
+    if (err instanceof this._pyodide!.ffi.PythonError) {
+      const prox = this._pyodide!.runPython(extractExc);
+      const [lineno, msg] = prox;
+      prox.destroy();
+      return [new Error(msg), lineno];
+    }
+    return [err, undefined];
+  }
+
   // TODO: Add checking for NONE/SINGLE/MULTI
   async run(script: FiolinScript, request: FiolinRunRequest): Promise<FiolinRunResponse> {
     await this.loaded;
@@ -137,7 +167,10 @@ export class PyodideRunner implements FiolinRunner {
       };
       return response;
     } catch (e) {
-      return { outputs: [], stdout: this._stdout, stderr: this._stderr, error: toErr(e) };
+      const [error, lineno] = this.translateError(e);
+      return {
+        outputs: [], stdout: this._stdout, stderr: this._stderr, error, lineno
+      };
     }
   }
 }

@@ -74,6 +74,7 @@ export interface FiolinRunResponse {
   stdout: string;
   stderr: string;
   error?: Error;
+  lineno?: number;
 }
 
 export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
