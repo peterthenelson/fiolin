@@ -1,6 +1,6 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript } from './types';
-import { toErr } from './errors';
+import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime } from './types';
+import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
 
 export interface ConsoleLike { log(s: string): void, error(s: string): void };
 
@@ -28,9 +28,39 @@ def _extract_exc():
 _extract_exc()
 `;
 
+function cmpPkg(a: FiolinPyPackage, b: FiolinPyPackage): number {
+  if (a.type < b.type) {
+    return -1;
+  } else if (a.type > b.type) {
+    return 1;
+  } else if (a.name < b.name) {
+    return -1
+  } else if (a.name > b.name) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+function packagesDiffer(a: FiolinScriptRuntime, b: FiolinScriptRuntime): boolean {
+  const aPkgs: FiolinPyPackage[] = a.pythonPkgs || [];
+  const bPkgs: FiolinPyPackage[] = a.pythonPkgs || [];
+  if (aPkgs.length !== bPkgs.length) return true;
+  aPkgs.sort(cmpPkg);
+  bPkgs.sort(cmpPkg);
+  for (let i = 0; i < aPkgs.length; i++) {
+    if (cmpPkg(aPkgs[i], bPkgs[i]) !== 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export class PyodideRunner implements FiolinRunner {
   private _shared: FiolinJsGlobal;
   private _pyodide?: PyodideInterface;
+  private _installed?: FiolinScriptRuntime;
+  private readonly _indexUrl?: string;
   private readonly _console: ConsoleLike;
   private _stdout: string;
   private _stderr: string;
@@ -38,21 +68,22 @@ export class PyodideRunner implements FiolinRunner {
 
   constructor(options?: PyodideRunnerOptions) {
     this._shared = { inputs: [], outputs: [], argv: '' };
-    this.loaded = this.load(options);
     this._console = options?.console || console;
+    this._indexUrl = options?.indexUrl;
     this._stdout = '';
     this._stderr = '';
+    this.loaded = this.load();
   }
 
-  // TODO: Where should I be dealing w/errno codes in these functions?
-  resetFs() {
+  private resetFs() {
     this._console.log('Resetting FS');
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present before resetFs!`)
     }
-    // TODO: Actually delete everything in the filesystem
-    this._pyodide.FS.mkdir('/input');
-    this._pyodide.FS.mkdir('/output');
+    rmRf(this._pyodide, '/input');
+    mkDir(this._pyodide, '/input');
+    rmRf(this._pyodide, '/output');
+    mkDir(this._pyodide, '/output');
   }
 
   private async mountInputs(inputs: File[]) {
@@ -64,7 +95,7 @@ export class PyodideRunner implements FiolinRunner {
     for (const input of inputs) {
       const inBytes = new Uint8Array(await input.arrayBuffer());
       this._shared.inputs.push(input.name);
-      this._pyodide.FS.writeFile(`/input/${input.name}`, inBytes);
+      writeFile(this._pyodide, `/input/${input.name}`, inBytes);
     }
   }
 
@@ -75,7 +106,7 @@ export class PyodideRunner implements FiolinRunner {
     }
     const outFiles: File[] = [];
     for (const output of this._shared.outputs) {
-      const outBytes = this._pyodide.FS.readFile(`/output/${output}`);
+      const outBytes = readFile(this._pyodide, `/output/${output}`);
       outFiles.push(new File([new Blob([outBytes])], output));
     }
     return outFiles;
@@ -87,9 +118,9 @@ export class PyodideRunner implements FiolinRunner {
     this._shared.argv = '';
   }
 
-  private async load(options?: PyodideRunnerOptions) {
+  private async load() {
     this._pyodide = await loadPyodide({
-      indexURL: options?.indexUrl,
+      indexURL: this._indexUrl,
       jsglobals: this._shared,
     });
     this._pyodide.setStdout({
@@ -100,14 +131,25 @@ export class PyodideRunner implements FiolinRunner {
     });
   }
 
-  private async installPkgs(script: FiolinScript) {
+  async installPkgs(script: FiolinScript) {
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present after loading!`)
     }
     const pkgs: FiolinPyPackage[] = script.runtime.pythonPkgs || [];
     if (pkgs.length === 0) {
-      this._console.log('No python packages to be installed');
+      this._console.log('No packages to be installed');
       return;
+    }
+    if (typeof this._installed !== 'undefined') {
+      if (packagesDiffer(this._installed, script.runtime)) {
+        this._console.log(
+          'Required packages differ from those installed; reloading pyodide');
+        this.loaded = this.load();
+        await this.loaded;
+      } else {
+        this._console.log('Required packages already installed')
+        return;
+      }
     }
     try {
       this._console.log(`${pkgs.length} python packages to be installed`);
@@ -127,6 +169,7 @@ export class PyodideRunner implements FiolinRunner {
         }
       }
       this._console.log(`Finished installing packages`);
+      this._installed = script.runtime;
     } finally {
       this._shared['Object'] = undefined;
       this._shared['fetch'] = undefined;
@@ -134,7 +177,7 @@ export class PyodideRunner implements FiolinRunner {
   }
 
   private translateError(e: unknown): [Error, number | undefined] {
-    const err = toErr(e);
+    const err = toErrWithErrno(e);
     if (err instanceof this._pyodide!.ffi.PythonError) {
       const prox = this._pyodide!.runPython(extractExc);
       const [lineno, msg] = prox;
@@ -145,10 +188,15 @@ export class PyodideRunner implements FiolinRunner {
   }
 
   // TODO: Add checking for NONE/SINGLE/MULTI
-  async run(script: FiolinScript, request: FiolinRunRequest): Promise<FiolinRunResponse> {
+  async run(script: FiolinScript, request: FiolinRunRequest, forceReload?: boolean): Promise<FiolinRunResponse> {
     await this.loaded;
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present after loading!`)
+    }
+    if (forceReload) {
+      this._console.log('Reloading interpreter');
+      this.loaded = this.load();
+      await this.loaded;
     }
     this._stdout = '';
     this._stderr = '';

@@ -1,4 +1,4 @@
-import { FiolinScript, FiolinScriptTemplate } from '../common/types';
+import { FiolinScript } from '../common/types';
 import { readdirSync, readFileSync } from 'node:fs';
 import { pkgPath } from './pkg-path';
 import { asFiolinScript } from '../common/parse';

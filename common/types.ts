@@ -59,9 +59,6 @@ export interface FiolinScript {
   code: FiolinScriptCode;
 }
 
-// Used internally to allow putting the python in a separate file.
-export type FiolinScriptTemplate = Omit<FiolinScript, 'code'>;
-
 // Used for encapsulating running a script.
 export interface FiolinRunRequest {
   inputs: File[];
@@ -88,5 +85,14 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
 }
 
 export interface FiolinRunner {
-  run(script: FiolinScript, request: FiolinRunRequest): Promise<FiolinRunResponse>;
+  // Install any necessary external packages to run the script. If the runner
+  // has previously installed packages, then compares the requested packages to
+  // those. If they're the same, installPkgs is a no-op. Otherwise, it reloads
+  // the entire interpreter before installing them.
+  installPkgs(script: FiolinScript): Promise<void>;
+
+  // Run the given script. forceReload triggers a reload of the interpreter
+  // before proceeding. installPkgs is triggered on runs--see above for the
+  // logic about which behaviors that results in.
+  run(script: FiolinScript, request: FiolinRunRequest, forceReload?: boolean): Promise<FiolinRunResponse>;
 }

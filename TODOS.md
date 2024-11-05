@@ -11,10 +11,8 @@ A not-necessarily-exhaustive list of TODOs:
   - Deployment setup for cloudflare pages and update README
   - HSTS for prod? Any updates to headers for wasm files?
 - Core functionality
-  - Utility for wrapping those errno errors that the wasm filesystem throws
-  - Proper resetting of file system between runs (and avoiding re-importing or
-    whatever messes up re-runs).
   - Checking for none/single/multi
+  - Adding a fiolin python module that scripts can use
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
   - More file-conversion example scripts
@@ -38,7 +36,10 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert image ...
     - Convert video ...
 - Frontend
-  - Better UI for input / output filesystem to allow for multiple files
+  - Better UI for input / output filesystem to allow for multiple files (and
+    remember to lock up 'run' button during installPkgs step and during any
+    runs)
+  - Using the installPkgs to decrease perceived latency
   - Autocomplete search for landing page.
   - Improve styling for all pages
   - Link to documentation on landing page
