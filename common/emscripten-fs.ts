@@ -1,4 +1,4 @@
-import { PyodideInterface } from 'pyodide/pyodide';
+import { PyodideInterface } from 'pyodide';
 import { toErr } from './errors';
 
 export function toErrWithErrno(e: unknown, prefix?: string): Error {

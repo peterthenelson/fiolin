@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PyodideRunner } from './runner';
-import { FiolinScript } from './types';
+import { FiolinScript, FiolinScriptRuntime } from './types';
 
 function dedent(s: string): string {
   const lines = s.split('\n');
@@ -21,11 +21,15 @@ function dedent(s: string): string {
   return lines.join('\n');
 }
 
-function mkScript(python: string): FiolinScript {
+function mkScript(python: string, pkgNames?: string[]): FiolinScript {
+  const runtime: FiolinScriptRuntime = {};
+  if (pkgNames && pkgNames.length > 0) {
+    runtime.pythonPkgs = pkgNames.map((n) => ({ type: 'PYPI', name: n }))
+  }
   return {
     meta: { title: 'title', description: 'desc' },
     interface: { inputFiles: 'MULTI', outputFiles: 'MULTI' },
-    runtime: {},
+    runtime,
     code: { python: dedent(python) },
   };
 }
@@ -46,6 +50,10 @@ const indexUrl = (() => {
   parts.push('node_modules/pyodide');
   return parts.join('/');
 })();
+
+function multiRe(...res: RegExp[]): RegExp {
+  return new RegExp(res.map((r) => r.source).join(''), 's');
+}
 
 describe('PyodideRunner', () => {
   it('runs', async () => {
@@ -110,18 +118,96 @@ describe('PyodideRunner', () => {
   });
 
   it('automatically installs pkgs', async () => {
-    // TODO
+    const runner = new PyodideRunner({ indexUrl });
+    const script = mkScript(`
+      import idna
+      import sys
+      # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
+      print(idna.encode('ドメイン.テスト'), file=sys.stderr)
+    `, ['idna']);
+    const response = await runner.run(script, { inputs: [], argv: '' });
+    expect(response.error).toBeUndefined();
+    expect(response.stderr.trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
+    expect(response.stdout).toMatch(multiRe(
+      /Resetting FS.*/,
+      /1 python packages to be installed.*/,
+      /Installing package idna.*/
+    ));
   });
 
   it('can manually preinstall pkgs', async () => {
-    // TODO
+    const runner = new PyodideRunner({ indexUrl });
+    const script = mkScript(`
+      import idna
+      import sys
+      # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
+      print(idna.encode('ドメイン.テスト'), file=sys.stderr)
+    `, ['idna']);
+    await runner.installPkgs(script);
+    const response = await runner.run(script, { inputs: [], argv: '' });
+    expect(response.error).toBeUndefined();
+    expect(response.stderr.trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
+    expect(response.stdout).toMatch(multiRe(
+      /Resetting FS.*/,
+      /Required packages already installed.*/,
+    ));
   });
 
   it('avoids redundant pkg installation', async () => {
-    // TODO
+    const runner = new PyodideRunner({ indexUrl });
+    const script = mkScript(`
+      import idna
+      import sys
+      # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
+      print(idna.encode('ドメイン.テスト'), file=sys.stderr)
+    `, ['idna']);
+    {
+      const response = await runner.run(script, { inputs: [], argv: '' });
+      expect(response.error).toBeUndefined();
+      expect(response.stdout).toMatch(multiRe(
+        /Resetting FS.*/,
+        /1 python packages to be installed.*/,
+        /Installing package idna.*/
+      ));
+    }
+    {
+      const response = await runner.run(script, { inputs: [], argv: '' });
+      expect(response.error).toBeUndefined();
+      expect(response.stdout).toMatch(multiRe(
+        /Resetting FS.*/,
+        /Required packages already installed.*/,
+      ));
+    }
   });
 
   it('reloads the interpreter when pkgs change', async () => {
-    // TODO
+    const runner = new PyodideRunner({ indexUrl });
+    const script = mkScript(`
+      import idna
+      import sys
+      # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
+      print(idna.encode('ドメイン.テスト'), file=sys.stderr)
+    `, ['idna']);
+    {
+      const response = await runner.run(script, { inputs: [], argv: '' });
+      expect(response.error).toBeUndefined();
+      expect(response.stdout).toMatch(multiRe(
+        /Resetting FS.*/,
+        /1 python packages to be installed.*/,
+        /Installing package idna.*/
+      ));
+    }
+    {
+      script.runtime.pythonPkgs?.push({ type: 'PYPI', name: 'six' });
+      const response = await runner.run(script, { inputs: [], argv: '' });
+      expect(response.error).toBeUndefined();
+      expect(response.stdout).toMatch(multiRe(
+        /Resetting FS.*/,
+        /Required packages differ from those installed.*/,
+        /2 python packages to be installed.*/,
+        /Installing package idna.*/,
+        /Installing package six.*/
+      ));
+    }
   });
 });

@@ -44,7 +44,7 @@ function cmpPkg(a: FiolinPyPackage, b: FiolinPyPackage): number {
 
 function packagesDiffer(a: FiolinScriptRuntime, b: FiolinScriptRuntime): boolean {
   const aPkgs: FiolinPyPackage[] = a.pythonPkgs || [];
-  const bPkgs: FiolinPyPackage[] = a.pythonPkgs || [];
+  const bPkgs: FiolinPyPackage[] = b.pythonPkgs || [];
   if (aPkgs.length !== bPkgs.length) return true;
   aPkgs.sort(cmpPkg);
   bPkgs.sort(cmpPkg);
@@ -68,10 +68,20 @@ export class PyodideRunner implements FiolinRunner {
 
   constructor(options?: PyodideRunnerOptions) {
     this._shared = { inputs: [], outputs: [], argv: '' };
-    this._console = options?.console || console;
-    this._indexUrl = options?.indexUrl;
+    const innerConsole: ConsoleLike = options?.console || console;
     this._stdout = '';
     this._stderr = '';
+    this._console = {
+      log: (s) => {
+        innerConsole.log(s);
+        this._stdout += s + '\n';
+      },
+      error: (s) => {
+        innerConsole.error(s);
+        this._stderr += s + '\n';
+      }
+    };
+    this._indexUrl = options?.indexUrl;
     this.loaded = this.load();
   }
 
@@ -123,15 +133,12 @@ export class PyodideRunner implements FiolinRunner {
       indexURL: this._indexUrl,
       jsglobals: this._shared,
     });
-    this._pyodide.setStdout({
-      batched: (s) => { this._console.log(s); this._stdout += s + '\n' }
-    });
-    this._pyodide.setStderr({
-      batched: (s) => { this._console.error(s); this._stderr += s + '\n' }
-    });
+    this._pyodide.setStdout({ batched: (s) => { this._console.log(s) } });
+    this._pyodide.setStderr({ batched: (s) => { this._console.error(s) } });
   }
 
   async installPkgs(script: FiolinScript) {
+    await this.loaded;
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present after loading!`)
     }
@@ -169,7 +176,7 @@ export class PyodideRunner implements FiolinRunner {
         }
       }
       this._console.log(`Finished installing packages`);
-      this._installed = script.runtime;
+      this._installed = structuredClone(script.runtime);
     } finally {
       this._shared['Object'] = undefined;
       this._shared['fetch'] = undefined;
@@ -204,14 +211,13 @@ export class PyodideRunner implements FiolinRunner {
     this._shared.argv = request.argv;
     try {
       this.resetFs();
-      await this.mountInputs(request.inputs);
       await this.installPkgs(script);
       await this._pyodide.loadPackagesFromImports(script.code.python);
+      await this.mountInputs(request.inputs);
       await this._pyodide.runPythonAsync(script.code.python);
+      const outputs = this.extractOutputs();
       const response: FiolinRunResponse = {
-        outputs: this.extractOutputs(),
-        stdout: this._stdout,
-        stderr: this._stderr,
+        outputs, stdout: this._stdout, stderr: this._stderr,
       };
       return response;
     } catch (e) {
