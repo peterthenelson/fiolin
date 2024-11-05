@@ -1,6 +1,7 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
 import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
+import { getPyLib } from './pylib';
 
 export interface ConsoleLike { log(s: string): void, error(s: string): void };
 
@@ -8,25 +9,6 @@ export interface PyodideRunnerOptions {
   console?: ConsoleLike;
   indexUrl?: string;
 }
-
-const extractExc = `
-def _extract_exc():
-  import sys
-  import traceback
-  e = sys.last_exc
-  if not e:
-    return (-1, 'No exception')
-  # Skip the stackframes from pyodide wrapper code
-  tb = e.__traceback__
-  while tb:
-    if tb.tb_frame.f_code.co_filename == '<exec>':
-      break
-    tb = tb.tb_next
-  if not tb:
-    return (-1, 'No stack frames with <exec>!')
-  return (tb.tb_lineno, ''.join(traceback.format_exception(e.with_traceback(tb))))
-_extract_exc()
-`;
 
 function cmpPkg(a: FiolinPyPackage, b: FiolinPyPackage): number {
   if (a.type < b.type) {
@@ -94,6 +76,7 @@ export class PyodideRunner implements FiolinRunner {
     mkDir(this._pyodide, '/input');
     rmRf(this._pyodide, '/output');
     mkDir(this._pyodide, '/output');
+    rmRf(this._pyodide, '/home/pyodide/fiolin.py');
   }
 
   private async mountInputs(inputs: File[]) {
@@ -107,6 +90,8 @@ export class PyodideRunner implements FiolinRunner {
       this._shared.inputs.push(input.name);
       writeFile(this._pyodide, `/input/${input.name}`, inBytes);
     }
+    this._console.log('Setting up utility library');
+    writeFile(this._pyodide, `/home/pyodide/fiolin.py`, getPyLib(this._pyodide))
   }
 
   private extractOutputs(): File[] {
@@ -186,7 +171,7 @@ export class PyodideRunner implements FiolinRunner {
   private translateError(e: unknown): [Error, number | undefined] {
     const err = toErrWithErrno(e);
     if (err instanceof this._pyodide!.ffi.PythonError) {
-      const prox = this._pyodide!.runPython(extractExc);
+      const prox = this._pyodide!.runPython('import fiolin; fiolin.extract_exc()');
       const [lineno, msg] = prox;
       prox.destroy();
       return [new Error(msg), lineno];

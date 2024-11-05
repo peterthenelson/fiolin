@@ -42,20 +42,15 @@ class TypedWorker {
 }
 
 const defaultPy: string = `# Basic script that copies input to output
-import js
-import os.path
+import fiolin
+import os
 
-infname = os.path.join('/input', js.inputs[0])
-stem, ext = os.path.splitext(js.inputs[0])
-js.outputs = [stem + '-copy' + ext]
-outfname = os.path.join('/output', js.outputs[0])
-
-with open(infname, 'rb') as infile:
-  print(f'opened {infname} (to read)')
-  with open(outfname, 'wb') as outfile:
-    print(f'opened {outfname} (to write)')
-    outfile.write(infile.read())
-  print('copied input to output')
+input = fiolin.get_input_basename()
+stem, ext = os.path.splitext(input)
+output = [stem + '-copy' + ext]
+print(f'Copying /input/{input} to /output/{stem}-copy{ext}')
+fiolin.cp(f'/input/{input}', f'/output/{stem}-copy{ext}')
+fiolin.auto_set_outputs()
 `;
 let script: FiolinScript = {
   meta: {

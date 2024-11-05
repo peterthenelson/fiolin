@@ -130,7 +130,7 @@ export default defineCommand({
     if (args.watch) {
       watch(pkgPath('fiols'), { persistent: true, recursive: false }, (type, fileName) => {
         if (!fileName) return;
-        if (fileName === 'js.py') return;
+        if (fileName === 'js.py' || fileName === 'fiolin.py') return;
         let name = '';
         if (fileName.endsWith('.py')) {
           name = fileName.substring(0, fileName.length - 3);

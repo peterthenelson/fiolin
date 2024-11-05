@@ -1,19 +1,18 @@
-import js
+import fiolin
 import os.path
 import tnefparse # type: ignore
 
-input = js.inputs[0]
+input = fiolin.get_input_basename()
 stem, ext = os.path.splitext(input)
-js.outputs = []
 
 print(f'Opening {input}')
-tnef_bytes = open(os.path.join('/input', input), 'rb').read()
+tnef_bytes = open(f'/input/{input}', 'rb').read()
 tnef = tnefparse.TNEF(tnef_bytes, do_checksum=True)
 for attachment in tnef.attachments:
   print(f'  Unpacking attachment {attachment.name}')
-  with open(os.path.join('/output', attachment.name), 'wb') as outfile:
+  with open(f'/output/{attachment.name}', 'wb') as outfile:
     outfile.write(attachment.data)
-  js.outputs.append(attachment.name)
-print(f'Unpacked {len(js.outputs)} attachments')
+print(f'Unpacked {len(tnef.attachments)} attachments')
 
+fiolin.auto_set_outputs()
 print('Done')

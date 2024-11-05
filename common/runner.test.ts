@@ -67,10 +67,10 @@ describe('PyodideRunner', () => {
   it('resets the file system between runs', async () => {
     const runner = new PyodideRunner({ indexUrl });
     const script = mkScript(`
-      import js
+      import fiolin
       import os
       import sys
-      # First dump all the existing file paths to stderr
+      # First dump all the existing input/output file paths to stderr
       def dump(dir):
         for dirpath, _, filenames in os.walk(dir):
           for f in filenames:
@@ -78,11 +78,9 @@ describe('PyodideRunner', () => {
       dump('/input')
       dump('/output')
       # Copy inputs to outputs
-      js.outputs = js.inputs
-      for i in js.inputs:
-        with open(f'/input/{i}') as infile:
-          with open(f'/output/{i}', 'w') as outfile:
-            outfile.write(infile.read())
+      for i in fiolin.get_input_basenames():
+        fiolin.cp(f'/input/{i}', f'/output/{i}')
+      fiolin.auto_set_outputs()
     `);
     {
       const response = await runner.run(script, {

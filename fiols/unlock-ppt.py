@@ -1,12 +1,11 @@
-import js
+import fiolin
 import os.path
 import re
 import zipfile
 
-input = js.inputs[0]
+input = fiolin.get_input_basename()
 stem, ext = os.path.splitext(input)
 output = stem + '-unlocked' + ext
-js.outputs = [output]
 
 print(f'Unzipping {input} to /ppt-tmp...')
 os.mkdir('/ppt-tmp')
@@ -28,4 +27,5 @@ with zipfile.ZipFile(os.path.join('/output', output), 'w', zipfile.ZIP_DEFLATED)
       arcname = os.path.relpath(path, '/ppt-tmp')
       zf.write(path, arcname=arcname)
 
+fiolin.auto_set_outputs()
 print('Done')

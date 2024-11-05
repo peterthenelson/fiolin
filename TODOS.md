@@ -12,7 +12,6 @@ A not-necessarily-exhaustive list of TODOs:
   - HSTS for prod? Any updates to headers for wasm files?
 - Core functionality
   - Checking for none/single/multi
-  - Adding a fiolin python module that scripts can use
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
   - More file-conversion example scripts
