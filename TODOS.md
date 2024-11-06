@@ -11,7 +11,9 @@ A not-necessarily-exhaustive list of TODOs:
   - Deployment setup for cloudflare pages and update README
   - HSTS for prod? Any updates to headers for wasm files?
 - Core functionality
-  - Checking for none/single/multi
+  - Some kind of flag parsing functionality
+  - Maybe have the user script execute in a separate module from a wrapper
+    script
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
   - More file-conversion example scripts

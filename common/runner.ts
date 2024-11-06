@@ -79,10 +79,15 @@ export class PyodideRunner implements FiolinRunner {
     rmRf(this._pyodide, '/home/pyodide/fiolin.py');
   }
 
-  private async mountInputs(inputs: File[]) {
+  private async mountInputs(script: FiolinScript, inputs: File[]) {
+    if (script.interface.inputFiles === 'NONE' && inputs.length > 0) {
+      throw new Error(`Script expects no input files; got ${inputs.length}`);
+    } else if (script.interface.inputFiles === 'SINGLE' && inputs.length !== 1) {
+      throw new Error(`Script expects one input file; got ${inputs.length}`);
+    }
     this._console.log('Mounting inputs to /input');
     if (!this._pyodide) {
-      throw new Error(`this._pyodide should be present before resetFs!`)
+      throw new Error(`this._pyodide should be present before resetFs!`);
     }
     this._shared.inputs = [];
     for (const input of inputs) {
@@ -91,10 +96,16 @@ export class PyodideRunner implements FiolinRunner {
       writeFile(this._pyodide, `/input/${input.name}`, inBytes);
     }
     this._console.log('Setting up utility library');
-    writeFile(this._pyodide, `/home/pyodide/fiolin.py`, getPyLib(this._pyodide))
+    writeFile(this._pyodide, `/home/pyodide/fiolin.py`, getPyLib(this._pyodide));
   }
 
-  private extractOutputs(): File[] {
+  private extractOutputs(script: FiolinScript): File[] {
+    const nOutputs = this._shared.outputs.length;
+    if (script.interface.outputFiles === 'NONE' && nOutputs > 0) {
+      throw new Error(`Script expected to produce no output files; got ${nOutputs}`);
+    } else if (script.interface.outputFiles === 'SINGLE' && nOutputs !== 1) {
+      throw new Error(`Script expected to produce one output file; got ${nOutputs}`);
+    }
     this._console.log('Extracting outputs from /output');
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present before resetFs!`)
@@ -179,7 +190,6 @@ export class PyodideRunner implements FiolinRunner {
     return [err, undefined];
   }
 
-  // TODO: Add checking for NONE/SINGLE/MULTI
   async run(script: FiolinScript, request: FiolinRunRequest, forceReload?: boolean): Promise<FiolinRunResponse> {
     await this.loaded;
     if (!this._pyodide) {
@@ -198,9 +208,9 @@ export class PyodideRunner implements FiolinRunner {
       this.resetFs();
       await this.installPkgs(script);
       await this._pyodide.loadPackagesFromImports(script.code.python);
-      await this.mountInputs(request.inputs);
+      await this.mountInputs(script, request.inputs);
       await this._pyodide.runPythonAsync(script.code.python);
-      const outputs = this.extractOutputs();
+      const outputs = this.extractOutputs(script);
       const response: FiolinRunResponse = {
         outputs, stdout: this._stdout, stderr: this._stderr,
       };

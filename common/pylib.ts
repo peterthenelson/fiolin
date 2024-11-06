@@ -10,6 +10,10 @@ import os
 import sys
 import traceback
 
+# TODO: Actual arg parsing
+def argv():
+  return list(js.argv.split())
+
 def get_input_basename():
   """Gets the (assumed to be single) input file basename."""
   if len(js.inputs):

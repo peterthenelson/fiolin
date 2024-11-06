@@ -1,5 +1,7 @@
 # This is just a fake module to make pylance happy. In reality, the fiolin
 # module is provided by pylib.ts and saved into the emscripten file system.
+def argv():
+  return []
 def get_input_basename():
   return ''
 def get_input_path():
