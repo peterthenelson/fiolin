@@ -50,7 +50,6 @@ stem, ext = os.path.splitext(input)
 output = [stem + '-copy' + ext]
 print(f'Copying /input/{input} to /output/{stem}-copy{ext}')
 fiolin.cp(f'/input/{input}', f'/output/{stem}-copy{ext}')
-fiolin.auto_set_outputs()
 `;
 let script: FiolinScript = {
   meta: {

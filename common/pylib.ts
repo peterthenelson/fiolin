@@ -1,6 +1,6 @@
 import { PyodideInterface } from 'pyodide';
 
-export function getPyLib(pyodide: PyodideInterface): string {
+export function getFiolinPy(pyodide: PyodideInterface): string {
   const codePairs = Object.entries(pyodide.ERRNO_CODES);
   return `
 # Helpful fiolin-related python utilities; simply import fiolin to use them.
@@ -36,16 +36,19 @@ def get_input_paths():
   return [f'/input/{i}' for i in js.inputs]
 
 def auto_set_outputs():
-  """Sets the outputs based on the files in /output"""
+  """Sets the outputs based on the files in /output."""
+  # If js.outputs has already been set, don't override it.
+  if js.outputs:
+    return
   js.outputs = []
   for dirpath, _, filenames in os.walk('/output'):
     for f in filenames:
       path = os.path.join(dirpath, f)
-      if dirpath == '/output':
-        js.outputs.append(f)
-      else:
+      if dirpath != '/output':
         print(f'/output must only have files, not directories; found {path}',
               file=sys.stderr)
+      elif f:
+        js.outputs.append(f)
 
 def _gen_prefix(prefix):
   if len(prefix) == 0:
@@ -74,16 +77,20 @@ def extract_exc(e=None):
   if not e:
     e = sys.last_exc
   if not e:
-    return (-1, 'No exception')
+    js.errorMsg = 'extract_exc called but no Exception occured'
+    return (js.errorLine, js.errorMsg)
   # Skip the stackframes from pyodide wrapper code
   tb = e.__traceback__
   while tb:
-    if tb.tb_frame.f_code.co_filename == '<exec>':
+    if tb.tb_frame.f_code.co_filename == '/home/pyodide/script.py':
       break
     tb = tb.tb_next
   if not tb:
-    return (-1, 'No stack frames with <exec>!')
-  return (tb.tb_lineno, ''.join(traceback.format_exception(e.with_traceback(tb))))
+    js.errorMsg = 'extract_exc could not find stack frames for script.py!'
+    return (js.errorLine, js.errorMsg)
+  js.errorLine = tb.tb_lineno
+  js.errorMsg = ''.join(traceback.format_exception(e.with_traceback(tb)))
+  return (js.errorLine, js.errorMsg)
 
 class Errno(enum.IntEnum):
 ${codePairs.map(([s, n]) => `  ${s} = ${n}`).join('\n')}
@@ -97,5 +104,22 @@ def cp(src, dest):
   with open(src, 'rb') as infile:
     with open(dest, 'wb') as outfile:
       outfile.write(infile.read())
+`;
+}
+
+export function getWrapperPy(): string {
+  return `
+import fiolin
+import importlib
+import sys
+
+try:
+  if 'script' in sys.modules:
+    importlib.reload(sys.modules['script'])
+  else:
+    importlib.import_module('script')
+  fiolin.auto_set_outputs()
+except Exception as e:
+  fiolin.extract_exc(e)
 `;
 }

@@ -14,5 +14,4 @@ for attachment in tnef.attachments:
     outfile.write(attachment.data)
 print(f'Unpacked {len(tnef.attachments)} attachments')
 
-fiolin.auto_set_outputs()
 print('Done')

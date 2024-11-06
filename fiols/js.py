@@ -2,4 +2,6 @@
 # a javascript object (surprise!) that is provided by the host for Pyodide.
 inputs = []
 outputs = []
+errorMsg = None
+errorLine = None
 argv = ''

@@ -1,7 +1,7 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
 import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
-import { getPyLib } from './pylib';
+import { getFiolinPy, getWrapperPy } from './pylib';
 
 export interface ConsoleLike { log(s: string): void, error(s: string): void };
 
@@ -77,6 +77,7 @@ export class PyodideRunner implements FiolinRunner {
     rmRf(this._pyodide, '/output');
     mkDir(this._pyodide, '/output');
     rmRf(this._pyodide, '/home/pyodide/fiolin.py');
+    rmRf(this._pyodide, '/home/pyodide/script.py');
   }
 
   private async mountInputs(script: FiolinScript, inputs: File[]) {
@@ -95,8 +96,9 @@ export class PyodideRunner implements FiolinRunner {
       this._shared.inputs.push(input.name);
       writeFile(this._pyodide, `/input/${input.name}`, inBytes);
     }
-    this._console.log('Setting up utility library');
-    writeFile(this._pyodide, `/home/pyodide/fiolin.py`, getPyLib(this._pyodide));
+    this._console.log('Setting up python files');
+    writeFile(this._pyodide, `/home/pyodide/fiolin.py`, getFiolinPy(this._pyodide));
+    writeFile(this._pyodide, `/home/pyodide/script.py`, script.code.python);
   }
 
   private extractOutputs(script: FiolinScript): File[] {
@@ -121,6 +123,8 @@ export class PyodideRunner implements FiolinRunner {
   private resetShared() {
     this._shared.inputs = [];
     this._shared.outputs = [];
+    this._shared.errorMsg = undefined;
+    this._shared.errorLine = undefined;
     this._shared.argv = '';
   }
 
@@ -179,17 +183,6 @@ export class PyodideRunner implements FiolinRunner {
     }
   }
 
-  private translateError(e: unknown): [Error, number | undefined] {
-    const err = toErrWithErrno(e);
-    if (err instanceof this._pyodide!.ffi.PythonError) {
-      const prox = this._pyodide!.runPython('import fiolin; fiolin.extract_exc()');
-      const [lineno, msg] = prox;
-      prox.destroy();
-      return [new Error(msg), lineno];
-    }
-    return [err, undefined];
-  }
-
   async run(script: FiolinScript, request: FiolinRunRequest, forceReload?: boolean): Promise<FiolinRunResponse> {
     await this.loaded;
     if (!this._pyodide) {
@@ -209,16 +202,20 @@ export class PyodideRunner implements FiolinRunner {
       await this.installPkgs(script);
       await this._pyodide.loadPackagesFromImports(script.code.python);
       await this.mountInputs(script, request.inputs);
-      await this._pyodide.runPythonAsync(script.code.python);
+      this._console.log('Executing script.py');
+      await this._pyodide.runPythonAsync(getWrapperPy());
+      if (this._shared.errorMsg) {
+        return {
+          outputs: [], stdout: this._stdout, stderr: this._stderr,
+          error: new Error(this._shared.errorMsg), lineno: this._shared.errorLine
+        };
+      }
       const outputs = this.extractOutputs(script);
-      const response: FiolinRunResponse = {
-        outputs, stdout: this._stdout, stderr: this._stderr,
-      };
-      return response;
+      return { outputs, stdout: this._stdout, stderr: this._stderr };
     } catch (e) {
-      const [error, lineno] = this.translateError(e);
+      const error = toErrWithErrno(e);
       return {
-        outputs: [], stdout: this._stdout, stderr: this._stderr, error, lineno
+        outputs: [], stdout: this._stdout, stderr: this._stderr, error
       };
     }
   }

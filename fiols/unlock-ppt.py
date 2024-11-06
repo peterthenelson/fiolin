@@ -27,5 +27,4 @@ with zipfile.ZipFile(os.path.join('/output', output), 'w', zipfile.ZIP_DEFLATED)
       arcname = os.path.relpath(path, '/ppt-tmp')
       zf.write(path, arcname=arcname)
 
-fiolin.auto_set_outputs()
 print('Done')

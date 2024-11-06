@@ -80,6 +80,10 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   inputs: string[];
   outputs: string[];
 
+  // Used to pass exceptions back to the host
+  errorMsg?: string;
+  errorLine?: number;
+
   // Other properties may be temporarily needed during the loading phase.
   [key: string]: any;
 }

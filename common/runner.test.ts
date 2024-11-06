@@ -64,6 +64,19 @@ describe('PyodideRunner', () => {
     expect(response.stdout).toMatch(/hello/);
   });
 
+  it('accurately reports exceptions', async () => {
+    const runner = new PyodideRunner({ indexUrl });
+    const script = mkScript(`
+      print('ok') # line 2
+      raise Exception('not ok') # line 3
+      print('ok again') # line 4
+    `);
+    const response = await runner.run(script, { inputs: [], argv: '' });
+    expect(response.error).not.toBeUndefined();
+    expect(response.error?.message).toMatch(/raise Exception\('not ok'\)/);
+    expect(response.lineno).toEqual(3);
+  });
+
   it('resets the file system between runs', async () => {
     const runner = new PyodideRunner({ indexUrl });
     const script = mkScript(`
@@ -80,7 +93,6 @@ describe('PyodideRunner', () => {
       # Copy inputs to outputs
       for i in fiolin.get_input_basenames():
         fiolin.cp(f'/input/{i}', f'/output/{i}')
-      fiolin.auto_set_outputs()
     `);
     {
       const response = await runner.run(script, {
@@ -159,7 +171,6 @@ describe('PyodideRunner', () => {
         for i in range(int(fiolin.argv()[0])):
           with open(f'/output/out{i}', 'w') as f:
             f.write('foo')
-        fiolin.auto_set_outputs()
       `);
       saveNFiles.interface = { inputFiles: 'NONE', outputFiles: 'NONE' };
       {
@@ -180,7 +191,6 @@ describe('PyodideRunner', () => {
         for i in range(int(fiolin.argv()[0])):
           with open(f'/output/out{i}', 'w') as f:
             f.write('foo')
-        fiolin.auto_set_outputs()
       `);
       saveNFiles.interface = { inputFiles: 'NONE', outputFiles: 'SINGLE' };
       {
