@@ -64,17 +64,43 @@ describe('PyodideRunner', () => {
     expect(response.stdout).toMatch(/hello/);
   });
 
-  it('accurately reports exceptions', async () => {
-    const runner = new PyodideRunner({ indexUrl });
-    const script = mkScript(`
-      print('ok') # line 2
-      raise Exception('not ok') # line 3
-      print('ok again') # line 4
-    `);
-    const response = await runner.run(script, { inputs: [], argv: '' });
-    expect(response.error).not.toBeUndefined();
-    expect(response.error?.message).toMatch(/raise Exception\('not ok'\)/);
-    expect(response.lineno).toEqual(3);
+  describe('error handling', () => {
+    it('reports exceptions and line numbers', async () => {
+      const runner = new PyodideRunner({ indexUrl });
+      const script = mkScript(`
+        print('ok') # line 2
+        raise Exception('not ok') # line 3
+        print('ok again') # line 4
+      `);
+      const response = await runner.run(script, { inputs: [], argv: '' });
+      expect(response.error).not.toBeUndefined();
+      expect(response.error?.message).toMatch(/raise Exception\('not ok'\)/);
+      expect(response.lineno).toEqual(3);
+    });
+
+    it('reports non-zero sys.exit as error with message', async () => {
+      const runner = new PyodideRunner({ indexUrl });
+      {
+        const script = mkScript(`
+          import sys
+          print('prints', file=sys.stderr)
+          sys.exit(0) # exits but not treated as an error
+          print('does not print', file=sys.stderr)
+        `);
+        const response = await runner.run(script, { inputs: [], argv: '' });
+        expect(response.error).toBeUndefined();
+        expect(response.stderr).toEqual('prints\n');
+      }
+      {
+        const script = mkScript(`
+          import sys
+          sys.exit('error message') # treated like exception, but no stack trace
+        `);
+        const response = await runner.run(script, { inputs: [], argv: '' });
+        expect(response.error).not.toBeUndefined();
+        expect(response.error?.message).toEqual('error message')
+      }
+    });
   });
 
   it('resets the file system between runs', async () => {

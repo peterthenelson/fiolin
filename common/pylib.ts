@@ -119,6 +119,9 @@ try:
   else:
     importlib.import_module('script')
   fiolin.auto_set_outputs()
+except SystemExit as e:
+  if e.code:
+    fiolin.js.errorMsg = str(e)
 except Exception as e:
   fiolin.extract_exc(e)
 `;
