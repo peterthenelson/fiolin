@@ -15,7 +15,6 @@ A not-necessarily-exhaustive list of TODOs:
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
   - More file-conversion example scripts
-    - Combine / split pdfs
     - SVG recolor
     - ImageMagick:
       - Resize / adjust quality of / trim image

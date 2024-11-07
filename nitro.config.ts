@@ -3,7 +3,7 @@ import { defineNitroConfig } from 'nitropack/config';
 const noneCsp = "default-src 'none'";
 
 const indexCsp = [
-  "default-src 'self'",
+  "default-src 'self' 'unsafe-inline'", // TODO: Deal w/unsafe-inline
   'connect-src *',
   "frame-ancestors 'none'"
 ].join('; ');
@@ -26,6 +26,10 @@ export default defineNitroConfig({
     'index.html': { cors: false, ...csp(indexCsp) },
     'index.js': { cors: false, ...csp(indexCsp) },
     'worker.js': { cors: false, ...csp(workerCsp) },
-    's/*': { cors: false, ...csp(noneCsp) },
+    'playground/': { cors: false, ...csp(indexCsp) },
+    'playground/index.html': { cors: false, ...csp(indexCsp) },
+    's/*/': { cors: false, ...csp(indexCsp) },
+    's/*/index.html': { cors: false, ...csp(indexCsp) },
+    's/*/script.json': { cors: false, ...csp(noneCsp) },
   },
 });

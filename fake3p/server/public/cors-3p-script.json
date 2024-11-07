@@ -1,5 +1,9 @@
 {
-  "title": "Example Script",
-  "description": "Prints \"hello world!\" and ignores the file input.",
-  "py": "print('hello world!')"
+  "meta": {
+    "title": "Example Script",
+    "description": "Prints \"hello world!\" and ignores the file input."
+  },
+  "interface": { "inputFiles": "NONE", "outputFiles": "NONE" },
+  "runtime": {},
+  "code": { "python": "print('hello world')" }
 }
