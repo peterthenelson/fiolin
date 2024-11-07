@@ -5,8 +5,10 @@ export function getFiolinPy(pyodide: PyodideInterface): string {
   return `
 # Helpful fiolin-related python utilities; simply import fiolin to use them.
 import enum
+import functools
 import js
 import os
+import re
 import sys
 import traceback
 
@@ -49,6 +51,45 @@ def auto_set_outputs():
               file=sys.stderr)
       elif f:
         js.outputs.append(f)
+
+def _strip_common_prefix(a, b):
+  p_len = len(os.path.commonprefix([a, b]))
+  return a[p_len:], b[p_len:]
+
+def _split_num(x):
+  m = re.match(r'[-._() ]*(\\d+)[-._() ]*(.*)', x)
+  if not m:
+    return None, x
+  return m.group(1), m.group(2)
+
+def _smart_cmp(a, b):
+  if a == b:
+    return 0
+  orig_a, orig_b = a, b
+  while a and b:
+    a, b = _strip_common_prefix(a, b)
+    a_num, a = _split_num(a)
+    b_num, b = _split_num(b)
+    if a_num and b_num:
+      a_num, b_num = int(a_num), int(b_num)
+      if a_num == b_num:
+        continue
+      else:
+        return int(a_num > b_num) - int(a_num < b_num)
+    elif a_num and not b_num:
+      return 1
+    elif not a_num and b_num:
+      return -1
+    elif a == b:
+      return int(orig_a > orig_b) - int(orig_a < orig_b)
+    elif not a or not b:
+      return int(len(a) > len(b)) - int(len(a) < len(b))
+    else:
+      return int(a > b) - int(a < b)
+
+def smart_sort(files):
+  """Sorts file names in the intuitive order, accounting for sloppy numbering."""
+  return sorted(files, key=functools.cmp_to_key(_smart_cmp))
 
 def _gen_prefix(prefix):
   if len(prefix) == 0:

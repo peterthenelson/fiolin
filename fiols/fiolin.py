@@ -12,6 +12,8 @@ def get_input_paths():
   return []
 def auto_set_outputs():
   pass
+def smart_sort(files):
+  return []
 def tree(path, file=None, prefix=None):
   pass
 def extract_exc(e=None):

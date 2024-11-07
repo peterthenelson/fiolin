@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Extract attachments from Winmail.dat",
+    "title": "Extract Winmail.dat Attachments",
     "author": "Peter Nelson",
     "description": "Extract attachments from Outlook Winmail.dat files (i.e., TNEF files)",
     "extensions": ["dat", "tnef"]
