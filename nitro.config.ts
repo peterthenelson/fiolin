@@ -24,7 +24,7 @@ export default defineNitroConfig({
   routeRules: {
     '': { cors: false, ...csp(indexCsp) },
     'index.html': { cors: false, ...csp(indexCsp) },
-    'index.js': { cors: false, ...csp(indexCsp) },
+    'host.js': { cors: false, ...csp(indexCsp) },
     'worker.js': { cors: false, ...csp(workerCsp) },
     'playground/': { cors: false, ...csp(indexCsp) },
     'playground/index.html': { cors: false, ...csp(indexCsp) },

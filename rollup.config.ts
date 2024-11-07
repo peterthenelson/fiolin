@@ -32,14 +32,14 @@ const config: RollupOptions[] = [
   monacoWorker('editor/editor.worker.js'),
   // NOTE: I'm leaving out language/{css,html,json,typescript}/{css,html,json,ts}.worker.js
   {
-    input: 'web-host/index.ts',
+    input: 'web-host/host.ts',
     output: {
       dir: 'server/public/bundle',
       sourcemap: true,
       format: 'esm'
     },
     plugins: [
-      css({ output: 'included.css' }),
+      css({ output: 'host.css' }),
       copyCodicons(),
       typescript(),
       nodeResolve(),

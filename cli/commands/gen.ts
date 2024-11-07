@@ -14,10 +14,10 @@ function makeFiolHtml(name: string, script: FiolinScript) {
   <head>
     <title>${name} - ƒɪᴏʟɪɴ</title>
     <link rel="stylesheet" href="/index.css">
-    <link rel="stylesheet" href="/bundle/included.css">
-    <script src="/bundle/index.js" type="module" defer></script>
+    <link rel="stylesheet" href="/bundle/host.css">
+    <script src="/bundle/host.js" type="module" defer></script>
     <script type="module" defer>
-      import { initFiolin } from '/bundle/index.js';
+      import { initFiolin } from '/bundle/host.js';
       initFiolin('/s/${name}/script.json');
     </script>
   </head>
@@ -55,8 +55,8 @@ function makeIndexHtml(names: Set<string>): string {
   <head>
     <title>ƒɪᴏʟɪɴ</title>
     <link rel="stylesheet" href="/index.css">
-    <link rel="stylesheet" href="/bundle/included.css">
-    <script src="/bundle/index.js" type="module" defer></script>
+    <link rel="stylesheet" href="/bundle/host.css">
+    <script src="/bundle/host.js" type="module" defer></script>
     <script type="module" defer>
       // TODO: Invoke autocomplete when that exists
     </script>
