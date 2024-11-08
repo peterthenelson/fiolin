@@ -1,8 +1,7 @@
 A not-necessarily-exhaustive list of TODOs:
 - Documentation
-  - Flesh out DESIGN
-  - Add intro to README
   - Landing page copy
+  - Documentation for the fiolin library and the script format
 - Dev server and release:
   - Get unjs/nitro#2814 merged/released and then revert my local changes to
     nitro; alternately reimplement functionality I need w/o nitro.
@@ -14,6 +13,7 @@ A not-necessarily-exhaustive list of TODOs:
   - Some kind of flag parsing functionality
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
+  - Some kind of (interactive?) canvas functionality
   - More file-conversion example scripts
     - SVG recolor
     - ImageMagick:

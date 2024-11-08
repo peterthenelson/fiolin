@@ -1,15 +1,26 @@
 import { defineNitroConfig } from 'nitropack/config';
 
-const noneCsp = "default-src 'none'";
+// This CSP disallows everything and is the fallback for anything not explicitly
+// assigned a different CSP.
+const noneCsp = "default-src 'none'; frame-ancestors 'none'";
 
+// The host/UI page and code use this CSP.
 const indexCsp = [
+  // Default to self only.
   "default-src 'self'",
-  "style-src 'self' 'unsafe-inline'", // Note: inline results from monaco
+  // Note: inline css is used by monaco.
+  "style-src 'self' 'unsafe-inline'",
+  // No iframing of this page allowed.
   "frame-ancestors 'none'"
 ];
 
+// The 3p host/UI page additionally needs to fetch scripts from github.
+// TODO: Switch to just whitelisting github specifically (and doing a dev-only
+// thing to allow localhost:3001).
 const thirdPartyCsp = indexCsp.concat('connect-src *');
 
+// The worker/script runner can use WASM and access pyodide and pypi packages.
+// TODO: Can this be narrowed?
 const workerCsp = [
   "default-src 'self'",
   "script-src 'wasm-unsafe-eval' https://cdn.jsdelivr.net",
@@ -27,20 +38,20 @@ export default defineNitroConfig({
   srcDir: 'server',
   preset: 'cloudflare-pages-static',
   routeRules: {
-    '': { cors: false, ...csp(indexCsp) },
-    'index.html': { cors: false, ...csp(indexCsp) },
-    'index.js': { cors: false, ...csp(indexCsp) },
-    'host.js': { cors: false, ...csp(indexCsp) },
-    'worker.js': { cors: false, ...csp(workerCsp) },
-    'init-fiol.js': { cors: false, ...csp(indexCsp) },
-    'playground/': { cors: false, ...csp(indexCsp) },
-    'playground/index.html': { cors: false, ...csp(indexCsp) },
-    'playground/index.js': { cors: false, ...csp(indexCsp) },
-    'third-party/': { cors: false, ...csp(thirdPartyCsp) },
-    'third-party/index.html': { cors: false, ...csp(thirdPartyCsp) },
-    'third-party/index.js': { cors: false, ...csp(thirdPartyCsp) },
-    's/*/': { cors: false, ...csp(indexCsp) },
-    's/*/index.html': { cors: false, ...csp(indexCsp) },
-    's/*/script.json': { cors: false, ...csp(noneCsp) },
+    '': csp(indexCsp),
+    'index.html': csp(indexCsp),
+    'index.js': csp(indexCsp),
+    'host.js': csp(indexCsp),
+    'worker.js': csp(workerCsp),
+    'init-fiol.js': csp(indexCsp),
+    'playground/': csp(indexCsp),
+    'playground/index.html': csp(indexCsp),
+    'playground/index.js': csp(indexCsp),
+    'third-party/': csp(thirdPartyCsp),
+    'third-party/index.html': csp(thirdPartyCsp),
+    'third-party/index.js': csp(thirdPartyCsp),
+    's/*/': csp(indexCsp),
+    's/*/index.html': csp(indexCsp),
+    '**/*': csp(noneCsp),
   },
 });
