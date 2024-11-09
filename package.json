@@ -10,7 +10,7 @@
     "dev": "jiti scripts/dev.ts",
     "dev:server": "nitro dev",
     "dev:fake3p": "cross-env PORT=3001 nitro dev --dir fake3p",
-    "prepare": "npm run build:rollup && npm run build:fiols && nitro prepare",
+    "prepare": "nitro prepare && npm run build:rollup && npm run build:fiols",
     "preview": "node .output/server/index.mjs",
     "test": "vitest",
     "watch:rollup": "npm run clean:rollup && rollup -c --configPlugin typescript --watch",
