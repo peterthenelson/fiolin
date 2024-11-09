@@ -25,6 +25,7 @@ class TypedWorker {
     this.onmessage = null;
     this.worker.onmessage = (ev) => {
       if (this.onmessage) {
+        // TODO: Actually parse rather than casting
         this.onmessage(ev.data as WorkerMessage);
       }
     }

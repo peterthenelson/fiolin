@@ -21,7 +21,7 @@ open-source libraries are just a few clicks away.
 And yet. No one ever installs software unless it's been personally approved by
 Gabe Newell or the ghost of Steve Jobs. We mostly use our super-computers as
 dumb terminals. All our files live in a data center in Virginia anyway, and as
-for songs, we don't actually own any to being with. When faced with simple math
+for songs, we don't actually own any to begin with. When faced with simple math
 problems, we may find it convenient to use the immense computational might of
 our computers to send the question over to OpenAI, where an artificial mind that
 is fluent in English and many other languages will decide, after some
@@ -36,12 +36,14 @@ creations with their non-programmer friends and relatives.
 Fiolin's thesis is this:
 - The average person ("the user") has some problems that an average programmer
   ("the developer") could solve pretty easily.
+- Many of these problems take the form of transforming a file or files. E.g.,
+  converting between formats, merging PDFs, etc.
 - The user's own computer is powerful enough to run the resulting programs
   locally, without needing to upload data to a third party's server.
 - Some of these problems can be solved within the security model and computing
   environment of the browser. Therefore:
   - The user won't need to install anything or trust any third party with access
-    to their data.
+    to their files.
   - The developer won't need to run a server in order to share their solutions
     with other people; they can just upload a static file to github.
 
@@ -59,7 +61,7 @@ themselves, and any libraries needed by the scripts.
   also provides some non-python libraries via WASM.
 - The scripts themselves are either:
   - First party: hosted alongside the other fiolin assets.
-  - Third party: hosted on github as json files; retrieved via CORS.
+  - Third party: hosted on github.io as json files; retrieved via CORS.
 
 ## Security
 
@@ -78,7 +80,7 @@ well.
 ### Content Security Policies
 
 - These direct the browser to disallow certain behaviors (e.g., sending
-  XMLHTTPRequests, wrapping the site in an iframe, etc.).
+  XMLHTTPRequests, wrapping the site in an iframe, running inline scripts, etc.).
 - The most directly relevant types of directives are `connect-src`, `script-src`,
   and `worker-src`, but honestly any type of inclusion of a resource from an
   attacker-controlled domain could result in data exfiltration, so the default
@@ -105,7 +107,7 @@ worker can communicate with the main thread via messages. The messages can
 contain objects, but only those that can be serialized. In Fiolin, communication
 between the worker and main thread takes place through some very narrowly scoped
 message types. Within the worker, the only functions of security relevance are
-`connect` and `importScript`. These are constrained by the CSP.
+`fetch` and `importScript`. These are constrained by the CSP.
 
 ### WASM
 
@@ -113,8 +115,9 @@ WASM itself provides an excellent sandbox for the code running in it. However,
 emscripten can easily blow huge holes in the sandbox when, for example, you link
 in support for sockets. The compiled artifacts include both the sandboxed WASM
 and the (sandbox compromising) javascript glue code in a big unreadable bundle.
-It will require some additional work to characterize what threats and
-mitigations WASM-in-Fiolin will bring.
+It will require some additional work to characterize what threats WASM-in-Fiolin
+will bring, but again, the ability to use anything gained here is mitigated by
+the CSP of the worker.
 
 ### Pyodide
 
