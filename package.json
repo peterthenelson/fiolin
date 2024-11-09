@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run build:rollup && npm run build:fiols && nitro build && tree dist",
+    "build": "npm run build:rollup && npm run build:fiols && nitro build",
     "build:rollup": "npm run clean:rollup && rollup -c --configPlugin typescript --no-watch",
     "build:fiols": "jiti cli/cli.ts gen",
     "clean:rollup": "shx rm -rf server/public/bundle",
