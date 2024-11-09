@@ -7,9 +7,6 @@ friends. Run them locally in your browser.
 
 ## Motivation and Overview
 
-TODO: Insert a pair of opposing quotes about the magic of programming and how
-users are morons who need to be protected from themselves.
-
 Personal computing has turned out differently than I imagined. We all carry
 around pocket sized super-computers 100 million times more powerful than the 
 Apple IIɢꜱ I played Oregon Trail on as a child. A million books or two years of
@@ -22,7 +19,7 @@ And yet. No one ever installs software unless it's been personally approved by
 Gabe Newell or the ghost of Steve Jobs. We mostly use our super-computers as
 dumb terminals. All our files live in a data center in Virginia anyway, and as
 for songs, we don't actually own any to begin with. When faced with simple math
-problems, we may find it convenient to use the immense computational might of
+problems, we find it most convenient to use the immense computational might of
 our computers to send the question over to OpenAI, where an artificial mind that
 is fluent in English and many other languages will decide, after some
 contemplation, to delegate the task to a calculator, since arithmetic isn't
