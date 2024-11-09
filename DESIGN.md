@@ -16,9 +16,9 @@ courses are numerous and mostly free; and thousands upon thousands of
 open-source libraries are just a few clicks away.
 
 And yet. No one ever installs software unless it's been personally approved by
-Gabe Newell or the ghost of Steve Jobs. We mostly use our super-computers as
-dumb terminals. All our files live in a data center in Virginia anyway, and as
-for songs, we don't actually own any to begin with. When faced with simple math
+Gabe Newell or the ghost of Steve Jobs. Our super-computers act mostly as dumb
+terminals. All our files live in a data center in Virginia anyway, and as for
+songs, we don't actually own any to begin with. When faced with simple math
 problems, we find it most convenient to use the immense computational might of
 our computers to send the question over to OpenAI, where an artificial mind that
 is fluent in English and many other languages will decide, after some
@@ -57,7 +57,7 @@ themselves, and any libraries needed by the scripts.
 - The script runner runs in a web worker. It uses pyodide to run scripts and
   also provides some non-python libraries via WASM.
 - The scripts themselves are either:
-  - First party: hosted alongside the other fiolin assets.
+  - First party: hosted alongside the other Fiolin assets.
   - Third party: hosted on github.io as json files; retrieved via CORS.
 
 ## Security
@@ -124,7 +124,7 @@ there are several mitigations:
 - We initialize pyodide with a custom `options.jsglobals` and expose very little
   to it. Fetching of any sort is only available during the `installPkgs` phase.
 - We run pyodide in a web worker (see above). A jail-broken pyodide shouldn't be
-  able to directly do anything to the main thread that a regular fiolin script
+  able to directly do anything to the main thread that a regular Fiolin script
   using the approved APIs couldn't already do.
 - Network exfiltration via `fetch` (and related APIs) is limited via CSP (both
   in the main thread and the worker).
@@ -157,7 +157,7 @@ there are several mitigations:
   so I don't think it's worth messing with this. Also, start up time is abysmal.
 - **Lua:** This is sort of the ideal embedded language, but...
   - Everyone knows python and no one knows lua.
-  - There are multiple ports to the browser; not clear to me which to use.
-  - You absolutely need to do things like zip/unzip files and whatnot; python
+  - There are multiple ports to the browser. It's not clear to me which to use.
+  - You absolutely need to do things like zip/unzip files and whatnot. Python
     is more batteries-included, as opposed to needing to reimplement basic stuff
     for the sandboxed environment.
