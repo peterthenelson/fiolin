@@ -5,6 +5,7 @@ node_modules
 **/.cache
 **/.output
 **/.env
+**/.wrangler
 server/public/bundle
 server/public/index.html
 server/public/s
