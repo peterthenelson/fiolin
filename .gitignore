@@ -7,5 +7,6 @@ node_modules
 **/.env
 **/.wrangler
 server/public/bundle
+server/public/doc
 server/public/index.html
 server/public/s

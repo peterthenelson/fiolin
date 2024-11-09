@@ -5,7 +5,7 @@ _A Fiddle For Files_
 **tl;dr:** Write simple scripts that manipulate files. Share them with your
 friends. Run them locally in your browser.
 
-Try it for yourself (TODO: link)!
+[Try it for yourself!](https://fiolin.org)
 
 ## License
 
@@ -33,6 +33,6 @@ $ npm run test
 # Individual fiolin scripts can be run using node:
 $ npm run fiol -- unlock-ppt --input some.pptx --outputDir .
 
-# TODO: deploy
-# $ npm run deploy
+# Deployment:
+# Currently automatically builds latest commit to github
 ```

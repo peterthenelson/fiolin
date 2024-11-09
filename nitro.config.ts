@@ -4,6 +4,9 @@ import { defineNitroConfig } from 'nitropack/config';
 // assigned a different CSP.
 const noneCsp = "default-src 'none'; frame-ancestors 'none'";
 
+// This CSP is for the documentation and disallows everything but HTML+CSS.
+const docCsp = "default-src 'none'; style-src 'self'; frame-ancestors 'none'";
+
 // The host/UI page and code use this CSP.
 const indexCsp = [
   // Default to self only.
@@ -52,6 +55,7 @@ export default defineNitroConfig({
     '/third-party/index.js': csp(thirdPartyCsp),
     '/s/*/': csp(indexCsp),
     '/s/*/index.html': csp(indexCsp),
+    '/doc/*': csp(docCsp),
     // TODO: Figure out how to get fallbacks to work w/cloudflare _headers
     // (This doesn't, as it ends up applying noneCsp to everything.)
     // '/**': csp(noneCsp),

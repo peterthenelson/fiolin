@@ -30,6 +30,10 @@ body a {
   padding-top: .75em;
 }
 
+#doc {
+  width: 70%;
+}
+
 #script-header {
   width: 90%;
   height: 2.4em;

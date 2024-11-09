@@ -1,8 +1,9 @@
 import { loadAll, loadScript } from '../../utils/config';
 import { defineCommand } from 'citty';
-import { cpSync, existsSync, mkdirSync, rmSync, watch, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, watch, writeFileSync } from 'node:fs';
 import { FiolinScript } from '../../common/types';
 import { pkgPath } from '../../utils/pkg-path';
+import { marked } from 'marked';
 
 function pubPath(path: string): string {
   return pkgPath(`server/public/${path}`);
@@ -70,7 +71,26 @@ function makeIndexHtml(names: Set<string>): string {
         <input type="text" id="url" name="url">
         <button type="submit">Submit</button>
       </form>
+      <h3><a href="/doc/">Read The Documentation</a></h3>
       <h3><a href="/playground/">Create A Script In The Playground</a></h3>
+    </div>
+  </body>
+</html>
+`;
+}
+
+function makeDocHtml(md: string): string {
+  return `<!DOCTYPE html>
+<html>
+  <head>
+    <title>ƒɪᴏʟɪɴ</title>
+    <link rel="stylesheet" href="/index.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="doc">
+${marked.parse(md)}
+      </div>
     </div>
   </body>
 </html>
@@ -118,6 +138,13 @@ export default defineCommand({
     for (const [name, script] of Object.entries(scripts)) {
       genFiol(name, { script, strict: true });
     }
+    const docOutputDir = pubPath('doc');
+    console.log('Recreating directory of generated documentation');
+    rmSync(docOutputDir, { force: true, recursive: true });
+    mkdirSync(docOutputDir);
+    // TODO: do a whole directory recursively and make it work with watching
+    const indexMd: string = readFileSync(pkgPath('docs/index.md'), { encoding: 'utf-8' });
+    writeFileSync(pubPath('doc/index.html'), makeDocHtml(indexMd));
     const scriptNames = new Set(Object.keys(scripts));
     console.log('Generating index.html');
     writeFileSync(pubPath('index.html'), makeIndexHtml(scriptNames));
