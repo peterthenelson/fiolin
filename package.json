@@ -2,9 +2,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run build:rollup && npm run build:fiols && nitro build",
+    "build": "npm run build:rollup && nitro build",
     "build:rollup": "npm run clean:rollup && rollup -c --configPlugin typescript --no-watch",
-    "build:fiols": "jiti cli/cli.ts gen",
     "clean:rollup": "shx rm -rf server/public/bundle",
     "fiol": "jiti cli/cli.ts run",
     "dev": "jiti scripts/dev.ts",
@@ -13,8 +12,7 @@
     "prepare": "nitro prepare",
     "preview": "node .output/server/index.mjs",
     "test": "vitest",
-    "watch:rollup": "npm run clean:rollup && rollup -c --configPlugin typescript --watch",
-    "watch:fiols": "jiti cli/cli.ts gen --watch"
+    "watch:rollup": "npm run clean:rollup && rollup -c --configPlugin typescript --watch"
   },
   "devDependencies": {
     "nitropack": "latest"
