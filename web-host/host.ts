@@ -144,16 +144,13 @@ async function runScript() {
   const term = getElementByIdAs('output-term', HTMLPreElement);
   term.textContent = '';
   (await monaco).clearMonacoErrors();
-  const file = getElementByIdAs('file-chooser', HTMLInputElement).files![0];
-  const fileDiv = document.querySelector('div:has(+ #file-chooser)');
-  if (!fileDiv) {
-    console.error('Could not find file selector sibling div');
-  } else if (!(fileDiv instanceof HTMLDivElement)) {
-    console.error('file selector sibling div was not div!');
+  const file = getElementByIdAs('input-files-chooser', HTMLInputElement).files![0];
+  const fileText = document.querySelector('#input-files p.files-panel-text');
+  if (fileText !== null && fileText instanceof HTMLParagraphElement) {
+    fileText.title = file.name;
+    fileText.textContent = file.name;
   } else {
-    fileDiv.title = file.name;
-    // TODO: Better approach
-    fileDiv.textContent = file.name.length > 18 ? file.name.substring(0, 15) + '...' : file.name;
+    console.error('Could not find #input-files p.files-panel-text');
   }
   const msg: RunMessage = { type: 'RUN', script, request: { inputs: [file], argv: '' } };
   worker.postMessage(msg);
@@ -164,7 +161,7 @@ async function handleMessage(msg: WorkerMessage): Promise<void> {
   if (msg.type === 'LOADED') {
     term.textContent = 'Pyodide Loaded';
     await initialized;
-    const fileChooser = getElementByIdAs('file-chooser', HTMLInputElement);
+    const fileChooser = getElementByIdAs('input-files-chooser', HTMLInputElement);
     fileChooser.disabled = false;
     fileChooser.onchange = runScript;
   } else if (msg.type === 'STDOUT') {

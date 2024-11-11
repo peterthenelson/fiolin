@@ -71,20 +71,21 @@ body a {
 
 #script-editor {
   height: 25em;
+  margin-bottom: 1em;
 }
 
 #controls {
   width: 90%;
 }
 
-.file-chooser-label {
+.files-label {
   display: inline-block;
   position: relative;
   height: 3em;
   width: 10em;
 }
 
-.file-chooser-div {
+.files-panel {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -92,15 +93,23 @@ body a {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1em;
   background-color: #404040;
   border-radius: 10px;  
 }
 
-.file-chooser-label:hover .file-chooser-div {
+.files-panel-text {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.files-label:hover .files-panel {
   background-color: #8a8a8a;
 }
 
-input[type="file"] {
+.files-label input[type="file"] {
   position: absolute;
   left: 0;
   opacity: 0;

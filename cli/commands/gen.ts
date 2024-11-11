@@ -30,9 +30,11 @@ function makeFiolHtml(name: string, script: FiolinScript) {
         <div id="script-editor" class="hidden"></div>
       </div>
       <div id="controls">
-        <label for="file-chooser" class="file-chooser-label">
-          <div class="file-chooser-div">Choose An Input File</div>
-          <input type="file" id="file-chooser" disabled />
+        <label id="input-files" for="input-files-chooser" class="files-label">
+          <div class="files-panel">
+            <p class="files-panel-text">Choose An Input File</p>
+          </div>
+          <input type="file" id="input-files-chooser" disabled />
         </label>
         <!-- TODO -->
       </div>

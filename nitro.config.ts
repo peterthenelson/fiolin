@@ -11,6 +11,8 @@ const docCsp = "default-src 'none'; style-src 'self'; frame-ancestors 'none'";
 const indexCsp = [
   // Default to self only.
   "default-src 'self'",
+  // Note: base64 images used by monaco
+  "img-src 'self' data:",
   // Note: inline css is used by monaco.
   "style-src 'self' 'unsafe-inline'",
   // No iframing of this page allowed.
