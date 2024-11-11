@@ -7,8 +7,9 @@ A not-necessarily-exhaustive list of TODOs:
     nitro; alternately reimplement functionality I need w/o nitro.
   - Set up tests involving the web server(s) and playwright to check that the
     security properties hold.
-  - Deployment setup for cloudflare pages and update README
   - HSTS for prod? Any updates to headers for wasm files?
+  - Something seems a bit messed up about caching; maybe I need to add explicit
+    etags or something to the _headers in the deploy process.
 - Core functionality
   - Some kind of flag parsing functionality
   - Get some other emscripten binary working in the same file-system as pyodide.
@@ -27,11 +28,11 @@ A not-necessarily-exhaustive list of TODOs:
       - To grayscale, invert, change colorspace, tint, blur
       - Mirror or rotate
       - Image to PDF
+      - Convert formats
     - Extract or convert 7z, cab, jar, rar, tar, tar.gz, tbz2, zip
     - Convert audio aac, aiff, flac, m4a, mp3, ogg, wav, wma
     - Convert docs djvu, docx, odt, pdf, rtf
     - Convert ebooks azw3, epub, mobi
-    - Convert image ...
     - Convert video ...
 - Frontend
   - Better UI for input / output filesystem to allow for multiple files (and
@@ -39,7 +40,7 @@ A not-necessarily-exhaustive list of TODOs:
     runs)
   - Using the installPkgs to decrease perceived latency
   - Autocomplete search for landing page.
-  - Improve styling for all pages
-  - Link to documentation on landing page
+  - Improve styling for all pages; importantly, make it work on mobile.
+  - Link to documentation on landing page.
   - Appropriate modal warnings for 3p + localstorage memory of approvals
   - Ability to edit script metadata in the editor and a json-generator button

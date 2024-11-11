@@ -145,6 +145,16 @@ async function runScript() {
   term.textContent = '';
   (await monaco).clearMonacoErrors();
   const file = getElementByIdAs('file-chooser', HTMLInputElement).files![0];
+  const fileDiv = document.querySelector('div:has(+ #file-chooser)');
+  if (!fileDiv) {
+    console.error('Could not find file selector sibling div');
+  } else if (!(fileDiv instanceof HTMLDivElement)) {
+    console.error('file selector sibling div was not div!');
+  } else {
+    fileDiv.title = file.name;
+    // TODO: Better approach
+    fileDiv.textContent = file.name.length > 18 ? file.name.substring(0, 15) + '...' : file.name;
+  }
   const msg: RunMessage = { type: 'RUN', script, request: { inputs: [file], argv: '' } };
   worker.postMessage(msg);
 }

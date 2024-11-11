@@ -77,6 +77,38 @@ body a {
   width: 90%;
 }
 
+.file-chooser-label {
+  display: inline-block;
+  position: relative;
+  height: 3em;
+  width: 10em;
+}
+
+.file-chooser-div {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #404040;
+  border-radius: 10px;  
+}
+
+.file-chooser-label:hover .file-chooser-div {
+  background-color: #8a8a8a;
+}
+
+input[type="file"] {
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
 #output {
   width: 90%;
 }
