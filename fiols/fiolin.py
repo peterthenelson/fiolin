@@ -1,5 +1,8 @@
-# This is just a fake module to make pylance happy. In reality, the fiolin
-# module is provided by pylib.ts and saved into the emscripten file system.
+"""
+This is just a fake module to make pylance happy. In reality, the fiolin module
+is provided by pylib.ts and saved into the emscripten file system. See the
+documentation for more information.
+"""
 def argv():
   return []
 def get_input_basename():
@@ -10,7 +13,9 @@ def get_input_basenames():
   return []
 def get_input_paths():
   return []
-def auto_set_outputs():
+def set_output_basename(output):
+  pass
+def set_output_basenames(outputs=None):
   pass
 def smart_sort(files):
   return []

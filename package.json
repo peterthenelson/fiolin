@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run build:rollup && nitro build",
+    "build:pydoc": "jiti scripts/pydoc.ts",
     "build:rollup": "npm run clean:rollup && rollup -c --configPlugin typescript --no-watch",
     "clean:rollup": "shx rm -rf server/public/bundle",
     "fiol": "jiti cli/cli.ts run",

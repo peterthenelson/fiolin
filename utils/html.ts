@@ -1,4 +1,7 @@
 import { redent } from '../common/indent';
+import { pkgPath } from './pkg-path';
+import { marked } from 'marked';
+import { readFileSync } from 'node:fs';
 
 export function fiolinSharedHeaders(): string {
   return redent(`
@@ -44,3 +47,28 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
     </div>
   `, '    ');
 }
+
+export function mdDoc(path: string) {
+  // Note: the dev server is just used for pre-rendering; we do not actually
+  // have to care about path traversal vulnerabilities.
+  const md: string = readFileSync(pkgPath(`docs/${path}.md`), { encoding: 'utf-8' });
+  const parsed: string = marked.parse(md, { async: false });
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>ƒɪᴏʟɪɴ documentation</title>
+        ${fiolinSharedHeaders()}
+        <script src="/doc.js" type="module" defer></script>
+      </head>
+      <body>
+        <div id="container">
+          <div id="doc">
+            ${parsed}
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+};

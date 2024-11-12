@@ -16,8 +16,8 @@ elsewhere.
 
 ## Documentation
 
-- [Design Document](/DESIGN.md)
-- Live Documentation (TODO: link)
+- [Design Document](/docs/design.md)
+- [Documentation](https://fiolin.org/doc)
 
 ## Development
 

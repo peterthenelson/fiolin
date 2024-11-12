@@ -134,6 +134,20 @@ export function initPlayground() {
   initialized = (async () => {})();
 }
 
+async function colorizeLang(lang: string): Promise<void> {
+  const readyMonaco = await monaco;
+  await Promise.all(Array.from(
+    document.querySelectorAll(`code.language-${lang}`),
+    (e) => readyMonaco.colorize(e as HTMLElement, lang)
+  ));
+}
+
+export async function colorizeExamples(): Promise<void> {
+  await Promise.all([
+    colorizeLang('py'), colorizeLang('json'), colorizeLang('sh')
+  ]);
+}
+
 export function die(msg: string) {
   const scriptDesc = getElementByIdAs('script-desc', HTMLPreElement);
   scriptDesc.textContent = msg;

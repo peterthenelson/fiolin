@@ -1,6 +1,9 @@
-// Import all the editor features but only the python language support.
+// Import all the editor features but only the language support for a python,
+// json, and bash.
 import 'monaco-editor/esm/vs/editor/editor.all.js';
 import 'monaco-editor/esm/vs/basic-languages/python/python.contribution.js';
+import 'monaco-editor/esm/vs/basic-languages/shell/shell.contribution.js';
+import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
 
 self.MonacoEnvironment = {
@@ -78,4 +81,15 @@ export function setMonacoError(lineno: number, msg: string) {
     startColumn: startCol,
     endColumn: endCol,
   }]);
+}
+
+export function colorize(e: HTMLElement, lang: string): Promise<void> {
+  if (lang === 'py') {
+    lang = 'python';
+  } else if (lang === 'sh') {
+    lang = 'shell';
+  } else if (lang === 'json') {
+    lang = 'application/json';
+  }
+  return monaco.editor.colorizeElement(e, { mimeType: lang, theme: 'vs-dark' });
 }

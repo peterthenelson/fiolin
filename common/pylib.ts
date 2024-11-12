@@ -2,8 +2,7 @@ import { PyodideInterface } from 'pyodide';
 
 export function getFiolinPy(pyodide: PyodideInterface): string {
   const codePairs = Object.entries(pyodide.ERRNO_CODES);
-  return `
-# Helpful fiolin-related python utilities; simply import fiolin to use them.
+  return `"""Helpful fiolin-related python utilities."""
 import enum
 import functools
 import js
@@ -37,8 +36,16 @@ def get_input_paths():
   """Gets the input file paths."""
   return [f'/input/{i}' for i in js.inputs]
 
-def auto_set_outputs():
-  """Sets the outputs based on the files in /output."""
+def set_output_basename(output):
+  """Manually sets the output file."""
+  set_output_basenames([output])
+
+def set_output_basenames(outputs=None):
+  """Sets the outputs; if not specified, adds all matching /output/*."""
+  # Respect manual attempts to set outputs
+  if outputs is not None:
+    js.outputs = outputs
+    return
   # If js.outputs has already been set, don't override it.
   if js.outputs:
     return
@@ -121,19 +128,22 @@ def extract_exc(e=None):
     js.errorMsg = 'extract_exc called but no Exception occured'
     return (js.errorLine, js.errorMsg)
   # Skip the stackframes from pyodide wrapper code
+  # TODO: This doesn't work when the error in script.py is a syntax error
   tb = e.__traceback__
   while tb:
     if tb.tb_frame.f_code.co_filename == '/home/pyodide/script.py':
       break
     tb = tb.tb_next
   if not tb:
-    js.errorMsg = 'extract_exc could not find stack frames for script.py!'
+    js.errorMsg = 'Warning: extract_exc could not find stack frames for script.py!'
+    js.errorMsg += ''.join(traceback.format_exception(e))
     return (js.errorLine, js.errorMsg)
   js.errorLine = tb.tb_lineno
   js.errorMsg = ''.join(traceback.format_exception(e.with_traceback(tb)))
   return (js.errorLine, js.errorMsg)
 
 class Errno(enum.IntEnum):
+  """Mapping between symbolic and numeric versions of WASM FS errors."""
 ${codePairs.map(([s, n]) => `  ${s} = ${n}`).join('\n')}
 
 def errno_to_str(code):
@@ -159,7 +169,7 @@ try:
     importlib.reload(sys.modules['script'])
   else:
     importlib.import_module('script')
-  fiolin.auto_set_outputs()
+  fiolin.set_output_basenames()
 except SystemExit as e:
   if e.code:
     fiolin.js.errorMsg = str(e)
