@@ -17,6 +17,7 @@ A not-necessarily-exhaustive list of TODOs:
   - Some kind of (interactive?) canvas functionality
   - More file-conversion example scripts
     - SVG recolor
+    - Extracting text and tables from PDFs
     - ImageMagick:
       - Resize / adjust quality of / trim image
       - View or strip EXIF / other metadata
