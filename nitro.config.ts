@@ -54,6 +54,7 @@ export default defineNitroConfig({
     '/third-party/index.js': csp(thirdPartyCsp),
     '/s/*/': csp(indexCsp),
     '/s/*/index.html': csp(indexCsp),
+    '/doc/': { redirect: '//doc/index.md' },
     '/doc/*': csp(indexCsp),
     // TODO: Figure out how to get fallbacks to work w/cloudflare _headers
     // (This doesn't, as it ends up applying noneCsp to everything.)

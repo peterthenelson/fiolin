@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
             <input type="text" id="url" name="url">
             <button type="submit">Submit</button>
           </form>
-          <h3><a href="/doc/">Read The Documentation</a></h3>
+          <h3><a href="/doc/index.md">Read The Documentation</a></h3>
           <h3><a href="/playground/">Create A Script In The Playground</a></h3>
         </div>
       </body>

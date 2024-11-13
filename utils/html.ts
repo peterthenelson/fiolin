@@ -51,7 +51,7 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
 export function mdDoc(path: string) {
   // Note: the dev server is just used for pre-rendering; we do not actually
   // have to care about path traversal vulnerabilities.
-  const md: string = readFileSync(pkgPath(`docs/${path}.md`), { encoding: 'utf-8' });
+  const md: string = readFileSync(pkgPath(`docs/${path}`), { encoding: 'utf-8' });
   const parsed: string = marked.parse(md, { async: false });
   return `
     <!DOCTYPE html>
