@@ -88,8 +88,8 @@ pages, or contribute them to the Fiolin repository.
    ```
 
    You're welcome to manage your json files manually too. Fiolin just expects
-   a valid json file conforming to the `FiolinScript` type (see [here][types]),
-   hosted on a github.io page.
+   a valid json file conforming to the `FiolinScript` type
+   (see [here](./fiolin-script)) hosted on a github.io page.
    
    The advantage of this method is that it's easy, and you're in control. Click
    a button, run a script, send your friend a link, and they can start using
@@ -125,4 +125,3 @@ If you're curious about configuration options you don't see covered in the docs,
 take a look at the [`types.ts`][types] file to learn more.
 
 [examples]: https://github.com/peterthenelson/fiolin/blob/main/fiols/
-[types]: https://github.com/peterthenelson/fiolin/blob/main/common/types.ts
