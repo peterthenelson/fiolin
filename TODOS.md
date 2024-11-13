@@ -1,15 +1,12 @@
 A not-necessarily-exhaustive list of TODOs:
 - Documentation
   - Landing page copy
-  - Documentation for the fiolin library and the script format
+  - Documentation for the script format
 - Dev server and release:
-  - Get unjs/nitro#2814 merged/released and then revert my local changes to
-    nitro; alternately reimplement functionality I need w/o nitro.
+  - Get unjs/nitro#2814 merged/released and then revert my local changes.
   - Set up tests involving the web server(s) and playwright to check that the
     security properties hold.
   - HSTS for prod? Any updates to headers for wasm files?
-  - Something seems a bit messed up about caching; maybe I need to add explicit
-    etags or something to the _headers in the deploy process.
 - Core functionality
   - Some kind of flag parsing functionality
   - Get some other emscripten binary working in the same file-system as pyodide.

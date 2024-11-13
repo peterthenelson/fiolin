@@ -5,7 +5,7 @@ function launch(cmd: string, args: string[]): [string, ChildProcess] {
   return [cmd, spawn(cmd, args, { shell: true })];
 }
 
-const children = ['build:pydoc', 'watch:rollup', 'dev:server', 'dev:fake3p'].map((s) => {
+const children = ['build:doc', 'watch:rollup', 'dev:server', 'dev:fake3p'].map((s) => {
   return launch('npm', ['run', s]);
 });
 

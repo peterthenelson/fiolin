@@ -2,8 +2,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run build:pydoc && npm run build:rollup && nitro build",
-    "build:pydoc": "jiti scripts/pydoc.ts",
+    "build": "npm run build:doc && npm run build:rollup && nitro build",
+    "build:doc": "jiti scripts/doc.ts",
     "build:rollup": "npm run clean:rollup && rollup -c --configPlugin typescript --no-watch",
     "clean:rollup": "shx rm -rf server/public/bundle",
     "fiol": "jiti cli/cli.ts run",
