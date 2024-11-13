@@ -49,7 +49,7 @@ fiolin.cp(f'/input/{name}', f'/output/bar-{name}')
 # /output/*, so it's usually not necessary to use these functions.
 ```
 
-For more information on the `fiolin` module, read [the pydoc](./fiolin-module.md).
+For more information on the `fiolin` module, read [the pydoc](./fiolin-module).
 
 ## Third-Party Packages <a name="third-party-packages"></a>
 

@@ -90,7 +90,7 @@ well.
 - The UI and the worker with the script runner will have different CSPs. The
   script runner will not, for instance, be response (or allowed!) to fetch the
   3p scripts itself.
-- See [this config][nitro-config] for the specifics.
+- See [this config](/nitro.config.ts) for the specifics.
 
 ### Web Workers
 
@@ -161,5 +161,3 @@ there are several mitigations:
   - You absolutely need to do things like zip/unzip files and whatnot. Python
     is more batteries-included, as opposed to needing to reimplement basic stuff
     for the sandboxed environment.
-
-[nitro-config]: https://github.com/peterthenelson/fiolin/blob/main/nitro.config.ts
