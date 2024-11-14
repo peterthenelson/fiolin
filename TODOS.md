@@ -1,7 +1,6 @@
 A not-necessarily-exhaustive list of TODOs:
 - Documentation
   - Landing page copy
-  - Documentation for the script format
 - Dev server and release:
   - Get unjs/nitro#2814 merged/released and then revert my local changes.
   - Set up tests involving the web server(s) and playwright to check that the
@@ -33,12 +32,10 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert ebooks azw3, epub, mobi
     - Convert video ...
 - Frontend
-  - Better UI for input / output filesystem to allow for multiple files (and
-    remember to lock up 'run' button during installPkgs step and during any
-    runs)
-  - Using the installPkgs to decrease perceived latency
+  - Improve the "simple" file UI to allow for resetting and redownloading.
+  - Advanced UI options other than the "simple" version.
+  - Lower UI perceived latency (e.g., with installPkgs and queuing run actions)
+    without allowing RUN to be posted to worker when it's not ready.
   - Autocomplete search for landing page.
-  - Improve styling for all pages; importantly, make it work on mobile.
-  - Link to documentation on landing page.
   - Appropriate modal warnings for 3p + localstorage memory of approvals
   - Ability to edit script metadata in the editor and a json-generator button

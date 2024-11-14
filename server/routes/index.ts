@@ -13,9 +13,8 @@ export default defineEventHandler(async (event) => {
     <!DOCTYPE html>
     <html>
       <head>
-        <meta charset="utf-8">
-        <title>ƒɪᴏʟɪɴ</title>
         ${fiolinSharedHeaders()}
+        <title>ƒɪᴏʟɪɴ</title>
         <script src="/index.js" type="module" defer></script>
       </head>
       <body>

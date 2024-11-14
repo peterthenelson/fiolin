@@ -6,13 +6,12 @@ export default defineEventHandler(() => {
     <!DOCTYPE html>
     <html>
       <head>
-        <meta charset="utf-8">
-        <title>ƒɪᴏʟɪɴ playground</title>
         ${fiolinSharedHeaders()}
+        <title>ƒɪᴏʟɪɴ playground</title>
         <script src="/playground.js" type="module" defer></script>
       </head>
       <body>
-        ${fiolinContainer({ editorOpen: true })}
+        ${fiolinContainer({ devModeOn: true })}
       </body>
     </html>
   `);

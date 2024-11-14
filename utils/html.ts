@@ -5,6 +5,8 @@ import { readFileSync } from 'node:fs';
 
 export function fiolinSharedHeaders(): string {
   return redent(`
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/index.css">
     <link rel="stylesheet" href="/bundle/host.css">
     <script src="/bundle/host.js" type="module" defer></script>
@@ -16,32 +18,33 @@ export interface FiolinContainerOptions {
   title?: string;
   // Description for the script (defaults to Loading...)
   desc?: string;
-  // Start with the script editor initially opened
-  editorOpen?: boolean;
+  // Start in dev mode
+  devModeOn?: boolean;
 }
 
 export function fiolinContainer(options?: FiolinContainerOptions): string {
   options = options || {};
   return redent(`
-    <div id="container">
-      <div id="script-header">
+    <div id="container" ${options.devModeOn ? 'class="dev-mode"': ''}>
+      <div class="script-header">
         <div id="script-title">${options.title || ''}</div>
-        <div id="script-mode-button" title="Edit Script">✎</div>
+        <div id="script-mode-button" class="button" title="Developer Mode">✎</div>
       </div>
-      <div id="script">
+      <div class="script">
         <pre id="script-desc">${options.desc || 'Loading...'}</pre>
-        <div id="script-editor"${options.editorOpen ? '' : 'class="hidden"'}></div>
+        <div class="script-mobile-warning">Developer Mode has limited support on mobile</div>
+        <div id="script-editor"}></div>
       </div>
-      <div id="controls">
-        <label id="input-files" for="input-files-chooser" class="files-label">
-          <div class="files-panel">
+      <div class="script-controls">
+        <label for="input-files-chooser" class="files-label">
+          <div class="files-panel button">
             <p class="files-panel-text">Choose An Input File</p>
           </div>
           <input type="file" id="input-files-chooser" disabled />
         </label>
         <!-- TODO -->
       </div>
-      <div id="output">
+      <div class="script-output">
         <pre id="output-term">Loading...</pre>
       </div>
     </div>
@@ -57,14 +60,13 @@ export function mdDoc(path: string) {
     <!DOCTYPE html>
     <html>
       <head>
-        <meta charset="utf-8">
-        <title>ƒɪᴏʟɪɴ documentation</title>
         ${fiolinSharedHeaders()}
+        <title>ƒɪᴏʟɪɴ documentation</title>
         <script src="/doc.js" type="module" defer></script>
       </head>
       <body>
         <div id="container">
-          <div id="doc">
+          <div class="doc">
             ${parsed}
           </div>
         </div>

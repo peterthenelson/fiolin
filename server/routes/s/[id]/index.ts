@@ -9,9 +9,8 @@ export default defineEventHandler((event) => {
     <!DOCTYPE html>
     <html>
       <head>
-        <meta charset="utf-8">
-        <title>${name} - ƒɪᴏʟɪɴ</title>
         ${fiolinSharedHeaders()}
+        <title>${name} - ƒɪᴏʟɪɴ</title>
         <script src="/init-fiol.js?fiol=${name}" type="module" defer></script>
       </head>
       <body>

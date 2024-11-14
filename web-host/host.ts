@@ -106,11 +106,11 @@ export function initFiolin(scriptUrl: string, loading?: boolean) {
       setupScriptEditor(script.code.python);
       const button = getElementByIdAs('script-mode-button', HTMLDivElement);
       button.onclick = () => {
-        const editor = getElementByIdAs('script-editor', HTMLDivElement);
-        if (editor.classList.contains('hidden')) {
-          editor.classList.remove('hidden');
+        const editor = getElementByIdAs('container', HTMLDivElement);
+        if (editor.classList.contains('dev-mode')) {
+          editor.classList.remove('dev-mode');
         } else {
-          editor.classList.add('hidden');
+          editor.classList.add('dev-mode');
         }
       };
     } catch (e) {
@@ -128,7 +128,6 @@ export function initPlayground() {
   const scriptDesc = getElementByIdAs('script-desc', HTMLPreElement);
   scriptTitle.textContent = script.meta.title;
   scriptDesc.textContent = script.meta.description;
-  getElementByIdAs('script-editor', HTMLDivElement).classList.remove('hidden');
   setupScriptEditor(script.code.python);
   worker.onmessage = handleMessage;
   initialized = (async () => {})();

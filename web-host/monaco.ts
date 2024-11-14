@@ -26,9 +26,31 @@ self.MonacoEnvironment = {
 	}
 }
 
+// This in-practice means a mobile device, but the width is the thing we
+// actually care about when deciding on monaco gutters and whatnot, so we just
+// query that directly.
+function isNarrow(): boolean {
+  return window.matchMedia('(max-width: 480px)').matches;
+}
+
+const narrowOpts: monaco.editor.IStandaloneEditorConstructionOptions = {
+  lineNumbers: 'off',
+  glyphMargin: false,
+  folding: false,
+  lineDecorationsWidth: 0,
+  lineNumbersMinChars: 0,
+  showFoldingControls: 'never',
+  minimap: { enabled: false },
+  overviewRulerLanes: 0,
+  scrollbar: {
+    vertical: 'hidden',
+    horizontal: 'hidden',
+  },
+};
+
 let editor: undefined | monaco.editor.IStandaloneCodeEditor;
 
-export function initMonaco(elem?: HTMLElement, value?: string, onchange?: (value: string) => void) {
+export function initMonaco(elem: HTMLElement | null, value: string, onchange?: (value: string) => void) {
   if (!elem) {
     console.log('No element provided to monaco; skipping initialization');
     return;
@@ -38,6 +60,7 @@ export function initMonaco(elem?: HTMLElement, value?: string, onchange?: (value
     value,
     theme: 'vs-dark',
     automaticLayout: true,
+    ...(isNarrow() ? narrowOpts : {})
   });
   if (onchange) {
     editor.onDidChangeModelContent(() => {

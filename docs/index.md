@@ -17,7 +17,7 @@ get you started.
 * [Third-Party Packages](#third-party-packages)
 * [Sharing Fiolin Scripts](#sharing-fiolin-scripts)
 * [Advanced UI Configuration](#advance-ui-configuration)
-* [Design Document](./design)
+* [Design Document](/doc/design)
 * [Example First-Party Fiolin Scripts][examples]
 
 ## Python API <a name="python-api"></a>
@@ -49,7 +49,7 @@ fiolin.cp(f'/input/{name}', f'/output/bar-{name}')
 # /output/*, so it's usually not necessary to use these functions.
 ```
 
-For more information on the `fiolin` module, read [the pydoc](./fiolin-module).
+For more information on the `fiolin` module, read [the pydoc](/doc/fiolin-module).
 
 ## Third-Party Packages <a name="third-party-packages"></a>
 
@@ -89,7 +89,7 @@ pages, or contribute them to the Fiolin repository.
 
    You're welcome to manage your json files manually too. Fiolin just expects
    a valid json file conforming to the `FiolinScript` type
-   (see [here](./fiolin-script)) hosted on a github.io page.
+   (see [here](/doc/fiolin-script)) hosted on a github.io page.
    
    The advantage of this method is that it's easy, and you're in control. Click
    a button, run a script, send your friend a link, and they can start using
@@ -122,6 +122,6 @@ any number of files.
 TODO: Update once there are more interesting options
 
 If you're curious about configuration options you don't see covered in the docs,
-take a look at the [`types.ts`][types] file to learn more.
+take a look at the [types](/doc/fiolin-script) to learn more.
 
 [examples]: https://github.com/peterthenelson/fiolin/blob/main/fiols/

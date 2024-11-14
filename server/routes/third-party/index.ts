@@ -6,9 +6,8 @@ export default defineEventHandler(() => {
     <!DOCTYPE html>
     <html>
       <head>
-        <meta charset="utf-8">
-        <title>ƒɪᴏʟɪɴ: 3rd party script</title>
         ${fiolinSharedHeaders()}
+        <title>ƒɪᴏʟɪɴ: 3rd party script</title>
         <script src="/third-party.js" type="module" defer></script>
       </head>
       <body>
