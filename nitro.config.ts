@@ -8,6 +8,8 @@ const noneCsp = "default-src 'none'; frame-ancestors 'none'";
 const indexCsp = [
   // Default to self only.
   "default-src 'self'",
+  // Note: cloudflare analytics
+  "script-src 'self' https://static.cloudflareinsights.com",
   // Note: base64 images used by monaco
   "img-src 'self' data:",
   // Note: inline css is used by monaco.
