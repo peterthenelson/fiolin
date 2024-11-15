@@ -4,12 +4,9 @@ import { defineNitroConfig } from 'nitropack/config';
 // assigned a different CSP.
 const noneCsp = "default-src 'none'; frame-ancestors 'none'";
 
-// The host/UI page and code use this CSP.
-const indexCsp = [
+const commonCsp = [
   // Default to self only.
   "default-src 'self'",
-  // Note: cloudflare analytics
-  "script-src 'self' https://static.cloudflareinsights.com",
   // Note: base64 images used by monaco
   "img-src 'self' data:",
   // Note: inline css is used by monaco.
@@ -18,10 +15,17 @@ const indexCsp = [
   "frame-ancestors 'none'"
 ];
 
+// The host/UI page and code use this CSP.
+// Note: cloudflare analytics
+const indexCsp = commonCsp.concat([
+  'connect-src https://cloudflareinsights.com/cdn-cgi/rum',
+  "script-src 'self' https://static.cloudflareinsights.com/beacon.min.js",
+]);
+
 // The 3p host/UI page additionally needs to fetch scripts from github.
 // TODO: Switch to just whitelisting github specifically (and doing a dev-only
 // thing to allow localhost:3001).
-const thirdPartyCsp = indexCsp.concat('connect-src *');
+const thirdPartyCsp = commonCsp.concat('connect-src *');
 
 // The worker/script runner can use WASM and access pyodide and pypi packages.
 // TODO: Can this be narrowed?
