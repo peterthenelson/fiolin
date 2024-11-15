@@ -18,7 +18,7 @@ const commonCsp = [
 // The host/UI page and code use this CSP.
 // Note: cloudflare analytics
 const indexCsp = commonCsp.concat([
-  'connect-src https://cloudflareinsights.com/cdn-cgi/rum',
+  "connect-src 'self' https://cloudflareinsights.com/cdn-cgi/rum",
   "script-src 'self' https://static.cloudflareinsights.com/beacon.min.js",
 ]);
 
