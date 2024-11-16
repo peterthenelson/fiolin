@@ -1,6 +1,8 @@
 import { PyodideRunner } from '../common/runner';
 import { toErr } from '../common/errors';
+import { parseAs } from '../common/parse';
 import { WorkerMessage } from '../web-utils/types';
+import { pWorkerMessage } from '../web-utils/parse-msg';
 
 // Typed messaging
 const _rawPost = self.postMessage;
@@ -8,7 +10,7 @@ function postMessage(msg: WorkerMessage) {
   _rawPost(msg);
 }
 self.onmessage = async (e) => {
-  const msg: WorkerMessage = (e.data as WorkerMessage);
+  const msg: WorkerMessage = parseAs(pWorkerMessage, e.data);
   await onMessage(msg);
 }
 

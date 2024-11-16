@@ -1,7 +1,8 @@
 import { FiolinScript } from '../common/types';
 import { readdirSync, readFileSync } from 'node:fs';
 import { pkgPath } from './pkg-path';
-import { asFiolinScript } from '../common/parse';
+import { pFiolinScript } from '../common/parse-script';
+import { parseAs } from '../common/parse';
 import jsonc, { printParseErrorCode } from 'jsonc-parser';
 
 function offsetToLC(s: string, offset: number): [number, number] {
@@ -58,7 +59,7 @@ export function loadScript(name: string): FiolinScript {
   const template = readJsonc(pkgPath(`fiols/${name}.fiol`));
   const python = readFileSync(pkgPath(`fiols/${name}.py`), 'utf-8');
   const script = { code: { python }, ...template };
-  return asFiolinScript(script);
+  return parseAs(pFiolinScript, script);
 }
 
 export async function loadAll(): Promise<Record<string, FiolinScript>> {

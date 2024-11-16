@@ -1,7 +1,9 @@
 import { RunMessage, WorkerMessage } from '../web-utils/types';
+import { pWorkerMessage } from '../web-utils/parse-msg';
 import { getErrMsg, toErr } from '../common/errors';
-import { asFiolinScript } from '../common/parse';
+import { pFiolinScript } from '../common/parse-script';
 import { FiolinScript } from '../common/types';
+import { parseAs } from '../common/parse';
 const monaco = import('./monaco');
 
 function getElementByIdAs<T extends HTMLElement>(id: string, cls: new (...args: any[])=> T): T {
@@ -25,8 +27,7 @@ class TypedWorker {
     this.onmessage = null;
     this.worker.onmessage = (ev) => {
       if (this.onmessage) {
-        // TODO: Actually parse rather than casting
-        this.onmessage(ev.data as WorkerMessage);
+        this.onmessage(parseAs(pWorkerMessage, ev.data));
       }
     }
     this.onerror = null;
@@ -100,7 +101,7 @@ export function initFiolin(scriptUrl: string, loading?: boolean) {
       const resp = await fetch(scriptUrl);
       const parsed = await resp.json();
       console.log(parsed);
-      script = asFiolinScript(parsed);
+      script = parseAs(pFiolinScript, parsed);
       scriptTitle.textContent = script.meta.title;
       scriptDesc.textContent = script.meta.description;
       setupScriptEditor(script.code.python);
