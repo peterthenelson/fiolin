@@ -34,6 +34,8 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert video ...
 - Frontend
   - Improve the "simple" file UI to allow for resetting and redownloading.
+  - Add some transition animations for the buttons to invite interaction, show
+    "in progress", and return to the initial state.
   - Advanced UI options other than the "simple" version.
   - Autocomplete search for landing page.
   - Appropriate modal warnings for 3p + localstorage memory of approvals

@@ -184,7 +184,10 @@ async function runScript() {
   fileChooser.disabled = true;
   await fiolinReady.promise;
   const term = getElementByIdAs('output-term', HTMLPreElement);
+  term.classList.remove('error');
   term.textContent = '';
+  const scriptEditor = getElementByIdAs('script-editor', HTMLDivElement);
+  scriptEditor.classList.remove('error');
   (await monaco).clearMonacoErrors();
   const file = fileChooser.files![0];
   const fileText = getElementByIdAs('files-panel-text', HTMLParagraphElement);
@@ -200,6 +203,7 @@ async function runScript() {
 async function handleMessage(msg: WorkerMessage): Promise<void> {
   const term = getElementByIdAs('output-term', HTMLPreElement);
   const fileChooser = getElementByIdAs('input-files-chooser', HTMLInputElement);
+  const scriptEditor = getElementByIdAs('script-editor', HTMLDivElement);
   if (msg.type === 'LOADED') {
     term.textContent = 'Pyodide Loaded\n';
   } else if (msg.type === 'PACKAGES_INSTALLED') {
@@ -227,6 +231,8 @@ async function handleMessage(msg: WorkerMessage): Promise<void> {
     }
   } else if (msg.type === 'ERROR') {
     fileChooser.disabled = false;
+    scriptEditor.classList.add('error');
+    term.classList.add('error');
     if (typeof msg.lineno !== 'undefined') {
       console.warn(msg.error.message);
       (await monaco).setMonacoError(msg.lineno, msg.error.message);
@@ -235,6 +241,7 @@ async function handleMessage(msg: WorkerMessage): Promise<void> {
     }
     term.textContent = msg.error.toString();
   } else {
+    term.classList.add('error');
     term.textContent = `Unexpected event data: ${msg}`;
     console.error(`Unexpected event data: ${msg}`);
   }
