@@ -42,6 +42,10 @@ with open(f'/input/{name}') as infile:
 # This common task can be done using fiolin.cp
 fiolin.cp(f'/input/{name}', f'/output/bar-{name}')
 
+# You can also put files in /tmp. They will not be persisted between runs of the
+# script.
+fiolin.cp(f'/input/{name}', f'/tmp/baz-{name}')
+
 # You can manually set which output files will be exposed:
 # fiolin.set_output_basename(f'/output/foo-{name}')
 # fiolin.set_output_basenames([f'/output/foo-{name}', f'/output/bar-{name}'])

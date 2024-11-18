@@ -24,4 +24,22 @@ describe('unlock-pptx', () => {
     const actualXml = xmlFormat(actualBuf.toString());
     expect(actualXml).toEqual(expectedXml);
   });
+
+  it('can rerun successfully', async () => {
+    const runner = new NodeFiolinRunner('unlock-ppt', output.path);
+    // Run it twice; the second time should succeed as well.
+    await runner.runWithLocalFs(
+      [pkgPath('fiols/testdata/locked.pptx')], { argv: '' });
+    const outputs = await runner.runWithLocalFs(
+      [pkgPath('fiols/testdata/locked.pptx')], { argv: '' });
+    expect(outputs).toEqual(['locked-unlocked.pptx']);
+    const expectedBuf = await readFromZip(
+      pkgPath('fiols/testdata/unlocked.pptx'), 'ppt/presentation.xml');
+    const actualBuf = await readFromZip(
+      path.join(output.path, 'locked-unlocked.pptx'), 'ppt/presentation.xml');
+    const expectedXml = xmlFormat(expectedBuf.toString());
+    const actualXml = xmlFormat(actualBuf.toString());
+    expect(actualXml).toEqual(expectedXml);
+  });
 });
+

@@ -76,6 +76,8 @@ export class PyodideRunner implements FiolinRunner {
     mkDir(this._pyodide, '/input');
     rmRf(this._pyodide, '/output');
     mkDir(this._pyodide, '/output');
+    rmRf(this._pyodide, '/tmp');
+    mkDir(this._pyodide, '/tmp');
     rmRf(this._pyodide, '/home/pyodide/fiolin.py');
     rmRf(this._pyodide, '/home/pyodide/script.py');
   }
