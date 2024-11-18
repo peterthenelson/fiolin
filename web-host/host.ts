@@ -1,9 +1,10 @@
-import { RunMessage, WorkerMessage } from '../web-utils/types';
-import { pWorkerMessage } from '../web-utils/parse-msg';
+import { WorkerMessage } from '../web-utils/types';
+import { Deferred } from '../common/deferred';
 import { getErrMsg, toErr } from '../common/errors';
 import { pFiolinScript } from '../common/parse-script';
 import { FiolinScript } from '../common/types';
 import { parseAs } from '../common/parse';
+import { TypedWorker } from './typed-worker';
 const monaco = import('./monaco');
 
 function getElementByIdAs<T extends HTMLElement>(id: string, cls: new (...args: any[])=> T): T {
@@ -14,32 +15,6 @@ function getElementByIdAs<T extends HTMLElement>(id: string, cls: new (...args: 
     return (elem as T);
   } else {
     throw new Error(`Element #${id} is not an instance of ${cls}`);
-  }
-}
-
-class TypedWorker {
-  private readonly worker: Worker;
-  public onmessage: ((msg: WorkerMessage) => void) | null;
-  public onerror: ((ev: ErrorEvent) => void) | null;
-
-  constructor(scriptURL: string | URL, options?: WorkerOptions) {
-    this.worker = new Worker(scriptURL, options);
-    this.onmessage = null;
-    this.worker.onmessage = (ev) => {
-      if (this.onmessage) {
-        this.onmessage(parseAs(pWorkerMessage, ev.data));
-      }
-    }
-    this.onerror = null;
-    this.worker.onerror = (ev) => {
-      if (this.onerror) {
-        this.onerror(ev);
-      }
-    }
-  }
-
-  postMessage(msg: WorkerMessage) {
-    this.worker.postMessage(msg);
   }
 }
 
@@ -88,25 +63,6 @@ async function setupScriptEditor(content: string): Promise<void> {
   });
 }
 
-class Deferred<T> {
-  public readonly promise: Promise<T>;
-  private _resolve?: (value: T) => void;
-  private _reject?: (error: any) => void;
-  constructor() {
-    this.promise = new Promise<T>((resolve, reject) => {
-      this._resolve = resolve;
-      this._reject = reject;
-    });
-  }
-  resolve(value: T) {
-    if (!this._resolve) throw new Error('_resolve not set!');
-    this._resolve(value);
-  }
-  reject(error: Error) {
-    if (!this._reject) throw new Error('_reject not set!');
-    this._reject(error);
-  }
-}
 let fiolinReady: Deferred<void> = new Deferred();
 
 export function initFiolin(scriptUrl: string, loading?: boolean) {
