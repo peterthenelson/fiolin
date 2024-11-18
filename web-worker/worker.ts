@@ -1,7 +1,7 @@
 import { PyodideRunner } from '../common/runner';
 import { toErr } from '../common/errors';
 import { parseAs } from '../common/parse';
-import { WorkerMessage } from '../web-utils/types';
+import { InstallPackagesMessage, RunMessage, WorkerMessage } from '../web-utils/types';
 import { pWorkerMessage } from '../web-utils/parse-msg';
 
 // Typed messaging
@@ -15,7 +15,7 @@ self.onmessage = async (e) => {
 }
 
 let runner: PyodideRunner | undefined = undefined;
-async function load() {
+async function load(): Promise<void> {
   try {
     const tmp = new PyodideRunner({
       console: {
@@ -30,15 +30,21 @@ async function load() {
     postMessage({ type: 'ERROR', error: toErr(e) });
   }
 }
-load();
+const loaded = load();
 
-async function onMessage(msg: WorkerMessage) {
-  if (msg.type !== 'RUN') {
-    throw new Error(`Expected RUN message; got ${msg}`);
+async function onMessage(msg: WorkerMessage): Promise<void> {
+  if (msg.type === 'INSTALL_PACKAGES') {
+    await onInstallPackages(msg);
+  } else if (msg.type === 'RUN') {
+    await onRun(msg);
+  } else {
+    throw new Error(`Expected INSTALL_PACKAGES or RUN message; got ${msg}`);
   }
-  if (!runner) {
-    throw new Error('RUN message sent before runner loaded');
-  }
+}
+
+async function onRun(msg: RunMessage): Promise<void> {
+  await loaded;
+  if (!runner) throw new Error(`runner missing after loaded completed`);
   try {
     const response = await runner.run(msg.script, msg.request);
     if (response.error) {
@@ -49,4 +55,15 @@ async function onMessage(msg: WorkerMessage) {
   } catch (e) {
     postMessage({ type: 'ERROR', error: toErr(e) });
   }
-};
+}
+
+async function onInstallPackages(msg: InstallPackagesMessage): Promise<void> {
+  await loaded;
+  if (!runner) throw new Error(`runner missing after loaded completed`);
+  try {
+    await runner.installPkgs(msg.script);
+    postMessage({ type: 'PACKAGES_INSTALLED' });
+  } catch (e) {
+    postMessage({ type: 'ERROR', error: toErr(e) });
+  }
+}

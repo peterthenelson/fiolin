@@ -59,7 +59,7 @@ export function pBool(p: ObjPath, v: unknown): boolean {
 export function pArr<V>(elem: Parser<V>): Parser<V[]> {
   return (p: ObjPath, v: unknown) => {
     if (!Array.isArray(v)) {
-      throw new Error(`be an array; got ${v}`);
+      throw p.err(`be an array; got ${v}`);
     }
     const vals: V[] = [];
     for (let i = 0; i < v.length; i++) {
@@ -95,7 +95,7 @@ export function pProp<K extends string, V>(p: ObjPath, o: object, key: K, val: (
 }
 
 export function pPropU<K extends string, V>(p: ObjPath, o: object, key: K, val: (p: ObjPath, v: unknown) => V): Record<K, V | undefined> {
-  if (key in o) {
+  if (key in o && typeof o[(key as keyof object)] !== 'undefined') {
     return { [key]: val(p._(key), o[key as (keyof typeof o)]) } as Record<K, V>;
   }
   return { [key]: undefined } as Record<K, undefined>;

@@ -38,7 +38,7 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
       <div class="script-controls">
         <label for="input-files-chooser" class="files-label">
           <div class="files-panel button">
-            <p class="files-panel-text">Choose An Input File</p>
+            <p id="files-panel-text">Choose An Input File</p>
           </div>
           <input type="file" id="input-files-chooser" disabled />
         </label>

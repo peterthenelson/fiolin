@@ -1,22 +1,26 @@
 import { pObj, ObjPath, pInst, pNum, pOnlyKeys, pProp, pPropU, pStr, pStrLit } from '../common/parse';
 import { pFiolinScript } from '../common/parse-script';
 import { pFiolinRunRequest, pFiolinRunResponse } from '../common/parse-run';
-import { ErrorMessage, LoadedMessage, RunMessage, StderrMessage, StdoutMessage, SuccessMessage, WorkerMessage } from './types';
+import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, StderrMessage, StdoutMessage, SuccessMessage, WorkerMessage } from './types';
 
 export function pWorkerMessage(p: ObjPath, v: unknown): WorkerMessage {
   const o: object = pObj(p, v);
   const type: string = pProp(p, o, 'type', pStr).type;
-  if (type == 'LOADED') {
+  if (type === 'LOADED') {
     return pLoadedMessage(p, v);
-  } else if (type == 'STDOUT') {
+  } else if (type === 'STDOUT') {
     return pStdoutMessage(p, v);
-  } else if (type == 'STDERR') {
+  } else if (type === 'STDERR') {
     return pStderrMessage(p, v);
-  } else if (type == 'RUN') {
+  } else if (type === 'INSTALL_PACKAGES') {
+    return pInstallPackagesMessage(p, v);
+  } else if (type === 'PACKAGES_INSTALLED') {
+    return pPackagesInstalledMessage(p, v);
+  } else if (type === 'RUN') {
     return pRunMessage(p, v);
-  } else if (type == 'SUCCESS') {
+  } else if (type === 'SUCCESS') {
     return pSuccessMessage(p, v);
-  } else if (type == 'ERROR') {
+  } else if (type === 'ERROR') {
     return pErrorMessage(p, v);
   } else {
     throw new Error(`Expected WorkerMessage to have a known type; got ${type}`);
@@ -46,6 +50,23 @@ export function pStderrMessage(p: ObjPath, v: unknown): StderrMessage {
   return {
     ...pProp(p, o, 'type', pStrLit('STDERR')),
     ...pProp(p, o, 'value', pStr),
+  };
+}
+
+export function pInstallPackagesMessage(p: ObjPath, v: unknown): InstallPackagesMessage {
+  const o: object = pObj(p, v);
+  pOnlyKeys(p, o, ['type', 'script']);
+  return {
+    ...pProp(p, o, 'type', pStrLit('INSTALL_PACKAGES')),
+    ...pProp(p, o, 'script', pFiolinScript),
+  };
+}
+
+export function pPackagesInstalledMessage(p: ObjPath, v: unknown): PackagesInstalledMessage {
+  const o: object = pObj(p, v);
+  pOnlyKeys(p, o, ['type']);
+  return {
+    ...pProp(p, o, 'type', pStrLit('PACKAGES_INSTALLED')),
   };
 }
 

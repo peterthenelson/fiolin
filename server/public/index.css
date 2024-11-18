@@ -161,7 +161,7 @@ body a {
   width: 100%;
 }
 
-.files-panel-text {
+#files-panel-text {
   width: 100%;
   overflow: hidden;
   white-space: nowrap;

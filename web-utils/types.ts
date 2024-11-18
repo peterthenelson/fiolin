@@ -1,8 +1,8 @@
 import { FiolinRunRequest, FiolinRunResponse, FiolinScript } from "../common/types";
 
 export type WorkerMessage = (
-  LoadedMessage | StdoutMessage | StderrMessage | RunMessage | SuccessMessage |
-  ErrorMessage
+  LoadedMessage | StdoutMessage | StderrMessage | InstallPackagesMessage |
+  PackagesInstalledMessage | RunMessage | SuccessMessage | ErrorMessage
 );
 
 export interface LoadedMessage { type: 'LOADED' }
@@ -16,6 +16,13 @@ export interface StderrMessage {
   type: 'STDERR';
   value: string;
 }
+
+export interface InstallPackagesMessage {
+  type: 'INSTALL_PACKAGES';
+  script: FiolinScript;
+}
+
+export interface PackagesInstalledMessage { type: 'PACKAGES_INSTALLED' }
 
 export interface RunMessage {
   type: 'RUN';

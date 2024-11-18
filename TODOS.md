@@ -7,6 +7,7 @@ A not-necessarily-exhaustive list of TODOs:
     security properties hold.
   - HSTS for prod? Any updates to headers for wasm files?
 - Core functionality
+  - Make unlock-ppt rerunnable (by using /tmp)
   - Some kind of flag parsing functionality
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
@@ -34,8 +35,6 @@ A not-necessarily-exhaustive list of TODOs:
 - Frontend
   - Improve the "simple" file UI to allow for resetting and redownloading.
   - Advanced UI options other than the "simple" version.
-  - Lower UI perceived latency (e.g., with installPkgs and queuing run actions)
-    without allowing RUN to be posted to worker when it's not ready.
   - Autocomplete search for landing page.
   - Appropriate modal warnings for 3p + localstorage memory of approvals
   - Ability to edit script metadata in the editor and a json-generator button

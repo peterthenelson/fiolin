@@ -88,6 +88,27 @@ async function setupScriptEditor(content: string): Promise<void> {
   });
 }
 
+class Deferred<T> {
+  public readonly promise: Promise<T>;
+  private _resolve?: (value: T) => void;
+  private _reject?: (error: any) => void;
+  constructor() {
+    this.promise = new Promise<T>((resolve, reject) => {
+      this._resolve = resolve;
+      this._reject = reject;
+    });
+  }
+  resolve(value: T) {
+    if (!this._resolve) throw new Error('_resolve not set!');
+    this._resolve(value);
+  }
+  reject(error: Error) {
+    if (!this._reject) throw new Error('_reject not set!');
+    this._reject(error);
+  }
+}
+let fiolinReady: Deferred<void> = new Deferred();
+
 export function initFiolin(scriptUrl: string, loading?: boolean) {
   const scriptTitle = getElementByIdAs('script-title', HTMLDivElement);
   const scriptDesc = getElementByIdAs('script-desc', HTMLPreElement);
@@ -98,10 +119,14 @@ export function initFiolin(scriptUrl: string, loading?: boolean) {
         scriptTitle.textContent = scriptUrl;
         scriptDesc.textContent = `Fetching script from\n${scriptUrl}`;
       }
+      const fileChooser = getElementByIdAs('input-files-chooser', HTMLInputElement);
+      fileChooser.disabled = false;
+      fileChooser.onchange = runScript;
       const resp = await fetch(scriptUrl);
       const parsed = await resp.json();
       console.log(parsed);
       script = parseAs(pFiolinScript, parsed);
+      worker.postMessage({ type: 'INSTALL_PACKAGES', script });
       scriptTitle.textContent = script.meta.title;
       scriptDesc.textContent = script.meta.description;
       setupScriptEditor(script.code.python);
@@ -155,35 +180,38 @@ export function die(msg: string) {
 }
 
 async function runScript() {
+  const fileChooser = getElementByIdAs('input-files-chooser', HTMLInputElement);
+  fileChooser.disabled = true;
+  await fiolinReady.promise;
   const term = getElementByIdAs('output-term', HTMLPreElement);
   term.textContent = '';
   (await monaco).clearMonacoErrors();
-  const file = getElementByIdAs('input-files-chooser', HTMLInputElement).files![0];
-  const fileText = document.querySelector('#input-files p.files-panel-text');
-  if (fileText !== null && fileText instanceof HTMLParagraphElement) {
-    fileText.title = file.name;
-    fileText.textContent = file.name;
-  } else {
-    console.error('Could not find #input-files p.files-panel-text');
-  }
-  const msg: RunMessage = { type: 'RUN', script, request: { inputs: [file], argv: '' } };
-  worker.postMessage(msg);
+  const file = fileChooser.files![0];
+  const fileText = getElementByIdAs('files-panel-text', HTMLParagraphElement);
+  fileText.title = file.name;
+  fileText.textContent = file.name;
+  worker.postMessage({
+    type: 'RUN',
+    script,
+    request: { inputs: [file], argv: '' }
+  });
 }
 
 async function handleMessage(msg: WorkerMessage): Promise<void> {
   const term = getElementByIdAs('output-term', HTMLPreElement);
+  const fileChooser = getElementByIdAs('input-files-chooser', HTMLInputElement);
   if (msg.type === 'LOADED') {
-    term.textContent = 'Pyodide Loaded';
+    term.textContent = 'Pyodide Loaded\n';
+  } else if (msg.type === 'PACKAGES_INSTALLED') {
     await initialized;
-    const fileChooser = getElementByIdAs('input-files-chooser', HTMLInputElement);
-    fileChooser.disabled = false;
-    fileChooser.onchange = runScript;
+    fiolinReady.resolve();
   } else if (msg.type === 'STDOUT') {
     term.textContent += msg.value + '\n';
   } else if (msg.type === 'STDERR') {
     console.warn(msg.value);
     term.textContent += msg.value + '\n';
   } else if (msg.type === 'SUCCESS') {
+    fileChooser.disabled = false;
     if (msg.response.outputs.length > 0) {
       for (const f of msg.response.outputs) {
         const elem = window.document.createElement('a');
@@ -198,6 +226,7 @@ async function handleMessage(msg: WorkerMessage): Promise<void> {
           '='.repeat(30) + '\nScript did not produce an output file.\n');
     }
   } else if (msg.type === 'ERROR') {
+    fileChooser.disabled = false;
     if (typeof msg.lineno !== 'undefined') {
       console.warn(msg.error.message);
       (await monaco).setMonacoError(msg.lineno, msg.error.message);
