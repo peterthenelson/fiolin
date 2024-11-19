@@ -35,7 +35,13 @@ export async function colorizeExamples(): Promise<void> {
 }
 
 export function die(msg: string): never {
-  const scriptDesc = getElementByIdAs('script-desc', HTMLPreElement);
-  scriptDesc.textContent = msg;
+  const scriptDesc = document.querySelector('[data-rel-id="script-desc"]');
+  if (scriptDesc === null) {
+    console.warn('Failed to find [data-rel-id="script-desc"]');
+  } else if (!(scriptDesc instanceof HTMLPreElement)) {
+    console.warn('Script description element not <pre> as expected');
+  } else {
+    scriptDesc.textContent = msg;
+  }
   throw new Error(msg);
 }
