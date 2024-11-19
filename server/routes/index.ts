@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
         <script src="/index.js" type="module" defer></script>
       </head>
       <body>
-        <div id="container">
+        <div class="container">
           <h3>First-Party ƒɪᴏʟɪɴ Scripts</h3>
           <ul>
             ${mkLis(Object.keys(scripts).map(s => [`/s/${s}`, s]), '            ')}

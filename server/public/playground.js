@@ -1,2 +1,2 @@
-import { initPlayground } from '/bundle/host.js';
-initPlayground();
+import { initFiolin } from '/bundle/host.js';
+initFiolin();

@@ -20,32 +20,35 @@ export interface FiolinContainerOptions {
   desc?: string;
   // Start in dev mode
   devModeOn?: boolean;
+  // Prefix for any ids (if you want multiple of these in the same page).
+  idPrefix?: string;
 }
 
 export function fiolinContainer(options?: FiolinContainerOptions): string {
   options = options || {};
+  const idPrefix = options.idPrefix ? options.idPrefix + '-' : '';
   return redent(`
-    <div id="container" ${options.devModeOn ? 'class="dev-mode"': ''}>
+    <div id="${idPrefix}container" class="container" ${options.devModeOn ? 'class="dev-mode"': ''}>
       <div class="script-header">
-        <div id="script-title">${options.title || ''}</div>
-        <div id="script-mode-button" class="button" title="Developer Mode">✎</div>
+        <div class="script-title" data-rel-id="script-title">${options.title || ''}</div>
+        <div class="dev-mode-button button" data-rel-id="dev-mode-button" title="Developer Mode">✎</div>
       </div>
       <div class="script">
-        <pre id="script-desc">${options.desc || 'Loading...'}</pre>
-        <div class="script-mobile-warning">Developer Mode has limited support on mobile</div>
-        <div id="script-editor"}></div>
+        <pre class="script-desc" data-rel-id="script-desc">${options.desc || 'Loading...'}</pre>
+        <div class="mobile-warning">Developer Mode has limited support on mobile</div>
+        <div class="script-editor" data-rel-id="script-editor"></div>
       </div>
       <div class="script-controls">
-        <label for="input-files-chooser" class="files-label">
+        <label for="${idPrefix}input-files-chooser" class="files-label">
           <div class="files-panel button">
-            <p id="files-panel-text">Choose An Input File</p>
+            <p class="files-panel-text" data-rel-id="files-panel-text">Choose An Input File</p>
           </div>
-          <input type="file" id="input-files-chooser" disabled />
+          <input type="file" id="${idPrefix}input-files-chooser" data-rel-id="input-files-chooser" disabled />
         </label>
         <!-- TODO -->
       </div>
       <div class="script-output">
-        <pre id="output-term">Loading...</pre>
+        <pre class="output-term" data-rel-id="output-term">Loading...</pre>
       </div>
     </div>
   `, '    ');
@@ -65,7 +68,7 @@ export function mdDoc(path: string) {
         <script src="/doc.js" type="module" defer></script>
       </head>
       <body>
-        <div id="container">
+        <div class="container">
           <div class="doc">
             ${parsed}
           </div>
