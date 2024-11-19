@@ -1,5 +1,5 @@
 import { loadAll } from '../../utils/config';
-import { fiolinSharedHeaders } from '../../utils/html';
+import { fiolinSharedHeaders, versionedLink } from '../../utils/html';
 import { indent, dedent } from '../../common/indent';
 
 function mkLis(pathNamePairs: [string, string][], prefix: string): string {
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
       <head>
         ${fiolinSharedHeaders()}
         <title>ƒɪᴏʟɪɴ</title>
-        <script src="/index.js" type="module" defer></script>
+        <script src="${versionedLink('/index.js')}" type="module" defer></script>
       </head>
       <body>
         <div class="container">

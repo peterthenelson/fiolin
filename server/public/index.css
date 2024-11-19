@@ -132,8 +132,7 @@ body a {
 
 .mobile-warning {
   display: none;
-  background-color: var(--redish);
-  color: var(--darkGrey);
+  color: var(--redish);
   border-radius: 8px;
   padding: 1em;
   margin-bottom: 1em;

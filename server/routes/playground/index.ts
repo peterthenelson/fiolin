@@ -1,5 +1,5 @@
 import { dedent } from '../../../common/indent';
-import { fiolinContainer, fiolinSharedHeaders } from '../../../utils/html';
+import { fiolinContainer, fiolinSharedHeaders, versionedLink } from '../../../utils/html';
 
 export default defineEventHandler(() => {
   return dedent(`
@@ -8,7 +8,7 @@ export default defineEventHandler(() => {
       <head>
         ${fiolinSharedHeaders()}
         <title>ƒɪᴏʟɪɴ playground</title>
-        <script src="/playground.js" type="module" defer></script>
+        <script src="${versionedLink('/playground.js')}" type="module" defer></script>
       </head>
       <body>
         ${fiolinContainer({ devModeOn: true })}

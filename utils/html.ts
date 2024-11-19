@@ -1,15 +1,28 @@
 import { redent } from '../common/indent';
 import { pkgPath } from './pkg-path';
 import { marked } from 'marked';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+
+// Covert x.js or /x.js to /x.js?v=123, supposing that the contents of the file
+// PKG_ROOT/server/public/x.js has a hash of 123.
+export function versionedLink(publicRelativePath: string): string {
+  if (publicRelativePath.at(0) === '/') {
+    publicRelativePath = publicRelativePath.substring(1);
+  }
+  const buf = readFileSync(pkgPath(`server/public/${publicRelativePath}`));
+  // Arbitrarily chosen, but it's not crazily long and it's unlikely to collide
+  const hash = createHash('shake256', { outputLength: 6 }).update(buf).digest('base64url');
+  return `/${publicRelativePath}?v=${hash}`;
+}
 
 export function fiolinSharedHeaders(): string {
   return redent(`
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/index.css">
-    <link rel="stylesheet" href="/bundle/host.css">
-    <script src="/bundle/host.js" type="module" defer></script>
+    <link rel="stylesheet" href="${versionedLink('/index.css')}">
+    <link rel="stylesheet" href="${versionedLink('/bundle/host.css')}">
+    <script src="${versionedLink('/bundle/host.js')}" type="module" defer></script>
   `, '    ');
 }
 
@@ -65,7 +78,7 @@ export function mdDoc(path: string) {
       <head>
         ${fiolinSharedHeaders()}
         <title>ƒɪᴏʟɪɴ documentation</title>
-        <script src="/doc.js" type="module" defer></script>
+        <script src="${versionedLink('/doc.js')}" type="module" defer></script>
       </head>
       <body>
         <div class="container">
