@@ -1,4 +1,4 @@
-import { redent } from '../common/indent';
+import { indent, redent } from '../common/indent';
 import { pkgPath } from './pkg-path';
 import { marked } from 'marked';
 import { createHash } from 'node:crypto';
@@ -16,6 +16,12 @@ export function versionedLink(publicRelativePath: string): string {
   return `/${publicRelativePath}?v=${hash}`;
 }
 
+function devSvg(): string {
+  return indent(
+    readFileSync(pkgPath('server/public/dev.svg'), { encoding: 'utf-8' }),
+    '          ');
+}
+
 export function fiolinSharedHeaders(): string {
   return redent(`
     <meta charset="utf-8">
@@ -23,7 +29,7 @@ export function fiolinSharedHeaders(): string {
     <link rel="stylesheet" href="${versionedLink('/index.css')}">
     <link rel="stylesheet" href="${versionedLink('/bundle/host.css')}">
     <script src="${versionedLink('/bundle/host.js')}" type="module" defer></script>
-  `, '    ');
+  `, '        ');
 }
 
 export interface FiolinContainerOptions {
@@ -44,7 +50,9 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
     <div id="${idPrefix}container" class="container" ${options.devModeOn ? 'class="dev-mode"': ''}>
       <div class="script-header">
         <div class="script-title" data-rel-id="script-title">${options.title || ''}</div>
-        <div class="dev-mode-button button" data-rel-id="dev-mode-button" title="Developer Mode">✎</div>
+        <div class="dev-mode-button button" data-rel-id="dev-mode-button" title="Developer Mode">
+          ${devSvg()}
+        </div>
       </div>
       <div class="script">
         <pre class="script-desc" data-rel-id="script-desc">${options.desc || 'Loading...'}</pre>

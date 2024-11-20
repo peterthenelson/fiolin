@@ -107,11 +107,7 @@ export class FiolinComponent {
       this.scriptDesc.textContent = script.meta.description;
       this.setupScriptEditor(script.code.python);
       this.modeButton.onclick = () => {
-        if (this.container.classList.contains('dev-mode')) {
-          this.container.classList.remove('dev-mode');
-        } else {
-          this.container.classList.add('dev-mode');
-        }
+        this.container.classList.toggle('dev-mode');
       };
       return script;
     } catch (e) {

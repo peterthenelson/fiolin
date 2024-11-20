@@ -1,0 +1,42 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1.5em"
+  height="1em"
+  viewBox="0 0 150 100"
+>
+  <rect
+    x="70" y="5"
+    width="10" height="90"
+    rx="50%" ry="4%"
+    transform="rotate(15, 75, 50)"
+    fill="currentColor"
+  />
+  <rect
+    x="10" y="45"
+    width="50" height="10"
+    rx="4%" ry="50%"
+    transform="rotate(30, 13, 50)"
+    fill="currentColor"
+  />
+  <rect
+    x="10" y="45"
+    width="50" height="10"
+    rx="4%" ry="50%"
+    transform="rotate(-30, 13, 50)"
+    fill="currentColor"
+  />
+  <rect
+    x="135" y="45"
+    width="50" height="10"
+    rx="4%" ry="50%"
+    transform="rotate(150, 138, 50)"
+    fill="currentColor"
+  />
+  <rect
+    x="135" y="45"
+    width="50" height="10"
+    rx="4%" ry="50%"
+    transform="rotate(-150, 138, 50)"
+    fill="currentColor"
+  />
+</svg>
