@@ -16,9 +16,9 @@ export function versionedLink(publicRelativePath: string): string {
   return `/${publicRelativePath}?v=${hash}`;
 }
 
-function devSvg(): string {
+function loadSvg(name: string): string {
   return indent(
-    readFileSync(pkgPath('server/public/dev.svg'), { encoding: 'utf-8' }),
+    readFileSync(pkgPath(`server/public/${name}.svg`), { encoding: 'utf-8' }),
     '          ');
 }
 
@@ -37,8 +37,8 @@ export interface FiolinContainerOptions {
   title?: string;
   // Description for the script (defaults to Loading...)
   desc?: string;
-  // Start in dev mode
-  devModeOn?: boolean;
+  // Run as script playground (dev mode always on, deploy button instead).
+  playground?: boolean;
   // Prefix for any ids (if you want multiple of these in the same page).
   idPrefix?: string;
 }
@@ -46,13 +46,53 @@ export interface FiolinContainerOptions {
 export function fiolinContainer(options?: FiolinContainerOptions): string {
   options = options || {};
   const idPrefix = options.idPrefix ? options.idPrefix + '-' : '';
+  const dmHidden = options.playground ? 'hidden' : '';
+  const depHidden = options.playground ? '' : 'hidden';
   return redent(`
-    <div id="${idPrefix}container" class="container" ${options.devModeOn ? 'class="dev-mode"': ''}>
+    <div id="${idPrefix}container" class="container ${options.playground ? 'dev-mode' : ''}">
       <div class="script-header">
         <div class="script-title" data-rel-id="script-title">${options.title || ''}</div>
-        <div class="dev-mode-button button" data-rel-id="dev-mode-button" title="Developer Mode">
-          ${devSvg()}
+        <div class="dev-mode-button button ${dmHidden}" data-rel-id="dev-mode-button" title="Developer Mode">
+          ${loadSvg('dev')}
         </div>
+        <div class="deploy-button button ${depHidden}" data-rel-id="deploy-button" title="Deploy To Github">
+          ${loadSvg('deploy')}
+        </div>
+        <dialog data-rel-id="deploy-dialog">
+          <form method="dialog" data-rel-id="deploy-form">
+            <input
+              type="text" name="gh-user-name"
+              placeholder="github-user" required
+            />
+            <input
+              type="text" name="gh-repo-name"
+              placeholder="github-repo" required
+            />
+            <input
+              type="text" name="gh-default-branch"
+              placeholder="github-default-branch" value="main" required
+            />
+            <input
+              type="text" name="gh-pages-branch"
+              placeholder="github-pages-branch" value="gh-pages" required
+            />
+            <input
+              type="text" name="script-id" data-rel-id="script-id"
+              pattern="^[a-z0-9_\\-]+$" placeholder="script-id" required
+            />
+            <select name="lang" required>
+              <option value="SH" data-rel-id="sh-lang">
+                Bash file (Mac, Linux)
+              </option>
+              <option value="BAT" data-rel-id="sh-lang">
+                Batch file (Windows)
+              </option>
+            </select>
+            <br>
+            <button type="submit">Deploy Script</button>
+            <button data-rel-id="deploy-cancel">Cancel</button>
+          </form>
+        </dialog>
       </div>
       <div class="script">
         <pre class="script-desc" data-rel-id="script-desc">${options.desc || 'Loading...'}</pre>

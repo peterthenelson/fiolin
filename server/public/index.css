@@ -43,6 +43,10 @@ body a:hover {
   display: none;
 }
 
+.button.hidden {
+  display: none;
+}
+
 .button {
   display: flex;
   align-content: center;
@@ -122,7 +126,7 @@ body a:hover {
   text-shadow: 0 0 2px var(--blueish);
 }
 
-.dev-mode-button {
+.dev-mode-button, .deploy-button {
   margin-left: auto;
   width: 2em;
   height: 2em;
@@ -130,9 +134,21 @@ body a:hover {
   padding: 0.2em;
 }
 
-.dev-mode .dev-mode-button {
+.dev-mode .dev-mode-button, .dev-mode .deploy-button {
   color: var(--greenish);
   box-shadow: 0 0 2.5px 1px inset var(--greenish);
+}
+
+dialog {
+  /* TODO: Style everything not like crap */
+  font-size: medium;
+  background-color: var(--medGrey);
+  max-width: 30em;
+  border-radius: 10px;
+}
+
+dialog::backdrop {
+  backdrop-filter: blur(5px);
 }
 
 .script-desc {

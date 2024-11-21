@@ -12,12 +12,12 @@ function getElementByIdAs<T extends HTMLElement>(id: string, cls: new (...args: 
   }
 }
 
-export function initFiolin(scriptUrl?: string, loading?: boolean): FiolinComponent {
+export function initFiolin(scriptUrl?: string, showLoading?: boolean): FiolinComponent {
   const container = document.getElementById('container');
   if (container === null) {
     die('#container not present; cannot initFiolin');
   }
-  return new FiolinComponent(container, scriptUrl, loading);
+  return new FiolinComponent(container, { scriptUrl, showLoading });
 }
 
 async function colorizeLang(lang: string): Promise<void> {

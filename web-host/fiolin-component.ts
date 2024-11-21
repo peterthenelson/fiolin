@@ -1,4 +1,5 @@
 import { WorkerMessage } from '../web-utils/types';
+import { DeployOptions, deployScript } from '../web-utils/deploy-gen';
 import { Deferred } from '../common/deferred';
 import { getErrMsg, toErr } from '../common/errors';
 import { pFiolinScript } from '../common/parse-script';
@@ -7,15 +8,36 @@ import { parseAs } from '../common/parse';
 import { TypedWorker } from './typed-worker';
 const monaco = import('./monaco');
 
-function getByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
+function maybeGetByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
   const elem = root.querySelector(`[data-rel-id="${relativeId}"]`);
-  if (elem === null) {
-    throw new Error(`Element [data-rel-id="${relativeId}"] not found`);
-  } else if (elem instanceof cls) {
+  if (elem instanceof cls) {
     return (elem as T);
   } else {
     throw new Error(`Element [data-rel-id="${relativeId}"] is not an instance of ${cls}`);
   }
+}
+
+function getByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
+  const elem = maybeGetByRelIdAs(root, relativeId, cls);
+  if (elem === null) {
+    throw new Error(`Element [data-rel-id="${relativeId}"] not found`);
+  }
+  return elem;
+}
+
+function getFormValue(fd: FormData, key: string): string {
+  const value = fd.get(key);
+  if (value !== null) return value.toString();
+  throw new Error(`Expected form data to have name ${key} but got ${Array.from(fd.keys())}`);
+}
+
+function downloadFile(f: File) {
+  const elem = document.createElement('a');
+  elem.href = window.URL.createObjectURL(f);
+  elem.download = f.name;
+  document.body.appendChild(elem);
+  elem.click();        
+  document.body.removeChild(elem);
 }
 
 const defaultPy: string = `# Basic script that copies input to output
@@ -46,11 +68,17 @@ let defaultScript: FiolinScript = {
   code: { python: defaultPy }
 };
 
+export interface FiolinComponentOptions {
+  scriptUrl?: string;
+  showLoading?: boolean;
+}
+
 export class FiolinComponent {
   private readonly worker: TypedWorker;
   private readonly container: HTMLElement;
   private readonly scriptTitle: HTMLDivElement;
   private readonly modeButton: HTMLDivElement;
+  private readonly deployButton: HTMLDivElement;
   private readonly scriptDesc: HTMLPreElement;
   private readonly fileChooser: HTMLInputElement;
   private readonly fileText: HTMLParagraphElement;
@@ -59,10 +87,11 @@ export class FiolinComponent {
   public readonly script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
 
-  constructor(container: HTMLElement, scriptUrl?: string, showLoading?: boolean) {
+  constructor(container: HTMLElement, opts?: FiolinComponentOptions) {
     this.container = container;
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
+    this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
     this.scriptEditor = getByRelIdAs(container, 'script-editor', HTMLDivElement);
     this.fileChooser = getByRelIdAs(container, 'input-files-chooser', HTMLInputElement);
@@ -76,7 +105,7 @@ export class FiolinComponent {
     this.worker.onmessage = (msg) => {
       this.handleMessage(msg);
     }
-    this.script = this.loadScript(scriptUrl, showLoading);
+    this.script = this.loadScript(container, opts || {});
     this.readyToRun = new Deferred();
   }
 
@@ -87,17 +116,17 @@ export class FiolinComponent {
     });
   }
 
-  private async loadScript(scriptUrl?: string, showLoading?: boolean): Promise<FiolinScript> {
+  private async loadScript(container: HTMLElement, opts: FiolinComponentOptions) {
     try {
       let script: FiolinScript = defaultScript;
-      if (scriptUrl) {
-        if (showLoading) {
-          this.scriptTitle.textContent = scriptUrl;
-          this.scriptDesc.textContent = `Fetching script from\n${scriptUrl}`;
+      if (opts.scriptUrl) {
+        if (opts.showLoading) {
+          this.scriptTitle.textContent = opts.scriptUrl;
+          this.scriptDesc.textContent = `Fetching script from\n${opts.scriptUrl}`;
         }
         this.fileChooser.disabled = false;
         this.fileChooser.onchange = () => { this.runScript() };
-        const resp = await fetch(scriptUrl);
+        const resp = await fetch(opts.scriptUrl);
         const parsed = await resp.json();
         script = parseAs(pFiolinScript, parsed);
       }
@@ -109,13 +138,40 @@ export class FiolinComponent {
       this.modeButton.onclick = () => {
         this.container.classList.toggle('dev-mode');
       };
+      const dialog = maybeGetByRelIdAs(container, 'deploy-dialog', HTMLDialogElement);
+      if (dialog !== null) {
+        const deployForm = getByRelIdAs(dialog, 'deploy-form', HTMLFormElement);
+        deployForm.onsubmit = async () => {
+          const fd = new FormData(deployForm);
+          const opts: DeployOptions = {
+            gh: {
+              userName: getFormValue(fd, 'gh-user-name'),
+              repoName: getFormValue(fd, 'gh-repo-name'),
+              defaultBranch: getFormValue(fd, 'gh-default-branch'),
+              pagesBranch: getFormValue(fd, 'gh-pages-branch'),
+            },
+            scriptId: getFormValue(fd, 'script-id'),
+            lang: fd.get('lang')?.toString() === 'SH' ? 'SH' : 'BAT',
+          };
+          downloadFile(deployScript(await this.script, opts));
+        };
+        getByRelIdAs(dialog, 'deploy-cancel', HTMLElement).onclick = () => {
+          dialog.close();
+        };
+        this.deployButton.onclick = async () => {
+          // TODO: Fill in other defaults from localstorage or detection.
+          getByRelIdAs(deployForm, 'script-id', HTMLInputElement).value = (
+            script.meta.title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-'));
+          dialog.showModal();
+        };
+      }
       return script;
     } catch (e) {
       console.log('Failed to fetch script!');
       const err = toErr(e);
       console.error(err);
       this.scriptDesc.textContent = (
-        `Failed to fetch script from\n${scriptUrl}\n${err.message}`);
+        `Failed to fetch script from\n${opts.scriptUrl}\n${err.message}`);
       throw e;
     }
   }
@@ -153,12 +209,7 @@ export class FiolinComponent {
       this.fileChooser.disabled = false;
       if (msg.response.outputs.length > 0) {
         for (const f of msg.response.outputs) {
-          const elem = window.document.createElement('a');
-          elem.href = window.URL.createObjectURL(f);
-          elem.download = f.name;
-          document.body.appendChild(elem);
-          elem.click();        
-          document.body.removeChild(elem);
+          downloadFile(f);
         }
       } else {
         this.outputTerm.textContent += (

@@ -11,7 +11,7 @@ export default defineEventHandler(() => {
         <script src="${versionedLink('/playground.js')}" type="module" defer></script>
       </head>
       <body>
-        ${fiolinContainer({ devModeOn: true })}
+        ${fiolinContainer({ playground: true })}
       </body>
     </html>
   `);
