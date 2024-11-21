@@ -1,13 +1,13 @@
 A not-necessarily-exhaustive list of TODOs:
 - Documentation
   - Landing page copy
+  - Add quick-start to the README and the doc/index.md
 - Dev server and release:
   - Get unjs/nitro#2814 merged/released and then revert my local changes.
   - Set up tests involving the web server(s) and playwright to check that the
     security properties hold.
   - HSTS for prod? Any updates to headers for wasm files?
 - Core functionality
-  - Make unlock-ppt rerunnable (by using /tmp)
   - Some kind of flag parsing functionality
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
@@ -34,6 +34,7 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert video ...
 - Frontend
   - Improve the "simple" file UI to allow for resetting and redownloading.
+  - Why is monaco occasionally triggering a request for clipboard permissions?
   - Add some transition animations for the buttons to invite interaction, show
     "in progress", and return to the initial state.
   - Advanced UI options other than the "simple" version.

@@ -7,12 +7,27 @@
   --whitish: #d4d4d4;
   --offWhite: #aaa;
   --blueish: #569cd6;
+  --blueishClear: #569cd620;
   --redish: #ce9178;
   --darkRed: #de6555;
   --darkGrey: #303030;
   --medGrey: #404040;
   --lightGrey: #8a8a8a;
   --greenish: #608b4e;
+  --buttonColor: var(--blueish);
+  --fuzzSvg: url(/fuzz.svg);
+}
+
+.flex-col-wrap {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: space-around;
+}
+
+.flex-row-wrap {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
 }
 
 h1, h2, h3 {
@@ -52,12 +67,10 @@ body a:hover {
   align-content: center;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
   border-radius: 8px;
-  padding: 1em;
-  background-color: unset;
-  color: var(--blueish);
-  box-shadow: 0 0 2.5px 1px inset var(--blueish);
+  background-color: var(--blackish);
+  color: var(--buttonColor);
+  box-shadow: 0 0 2.5px 1px inset var(--buttonColor);
 }
 
 .button:hover {
@@ -78,6 +91,7 @@ body a:hover {
   width: 100%;
   max-width: 40em;
   background-color: var(--blackish);
+  background-image: var(--fuzzSvg);
   border-radius: 8px;
   padding-top: .75em;
   padding-left: 1.5em;
@@ -134,30 +148,61 @@ body a:hover {
   padding: 0.2em;
 }
 
-.dev-mode .dev-mode-button, .dev-mode .deploy-button {
-  color: var(--greenish);
-  box-shadow: 0 0 2.5px 1px inset var(--greenish);
+.dev-mode :is(.dev-mode-button, .deploy-button) {
+  --buttonColor: var(--greenish);
 }
 
 dialog {
-  /* TODO: Style everything not like crap */
-  font-size: medium;
-  background-color: var(--medGrey);
-  max-width: 30em;
+  max-width: 98vw;
+  background-color: var(--blackish);
+  background-image: var(--fuzzSvg);
   border-radius: 10px;
+  border: none;
+  box-shadow: 0 0 2.5px 1px var(--blueish);
 }
 
 dialog::backdrop {
+  background: radial-gradient(circle, var(--blueish), var(--blueishClear) 23%, transparent 100%);
   backdrop-filter: blur(5px);
+}
+
+dialog label {
+  display: flex;
+  flex-direction: column;
+  margin: .5em .1em;
+  color: var(--whitish);
+  font-size: small;
+}
+
+dialog label:focus-within {
+  text-shadow: 0 0 3px var(--blueish);
+}
+
+dialog :is(input, select) {
+  font-size: medium;
+  background-color: var(--medGrey);
+  color: var(--whitish);
+  border: 1px solid var(--lightGrey);
+  border-radius: 5px;
+}
+
+dialog :is(input, select):focus {
+  box-shadow: 0 0 2.5px 1px var(--blueish);
+}
+
+dialog .button {
+  padding: .5em;
+  margin: .5em 1em 0.1em 1em;
+  font-size: medium;
 }
 
 .script-desc {
   background-color: var(--medGrey);
+  padding: 1em;
   white-space: pre-wrap;
   word-wrap: anywhere;
   font-family: serif;
   font-size: large;
-  padding: 1em;
   box-shadow: 0 0 2.5px 1px var(--offWhite);
 }
 
@@ -202,6 +247,7 @@ dialog::backdrop {
 
 .files-panel {
   position: absolute;
+  padding: 1em;
   top: 0;
   bottom: 0;
   width: 100%;

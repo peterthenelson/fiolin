@@ -1,5 +1,5 @@
 import { WorkerMessage } from '../web-utils/types';
-import { DeployOptions, deployScript } from '../web-utils/deploy-gen';
+import { DeployOptions, deployScript } from './deploy-gen';
 import { Deferred } from '../common/deferred';
 import { getErrMsg, toErr } from '../common/errors';
 import { pFiolinScript } from '../common/parse-script';
@@ -118,14 +118,14 @@ export class FiolinComponent {
 
   private async loadScript(container: HTMLElement, opts: FiolinComponentOptions) {
     try {
+      this.fileChooser.disabled = false;
+      this.fileChooser.onchange = () => { this.runScript() };
       let script: FiolinScript = defaultScript;
       if (opts.scriptUrl) {
         if (opts.showLoading) {
           this.scriptTitle.textContent = opts.scriptUrl;
           this.scriptDesc.textContent = `Fetching script from\n${opts.scriptUrl}`;
         }
-        this.fileChooser.disabled = false;
-        this.fileChooser.onchange = () => { this.runScript() };
         const resp = await fetch(opts.scriptUrl);
         const parsed = await resp.json();
         script = parseAs(pFiolinScript, parsed);
@@ -141,7 +141,7 @@ export class FiolinComponent {
       const dialog = maybeGetByRelIdAs(container, 'deploy-dialog', HTMLDialogElement);
       if (dialog !== null) {
         const deployForm = getByRelIdAs(dialog, 'deploy-form', HTMLFormElement);
-        deployForm.onsubmit = async () => {
+        getByRelIdAs(dialog, 'deploy-ok', HTMLElement).onclick = async () => {
           const fd = new FormData(deployForm);
           const opts: DeployOptions = {
             gh: {
@@ -154,6 +154,7 @@ export class FiolinComponent {
             lang: fd.get('lang')?.toString() === 'SH' ? 'SH' : 'BAT',
           };
           downloadFile(deployScript(await this.script, opts));
+          dialog.close();
         };
         getByRelIdAs(dialog, 'deploy-cancel', HTMLElement).onclick = () => {
           dialog.close();

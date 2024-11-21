@@ -32,6 +32,73 @@ export function fiolinSharedHeaders(): string {
   `, '        ');
 }
 
+function deployDialog(): string {
+  return redent(`
+    <dialog data-rel-id="deploy-dialog">
+      <form method="dialog" class="flex-col-wrap" data-rel-id="deploy-form">
+        <div class="flex-row-wrap">
+          <label>
+            Github username
+            <input
+              type="text" name="gh-user-name"
+              placeholder="github-user" required
+            />
+          </label>
+          <label>
+            Github repository
+            <input
+              type="text" name="gh-repo-name"
+              placeholder="github-repo" required
+            />
+          </label>
+        </div>
+        <div class="flex-row-wrap">
+          <label>
+            Default Branch
+            <input
+              type="text" name="gh-default-branch"
+              placeholder="github-default-branch" value="main" required
+            />
+          </label>
+          <label>
+            Github Pages Branch
+            <input
+              type="text" name="gh-pages-branch"
+              placeholder="github-pages-branch" value="gh-pages" required
+            />
+          </label>
+        </div>
+        <div class="flex-row-wrap">
+          <label>
+            Script id (lowercase, no spaces)
+            <input
+              type="text" name="script-id" data-rel-id="script-id"
+              pattern="^[a-z0-9_\\-]+$" placeholder="script-id" required
+            />
+          </label>
+        </div>
+        <div class="flex-row-wrap">
+          <label>
+            Shell language
+            <select name="lang" required>
+              <option value="SH" data-rel-id="sh-lang">
+                Bash file (Mac, Linux)
+              </option>
+              <option value="BAT" data-rel-id="sh-lang">
+                Batch file (Windows)
+              </option>
+            </select>
+          </label>
+        </div>
+        <div class="flex-row-wrap">
+          <div class="button" data-rel-id="deploy-ok">Deploy Script</div>
+          <div class="button" data-rel-id="deploy-cancel">Cancel</div>
+        </div>
+      </form>
+    </dialog>
+  `, '        ');
+}
+
 export interface FiolinContainerOptions {
   // Title for the script (defaults to empty)
   title?: string;
@@ -58,41 +125,7 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
         <div class="deploy-button button ${depHidden}" data-rel-id="deploy-button" title="Deploy To Github">
           ${loadSvg('deploy')}
         </div>
-        <dialog data-rel-id="deploy-dialog">
-          <form method="dialog" data-rel-id="deploy-form">
-            <input
-              type="text" name="gh-user-name"
-              placeholder="github-user" required
-            />
-            <input
-              type="text" name="gh-repo-name"
-              placeholder="github-repo" required
-            />
-            <input
-              type="text" name="gh-default-branch"
-              placeholder="github-default-branch" value="main" required
-            />
-            <input
-              type="text" name="gh-pages-branch"
-              placeholder="github-pages-branch" value="gh-pages" required
-            />
-            <input
-              type="text" name="script-id" data-rel-id="script-id"
-              pattern="^[a-z0-9_\\-]+$" placeholder="script-id" required
-            />
-            <select name="lang" required>
-              <option value="SH" data-rel-id="sh-lang">
-                Bash file (Mac, Linux)
-              </option>
-              <option value="BAT" data-rel-id="sh-lang">
-                Batch file (Windows)
-              </option>
-            </select>
-            <br>
-            <button type="submit">Deploy Script</button>
-            <button data-rel-id="deploy-cancel">Cancel</button>
-          </form>
-        </dialog>
+        ${deployDialog()}
       </div>
       <div class="script">
         <pre class="script-desc" data-rel-id="script-desc">${options.desc || 'Loading...'}</pre>
