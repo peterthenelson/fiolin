@@ -181,13 +181,13 @@ export class FiolinComponent {
     this.fileChooser.disabled = true;
     const script = await this.script;
     await this.readyToRun.promise;
-    this.outputTerm.classList.remove('error');
+    this.container.classList.remove('error');
     this.outputTerm.textContent = '';
-    this.scriptEditor.classList.remove('error');
     (await monaco).clearMonacoErrors();
     const file = this.fileChooser.files![0];
     this.fileText.title = file.name;
     this.fileText.textContent = file.name;
+    this.container.classList.add('running');
     this.worker.postMessage({
       type: 'RUN',
       script,
@@ -208,6 +208,7 @@ export class FiolinComponent {
       this.outputTerm.textContent += msg.value + '\n';
     } else if (msg.type === 'SUCCESS') {
       this.fileChooser.disabled = false;
+      this.container.classList.remove('running');
       if (msg.response.outputs.length > 0) {
         for (const f of msg.response.outputs) {
           downloadFile(f);
@@ -218,8 +219,8 @@ export class FiolinComponent {
       }
     } else if (msg.type === 'ERROR') {
       this.fileChooser.disabled = false;
-      this.scriptEditor.classList.add('error');
-      this.outputTerm.classList.add('error');
+      this.container.classList.add('error');
+      this.container.classList.remove('running');
       if (typeof msg.lineno !== 'undefined') {
         console.warn(msg.error.message);
         (await monaco).setMonacoError(msg.lineno, msg.error.message);
@@ -228,7 +229,7 @@ export class FiolinComponent {
       }
       this.outputTerm.textContent = msg.error.toString();
     } else {
-      this.outputTerm.classList.add('error');
+      this.container.classList.add('error');
       this.outputTerm.textContent = `Unexpected event data: ${msg}`;
       console.error(`Unexpected event data: ${msg}`);
     }

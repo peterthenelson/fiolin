@@ -229,7 +229,7 @@ dialog .button {
   box-shadow: 0 0 2.5px 1px var(--greenish);
 }
 
-.script-editor.error {
+.error .script-editor {
   box-shadow: 0 0 2.5px 1px var(--darkRed);
 }
 
@@ -251,6 +251,44 @@ dialog .button {
   top: 0;
   bottom: 0;
   width: 100%;
+}
+
+.files-panel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  box-shadow: 0 0 4px 2px var(--greenish);
+  opacity: 0;
+}
+
+.running .files-panel {
+  --buttonColor: var(--greenish);
+  animation: controls-pulse 2.5s infinite;
+}
+
+@keyframes controls-pulse {
+  0% { filter: blur(0) saturate(1); }
+  50% { filter: blur(.4px) saturate(4); }
+  100% { filter: blur(0) saturate(1); }
+}
+
+.running .files-panel::after {
+  opacity: 0;
+  animation: controls-pulse-bs 2.5s infinite;
+}
+
+@keyframes controls-pulse-bs {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.error .files-panel {
+  --buttonColor: var(--darkRed);
 }
 
 .files-panel-text {
@@ -285,7 +323,7 @@ dialog .button {
   box-shadow: 0 0 2.5px 1px var(--offWhite);
 }
 
-.output-term.error {
+.error .output-term {
   box-shadow: 0 0 2.5px 1px var(--darkRed);
 }
 
