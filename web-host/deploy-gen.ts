@@ -1,5 +1,6 @@
 import { FiolinScript } from '../common/types';
 import { indent, dedent } from '../common/indent';
+import YAML from 'yaml';
 
 export interface DeployOptions {
   gh: {
@@ -30,9 +31,9 @@ function genEof(s: string): string {
 }
 
 function bashScript(script: FiolinScript, opts: DeployOptions): string {
-  const fullJson = JSON.stringify(script, null, 2);
+  const json = JSON.stringify(script, null, 2);
   const { code, ...scriptNoCode } = script;
-  const noCodeJson = JSON.stringify(scriptNoCode, null, 2);
+  const yml = YAML.stringify(scriptNoCode);
   return dedent(`
     #!/bin/bash
     set -euxo pipefail
@@ -67,22 +68,22 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
     fi
     cd "$REPONAME"
     mkdir -p fiols
-    cat >"fiols/$FIOLID.fiol" <<${genEof(noCodeJson)}
-    ${indent(noCodeJson, '    ')}
-    ${genEof(noCodeJson)}
-    git add "fiols/$FIOLID.fiol"
+    cat >"fiols/$FIOLID.yml" <<${genEof(yml)}
+    ${indent(yml, '    ')}
+    ${genEof(yml)}
+    git add "fiols/$FIOLID.yml"
     cat >"fiols/$FIOLID.py" <<${genEof(code.python)}
     ${indent(code.python, '    ')}
     ${genEof(code.python)}
     git add "fiols/$FIOLID.py"
-    git_commit_p "Add $FIOLID.fiol to repository"
+    git_commit_p "Add $FIOLID yml/py to repository"
     git push -u origin "$MAINBRANCH"
     git checkout -b "$PAGESBRANCH"
     git pull origin "$PAGESBRANCH" || echo "new github pages branch"
     git ls-files | grep -v '\\.json$' | xargs git rm
-    cat >"$FIOLID.json" <<${genEof(fullJson)}
-    ${indent(fullJson, '    ')}
-    ${genEof(fullJson)}
+    cat >"$FIOLID.json" <<${genEof(json)}
+    ${indent(json, '    ')}
+    ${genEof(json)}
     git add "$FIOLID.json"
     git_commit_p "Publish $FIOLID.json to gh-pages"
     git push origin "$PAGESBRANCH"
@@ -105,4 +106,3 @@ function batFile(script: FiolinScript, opts: DeployOptions): string {
     exit /b 1
   `);
 }
-
