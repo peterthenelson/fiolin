@@ -8,7 +8,7 @@ if (gh) {
   if (!m) {
     die(`Invalid gh parameter; ${gh}`);
   } 
-  initFiolin(`https://${m[1]}.github.io/${m[2]}`, true);
+  initFiolin(`https://${m[1]}.github.io/${m[2]}.json`, true);
 } else if (url) {
   initFiolin(url, true);
 } else {

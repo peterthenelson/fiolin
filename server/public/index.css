@@ -166,6 +166,12 @@ dialog::backdrop {
   backdrop-filter: blur(5px);
 }
 
+.deploy-readme {
+  max-width: 25em;
+  padding: 1em;
+  color: var(--whitish);
+}
+
 dialog label {
   display: flex;
   flex-direction: column;

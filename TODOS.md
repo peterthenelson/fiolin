@@ -59,6 +59,7 @@ A not-necessarily-exhaustive list of TODOs:
       well as different file arities.
     - Advanced UI options other than the "simple" version.
   - Deployment:
+    - Return = submit
     - Detection of OS to set script lang.
-    - Bat file version of script.
+    - Bat/PS1 file version of script.
     - Localstorage memory of settings.

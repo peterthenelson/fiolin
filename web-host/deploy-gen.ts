@@ -36,7 +36,7 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
   const yml = YAML.stringify(scriptNoCode);
   return dedent(`
     #!/bin/bash
-    set -euxo pipefail
+    set -euo pipefail
     USERNAME="${opts.gh.userName}"
     REPONAME="${opts.gh.repoName}"
     MAINBRANCH="${opts.gh.defaultBranch}"
@@ -58,24 +58,60 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
             commit -m "$message"
       fi
     }
+    clone_or_create() {
+      if git ls-remote "$REPOURL" &>/dev/null; then
+        git clone "$REPOURL"
+        cd "$REPONAME"
+      else
+        # The very commonly installed version of gh has a race condition that
+        # causes the --clone option to fail here, so we have to just manually
+        # attempt clone (and maybe pull) until we have a local repo in the
+        # expected state.
+        gh repo create "$REPONAME" --public -p peterthenelson/fiolin-template
+        MAINBRANCH=main
+        echo "Waiting for https://github.com/$USERNAME/$REPONAME to be created..."
+        success=false
+        for i in {1..5}; do
+          if git clone "$REPOURL"; then
+            success=true
+            break
+          else
+            echo "git clone failed; will sleep and try again"
+            sleep 1
+          fi
+        done
+        if ! $success; then
+          echo "git clone failed 5 times"
+          exit 1
+        fi
+        cd "$REPONAME"
+        success=false
+        for i in {1..5}; do
+          if [ -f package.json ]; then
+            success=true
+            break
+          fi
+          echo "package.json missing; will sleep and git pull"
+          sleep 1
+          git pull origin "$MAINBRANCH"
+        done
+        if ! $success; then
+          echo "Expected package.json to exist in repository"
+          exit 1
+        fi
+      fi
+    }
     TMPDIR=$(mktemp -d)
     cd "$TMPDIR"
-    if git ls-remote "$REPOURL" &>/dev/null; then
-      git clone "$REPOURL"
-    else
-      gh repo create "$REPONAME" --clone --public -p peterthenelson/fiolin-template
-      MAINBRANCH=main
-    fi
-    cd "$REPONAME"
+    clone_or_create
     mkdir -p fiols
     cat >"fiols/$FIOLID.yml" <<${genEof(yml)}
     ${indent(yml, '    ')}
     ${genEof(yml)}
-    git add "fiols/$FIOLID.yml"
     cat >"fiols/$FIOLID.py" <<${genEof(code.python)}
     ${indent(code.python, '    ')}
     ${genEof(code.python)}
-    git add "fiols/$FIOLID.py"
+    git add .
     git_commit_p "Add $FIOLID yml/py to repository"
     git push -u origin "$MAINBRANCH"
     git checkout -b "$PAGESBRANCH"
@@ -84,17 +120,16 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
     cat >"$FIOLID.json" <<${genEof(json)}
     ${indent(json, '    ')}
     ${genEof(json)}
-    git add "$FIOLID.json"
+    git add .
     git_commit_p "Publish $FIOLID.json to gh-pages"
     git push origin "$PAGESBRANCH"
     echo "Success!"
     echo " "
-    echo "You now have your very own repository of fiolin scripts:"
+    echo "You now have your very own repository of fiolin scripts. Check out"
+    echo "the README to see how to continue developing your scripts locally:"
     echo "  https://github.com/$USERNAME/$REPONAME"
     echo "Your script has been published on github pages:"
     echo "  https://$USERNAME.github.io/$REPONAME/$FIOLID.json"
-    echo "You can continue developing your script locally by running setup.sh:"
-    echo "  https://github.com/$USERNAME/$REPONAME/blob/$MAINBRANCH/setup.sh"
     echo "You (and others) can run your script on fiolin.org:"
     echo "  https://fiolin.org/third-party?gh=$USERNAME/$REPONAME/$FIOLID"
   `);

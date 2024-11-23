@@ -37,10 +37,20 @@ function deployDialog(): string {
     <dialog data-rel-id="deploy-dialog">
       <form method="dialog" class="flex-col-wrap" data-rel-id="deploy-form">
         <div class="flex-row-wrap">
+          <div class="deploy-readme">
+            This shell script will create or update a github repository, add
+            files for the current script, and publish a compiled verion to
+            github.io. If you prefer, you can copy the
+            <a href="https://github.com/peterthenelson/fiolin-template">template
+            repo</a> and follow the documentation there to develop and deploy
+            fiolin scripts.
+          </div>
+        </div>
+        <div class="flex-row-wrap">
           <label>
             Github username
             <input
-              type="text" name="gh-user-name"
+              type="text" name="gh-user-name" autofocus
               placeholder="github-user" required
             />
           </label>
