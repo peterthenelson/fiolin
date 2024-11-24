@@ -62,13 +62,14 @@ body a:hover {
   display: none;
 }
 
-.button {
+button, .button {
   display: flex;
   align-content: center;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
   background-color: var(--blackish);
+  border-color: var(--buttonColor);
   color: var(--buttonColor);
   box-shadow: 0 0 2.5px 1px inset var(--buttonColor);
 }
@@ -196,7 +197,7 @@ dialog :is(input, select):focus {
   box-shadow: 0 0 2.5px 1px var(--blueish);
 }
 
-dialog .button {
+dialog button {
   padding: .5em;
   margin: .5em 1em 0.1em 1em;
   font-size: medium;

@@ -17,7 +17,7 @@ export function deployScript(script: FiolinScript, opts: DeployOptions): File {
   if (opts.lang === 'SH') {
     const contents = bashScript(script, opts);
     return new File([new Blob([contents])], 'deploy-to-github.sh');
-  } else if (opts.lang !== 'BAT') {
+  } else if (opts.lang === 'BAT') {
     const contents = batFile(script, opts);
     return new File([new Blob([contents])], 'deploy-to-github.bat');
   } else {
@@ -58,52 +58,41 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
             commit -m "$message"
       fi
     }
-    clone_or_create() {
-      if git ls-remote "$REPOURL" &>/dev/null; then
-        git clone "$REPOURL"
-        cd "$REPONAME"
-      else
-        # The very commonly installed version of gh has a race condition that
-        # causes the --clone option to fail here, so we have to just manually
-        # attempt clone (and maybe pull) until we have a local repo in the
-        # expected state.
-        gh repo create "$REPONAME" --public -p peterthenelson/fiolin-template
-        MAINBRANCH=main
-        echo "Waiting for https://github.com/$USERNAME/$REPONAME to be created..."
-        success=false
-        for i in {1..5}; do
-          if git clone "$REPOURL"; then
-            success=true
-            break
-          else
-            echo "git clone failed; will sleep and try again"
-            sleep 1
-          fi
-        done
-        if ! $success; then
-          echo "git clone failed 5 times"
-          exit 1
-        fi
-        cd "$REPONAME"
-        success=false
-        for i in {1..5}; do
-          if [ -f package.json ]; then
-            success=true
-            break
-          fi
-          echo "package.json missing; will sleep and git pull"
+    with_retries() {
+      local cmd="$1"
+      local retries="$2"
+      local retry_msg="$3"
+      local fail_msg="$4"
+      for ((i=0; i < retries; i++)); do
+        if eval "$cmd"; then
+          return 0
+        else
+          echo "$retry_msg"
           sleep 1
-          git pull origin "$MAINBRANCH"
-        done
-        if ! $success; then
-          echo "Expected package.json to exist in repository"
-          exit 1
         fi
+      done
+      echo "$fail_msg"
+      return 1
+    }
+    clone_or_create() {
+      local repo="$1"
+      if ! git ls-remote "$repo" &>/dev/null; then
+        # The very commonly installed old version of gh has a race condition
+        # that causes the --clone option to fail here, so we have to just
+        # manually wait for it to show up.
+        gh repo create "$repo" --public -p peterthenelson/fiolin-template
+        MAINBRANCH=main
+        echo "Waiting for $repo to be created..."
+        with_retries "git ls-remote --exit-code $repo -b $MAINBRANCH" \
+          5 "Still waiting for repo branch main to be created..." \
+          "Searching for main branch on remote failed 5 times"
       fi
+      git clone "$repo"
     }
     TMPDIR=$(mktemp -d)
     cd "$TMPDIR"
-    clone_or_create
+    clone_or_create "$REPOURL"
+    cd "$REPONAME"
     mkdir -p fiols
     cat >"fiols/$FIOLID.yml" <<${genEof(yml)}
     ${indent(yml, '    ')}
@@ -123,7 +112,9 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
     git add .
     git_commit_p "Publish $FIOLID.json to gh-pages"
     git push origin "$PAGESBRANCH"
-    echo "Success!"
+    with_retries "curl -s -f https://$USERNAME.github.io/$REPONAME/$FIOLID.json >/dev/null" \
+      100 "Still waiting for github pages deployment to be live..." \
+      "Waiting for github pages deployment failed 5 times"
     echo " "
     echo "You now have your very own repository of fiolin scripts. Check out"
     echo "the README to see how to continue developing your scripts locally:"

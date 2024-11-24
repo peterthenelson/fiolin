@@ -8,21 +8,29 @@ import { parseAs } from '../common/parse';
 import { TypedWorker } from './typed-worker';
 const monaco = import('./monaco');
 
-function maybeGetByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
-  const elem = root.querySelector(`[data-rel-id="${relativeId}"]`);
+function maybeSelectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T {
+  const elem = root.querySelector(sel);
   if (elem instanceof cls) {
     return (elem as T);
   } else {
-    throw new Error(`Element [data-rel-id="${relativeId}"] is not an instance of ${cls}`);
+    throw new Error(`${sel} is not an instance of ${cls}`);
   }
 }
 
-function getByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
-  const elem = maybeGetByRelIdAs(root, relativeId, cls);
+function selectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T {
+  const elem = maybeSelectAs(root, sel, cls);
   if (elem === null) {
-    throw new Error(`Element [data-rel-id="${relativeId}"] not found`);
+    throw new Error(`No matches for selector '${sel}'`);
   }
   return elem;
+}
+
+function maybeGetByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
+  return maybeSelectAs(root, `[data-rel-id="${relativeId}"]`, cls);
+}
+
+function getByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
+  return selectAs(root, `[data-rel-id="${relativeId}"]`, cls);
 }
 
 function getFormValue(fd: FormData, key: string): string {
@@ -38,6 +46,60 @@ function downloadFile(f: File) {
   document.body.appendChild(elem);
   elem.click();        
   document.body.removeChild(elem);
+}
+
+interface StorageLike {
+  clear: () => void;
+  getItem: (keyName: string) => string | null;
+  removeItem: (keyName: string) => void;
+  setItem: (keyName: string, keyValue: string) => void;
+}
+
+function setSelected(elem: HTMLSelectElement, value: string) {
+  for (let option of elem.options) {
+    if (option.value === value) {
+      option.selected = true;
+    } else {
+      option.selected = false;
+    }
+  }
+}
+
+function populateFormFromStorage(storage: StorageLike, deployForm: HTMLFormElement) {
+  selectAs(deployForm, '[name="gh-user-name"]', HTMLInputElement).value = (
+    storage.getItem('deploy/gh-user-name') || '');
+  selectAs(deployForm, '[name="gh-repo-name"]', HTMLInputElement).value = (
+    storage.getItem('deploy/gh-repo-name') || '');
+  selectAs(deployForm, '[name="gh-default-branch"]', HTMLInputElement).value = (
+    storage.getItem('deploy/gh-default-branch') || 'main');
+  selectAs(deployForm, '[name="gh-pages-branch"]', HTMLInputElement).value = (
+    storage.getItem('deploy/gh-pages-branch') || 'gh-pages');
+  const lang = storage.getItem('deploy/lang');
+  const langSel = selectAs(deployForm, '[name="lang"]', HTMLSelectElement);
+  if (lang === 'BAT' || lang === 'SH') {
+    setSelected(langSel, lang);
+  } else if (navigator.platform.startsWith('Win')) {
+    setSelected(langSel, 'BAT');
+  }
+}
+
+function saveFormToStorage(storage: StorageLike, deployForm: HTMLFormElement) {
+  storage.setItem(
+    'deploy/gh-user-name',
+    selectAs(deployForm, '[name="gh-user-name"]', HTMLInputElement).value);
+  storage.setItem(
+    'deploy/gh-repo-name',
+    selectAs(deployForm, '[name="gh-repo-name"]', HTMLInputElement).value);
+  storage.setItem(
+    'deploy/gh-default-branch',
+    selectAs(deployForm, '[name="gh-default-branch"]', HTMLInputElement).value);
+  storage.setItem(
+    'deploy/gh-pages-branch',
+    selectAs(deployForm, '[name="gh-pages-branch"]', HTMLInputElement).value);
+  const lang = selectAs(deployForm, 'select[name="lang"]', HTMLSelectElement);
+  storage.setItem(
+    'deploy/lang',
+    lang.options[lang.selectedIndex].value);
 }
 
 const defaultPy: string = `# Basic script that copies input to output
@@ -71,11 +133,12 @@ let defaultScript: FiolinScript = {
 export interface FiolinComponentOptions {
   scriptUrl?: string;
   showLoading?: boolean;
+  storage?: StorageLike;
 }
 
 export class FiolinComponent {
-  private readonly worker: TypedWorker;
   private readonly container: HTMLElement;
+  private readonly storage: StorageLike;
   private readonly scriptTitle: HTMLDivElement;
   private readonly modeButton: HTMLDivElement;
   private readonly deployButton: HTMLDivElement;
@@ -84,11 +147,13 @@ export class FiolinComponent {
   private readonly fileText: HTMLParagraphElement;
   private readonly scriptEditor: HTMLDivElement;
   private readonly outputTerm: HTMLPreElement;
+  private readonly worker: TypedWorker;
   public readonly script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
 
   constructor(container: HTMLElement, opts?: FiolinComponentOptions) {
     this.container = container;
+    this.storage = opts?.storage || window.localStorage;
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
@@ -141,7 +206,12 @@ export class FiolinComponent {
       const dialog = maybeGetByRelIdAs(container, 'deploy-dialog', HTMLDialogElement);
       if (dialog !== null) {
         const deployForm = getByRelIdAs(dialog, 'deploy-form', HTMLFormElement);
-        getByRelIdAs(dialog, 'deploy-ok', HTMLElement).onclick = async () => {
+        deployForm.onsubmit = async (event) => {
+          if (event.submitter instanceof HTMLButtonElement &&
+              event.submitter.value === 'cancel') {
+            return;
+          }
+          saveFormToStorage(this.storage, deployForm);
           const fd = new FormData(deployForm);
           const opts: DeployOptions = {
             gh: {
@@ -154,15 +224,11 @@ export class FiolinComponent {
             lang: fd.get('lang')?.toString() === 'SH' ? 'SH' : 'BAT',
           };
           downloadFile(deployScript(await this.script, opts));
-          dialog.close();
-        };
-        getByRelIdAs(dialog, 'deploy-cancel', HTMLElement).onclick = () => {
-          dialog.close();
         };
         this.deployButton.onclick = async () => {
-          // TODO: Fill in other defaults from localstorage or detection.
-          getByRelIdAs(deployForm, 'script-id', HTMLInputElement).value = (
+          selectAs(deployForm, '[name="script-id"]', HTMLInputElement).value = (
             script.meta.title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-'));
+          populateFormFromStorage(this.storage, deployForm);
           dialog.showModal();
         };
       }

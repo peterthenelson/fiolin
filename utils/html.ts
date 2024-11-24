@@ -38,9 +38,10 @@ function deployDialog(): string {
       <form method="dialog" class="flex-col-wrap" data-rel-id="deploy-form">
         <div class="flex-row-wrap">
           <div class="deploy-readme">
-            This shell script will create or update a github repository, add
-            files for the current script, and publish a compiled verion to
-            github.io. If you prefer, you can copy the
+            This shell script will create or update a github repository and
+            publish it on github.io.  It requires the
+            <a href="https://cli.github.com">github cli</a> to be installed.
+            If you prefer, you can copy the
             <a href="https://github.com/peterthenelson/fiolin-template">template
             repo</a> and follow the documentation there to develop and deploy
             fiolin scripts.
@@ -48,9 +49,19 @@ function deployDialog(): string {
         </div>
         <div class="flex-row-wrap">
           <label>
+            Script id (lowercase, no spaces)
+            <input
+              type="text" name="script-id" data-rel-id="script-id"
+              pattern="^[a-z0-9_\\-]+$" placeholder="script-id"
+              required autofocus
+            />
+          </label>
+        </div>
+        <div class="flex-row-wrap">
+          <label>
             Github username
             <input
-              type="text" name="gh-user-name" autofocus
+              type="text" name="gh-user-name"
               placeholder="github-user" required
             />
           </label>
@@ -80,15 +91,6 @@ function deployDialog(): string {
         </div>
         <div class="flex-row-wrap">
           <label>
-            Script id (lowercase, no spaces)
-            <input
-              type="text" name="script-id" data-rel-id="script-id"
-              pattern="^[a-z0-9_\\-]+$" placeholder="script-id" required
-            />
-          </label>
-        </div>
-        <div class="flex-row-wrap">
-          <label>
             Shell language
             <select name="lang" required>
               <option value="SH" data-rel-id="sh-lang">
@@ -101,8 +103,8 @@ function deployDialog(): string {
           </label>
         </div>
         <div class="flex-row-wrap">
-          <div class="button" data-rel-id="deploy-ok">Deploy Script</div>
-          <div class="button" data-rel-id="deploy-cancel">Cancel</div>
+          <button type="submit">Deploy Script</button>
+          <button value="cancel" formnovalidate>Cancel</button>
         </div>
       </form>
     </dialog>
