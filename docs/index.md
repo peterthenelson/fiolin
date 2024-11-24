@@ -1,21 +1,24 @@
-# Fiolin Developer Documentation
+# ƒɪᴏʟɪɴ -- Developer Docs
 
 _A Fiddle For Files_
 
 **tl;dr:** Write simple scripts that manipulate files. Share them with your
-friends. Run them locally in your browser.
+friends. Run them entirely in your browser.
 
 ## Guide
 
 Think about Fiolin as a JSFiddle-like platform for writing and sharing simple
 scripts, with a focus on transforming files provided by the user of the script.
-If you just want to dive right in, check out the
-[interactive playground](/playground), which includes some helpful examples to
-get you started.
+Check out the [interactive tutorial](/playground) to get started writing fiolin
+scripts in your browser, or copy the [template repository][fiolin-tmpl] and
+use the node-based offline toolchain.
+
+## Table of Contents
 
 * [Python API](#python-api)
 * [Third-Party Packages](#third-party-packages)
 * [Sharing Fiolin Scripts](#sharing-fiolin-scripts)
+* [Linking To 3p Scripts](#linking-3p-scripts)
 * [Advanced UI Configuration](#advance-ui-configuration)
 * [Design Document](/doc/design)
 * [Example First-Party Fiolin Scripts][examples]
@@ -78,31 +81,29 @@ of your Fiolin script json:
 
 TODO: Adding WASM stuff
 
-# Sharing Fiolin Scripts <a name="sharing-fiolin-scripts"></a>
+## Sharing Fiolin Scripts <a name="sharing-fiolin-scripts"></a>
 
-You have two options for distributing your Fiolin scripts: host them on github
-pages, or contribute them to the Fiolin repository.
+You have two options for distributing your Fiolin scripts: upload them to github
+pages (and run them on the production fiolin site!), or contribute them to the
+Fiolin repository.
 
-1. The first option is very easy. The playground should have a button that
-   generates a json file for you, along with the instructions for what to do
-   with it:
-
-   ```sh
-   # TODO: Write a script that creates a repo and uploads stuff to gh pages
-   ```
-
-   You're welcome to manage your json files manually too. Fiolin just expects
-   a valid json file conforming to the `FiolinScript` type
-   (see [here](/doc/fiolin-script)) hosted on a github.io page.
+1. The first option is easy. The playground has a deploy button that generates
+   a shell script. Run it. Congratulations, you now have a fiolin script in your
+   (new or updated) github repository. The script will also give you a link you
+   can share with your friends to run your script on the production fiolin site.
+   Once you have a github repository, you have the option of using the included
+   tools to develop, test, and deploy your scripts without an in-browser editor
+   and one-off shell scripts.
    
    The advantage of this method is that it's easy, and you're in control. Click
    a button, run a script, send your friend a link, and they can start using
-   your script immediately. Want to change it? Edit the file, rerun the script,
-   and you're done. The downside is that the user experience of running
-   so-called third-party scripts is higher friction. The user is asked whether
-   they trust the script developer (as identified by their github avatar and
-   username) before they can run it. If your script seems of general interest,
-   you might considering making it a first-party script.
+   your script immediately. Want to change it? Either click the button and run
+   another shell script, or update your repository with git and npm commands.
+   The only downside is that the user experience of running third-party scripts
+   is higher friction. The user is asked whether they trust the script developer
+   (as identified by their github avatar and username) before they can run it.
+   If your script seems of general interest, you might considering making it a
+   first-party script.
 
 2. The second option is to send me a pull request to incorporate it into the
    repository of first-party scripts. Before doing so, you should get your
@@ -111,7 +112,25 @@ pages, or contribute them to the Fiolin repository.
    careful to use testdata that is free from personal information and is
    compatible with the MIT open-source license.
 
-# Advanced UI Configuration <a name="advance-ui-configuration"></a>
+### Linking To 3p Scripts <a name="linking-3p-scripts"></a>
+
+<form id="form-3p" action="/third-party/" method="GET">
+  <div class="flex-row-wrap">
+    <label>
+      Github information
+      <input
+        type="text" name="gh" required
+        pattern="^[a-zA-Z0-9_\-]+/[a-zA-Z0-9_\-]+/[a-z0-9_\-]+$"
+        placeholder="username/repo/script-id"
+      />
+    </label>
+  </div>
+  <div class="flex-row-wrap">
+    <button type="submit">Run 3p Script</button>
+  </div>
+</form>
+
+## Advanced UI Configuration <a name="advance-ui-configuration"></a>
 
 You may have noticed that different Fiolin scripts have different interfaces.
 Some have just one "Choose An Input File" control that automatically triggers
@@ -129,3 +148,4 @@ If you're curious about configuration options you don't see covered in the docs,
 take a look at the [types](/doc/fiolin-script) to learn more.
 
 [examples]: https://github.com/peterthenelson/fiolin/blob/main/fiols/
+[fiolin-tmpl]: https://github.com/peterthenelson/fiolin-template

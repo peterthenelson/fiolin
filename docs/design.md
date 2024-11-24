@@ -3,7 +3,7 @@
 _A Fiddle For Files_
 
 **tl;dr:** Write simple scripts that manipulate files. Share them with your
-friends. Run them locally in your browser.
+friends. Run them entirely in your browser.
 
 ## Motivation and Overview
 

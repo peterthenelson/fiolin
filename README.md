@@ -3,9 +3,11 @@
 _A Fiddle For Files_
 
 **tl;dr:** Write simple scripts that manipulate files. Share them with your
-friends. Run them locally in your browser.
+friends. Run them entirely in your browser.
 
-[Try it for yourself!](https://fiolin.org)
+Try out for yourself:
+- [The user-facing experience](https://fiolin.org)
+- [The interactive tutorial](https://fiolin.org/playground)
 
 ## License
 
@@ -16,10 +18,12 @@ elsewhere.
 
 ## Documentation
 
-- [Design Document](/docs/design.md)
-- [Documentation](https://fiolin.org/doc)
+Read the [developer documentation][docs] on _fiolin.org_.
 
 ## Development
+
+This is for developing the core fiolin codebase itself. If you just want to
+write your own fiolin scripts, read the [developer documentation][docs].
 
 ```sh
 # Run dev server on http://localhost:3000 Also, a fake third-party server will
@@ -36,3 +40,5 @@ $ npm run fiol -- unlock-ppt --input some.pptx --outputDir .
 # Deployment:
 # Currently automatically builds latest commit to github
 ```
+
+[docs]: https://fiolin.org/doc

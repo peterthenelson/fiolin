@@ -1,8 +1,4 @@
 A not-necessarily-exhaustive list of TODOs:
-- Documentation
-  - Landing page copy
-  - Add quick-start to the README and the doc/index.md
-  - Update the repo template as needed
 - Dev server and release:
   - Get unjs/nitro#2814 merged/released and then revert my local changes.
   - Set up tests involving the web server(s) and playwright to check that the
@@ -13,7 +9,7 @@ A not-necessarily-exhaustive list of TODOs:
     use a different folder than dist, since I'll need that for the npm package.
   - Figure out what in the world I want in terms of distributing this as an npm
     package so that people can import fiolin from their fiolin-template cloned
-    projects and do local development.
+    projects and do local development. Update the repo template as needed.
 - Core functionality
   - Some kind of flag parsing functionality
   - Get some other emscripten binary working in the same file-system as pyodide.
@@ -46,9 +42,10 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert ebooks azw3, epub, mobi
     - Convert video?
 - Frontend
+  - Link to home
   - File an issue button
   - Landing page: autocomplete
-  - 3p page: modal warnings, different background, localstorage of approvals
+  - 3p page: modal warnings, dev avatar, localstorage of approvals
   - Editor and playground:
     - Example chooser for playground.
     - Why is monaco occasionally triggering a request for clipboard permissions?
@@ -59,7 +56,4 @@ A not-necessarily-exhaustive list of TODOs:
       well as different file arities.
     - Advanced UI options other than the "simple" version.
   - Deployment:
-    - Return = submit
-    - Detection of OS to set script lang.
     - Bat/PS1 file version of script.
-    - Localstorage memory of settings.

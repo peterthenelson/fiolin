@@ -19,21 +19,20 @@ export default defineEventHandler(async (event) => {
       </head>
       <body>
         <div class="container">
-          <h3>First-Party ƒɪᴏʟɪɴ Scripts</h3>
+          <h1>ƒɪᴏʟɪɴ</h1>
+          <div class="home-subtitle">Your files belong to you.</div>
+          <div class="home-text">
+            Easily convert between file formats, combine PDFs, and more.
+            Unlike other websites, your files stay on your computer!
+          </div>
           <ul>
             ${mkLis(Object.keys(scripts).map(s => [`/s/${s}`, s]), '            ')}
           </ul>
-          <h3>Run A Third-Party Script:</h3>
-          <a href="/third-party" class="hidden">third-party script page</a>
-          <form id="form-3p" action="/third-party/" method="GET">
-            <label for="gh">Github user/repo/path-to-fiolin.json</label>
-            <input type="text" id="gh" name="gh">
-            <label for="url">Alternately, fully specify a URL:</label>
-            <input type="text" id="url" name="url">
-            <button type="submit">Submit</button>
-          </form>
-          <h3><a href="/doc/">Read The Documentation</a></h3>
-          <h3><a href="/playground/">Create A Script In The Playground</a></h3>
+          <div class="home-footer home-text">
+            Are you a software developer? Write and share your own fiolin
+            scripts. Get started with the <a href="/playground/">tutorial</a> or
+            <a href="/doc">read the docs</a>.
+          </div>
         </div>
       </body>
     </html>

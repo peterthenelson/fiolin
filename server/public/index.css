@@ -54,6 +54,17 @@ body a:hover {
   filter: blur(0.2px) saturate(2);
 }
 
+.home-subtitle {
+  font-style: italic;
+  font-weight: bold;
+}
+
+.home-text {
+  margin: 1em;
+  max-width: 30em;
+  text-align: center;
+}
+
 .hidden {
   display: none;
 }
@@ -79,11 +90,16 @@ button, .button {
 button[type="submit"] {
   outline-width: 1px;
   outline-style: solid;
-  outline-offset: -3px;
+  outline-offset: 2px;
 }
 
 button:hover, .button:hover {
   filter: blur(0.2px) saturate(2);
+}
+
+button:focus-visible, .button:focus-visible {
+  outline-color: var(--whitish);
+  outline-style: auto;
 }
 
 @media (max-width: 480px) {
@@ -117,6 +133,10 @@ button:hover, .button:hover {
 }
 
 .doc pre {
+  background-color: var(--blackish);
+  box-shadow: 0 0 2.5px 1px var(--lightGrey);
+  padding: 1em .7em 0em .7em;
+  border-radius: 5px;
   display: block;
   overflow-x: auto;
   max-width: 100%;
@@ -181,7 +201,7 @@ dialog::backdrop {
   color: var(--whitish);
 }
 
-dialog label {
+form label {
   display: flex;
   flex-direction: column;
   margin: .5em .1em;
@@ -189,11 +209,11 @@ dialog label {
   font-size: small;
 }
 
-dialog label:focus-within {
+form label:focus-within  {
   text-shadow: 0 0 3px var(--blueish);
 }
 
-dialog :is(input, select) {
+form :is(input, select) {
   font-size: medium;
   background-color: var(--medGrey);
   color: var(--whitish);
@@ -201,11 +221,11 @@ dialog :is(input, select) {
   border-radius: 5px;
 }
 
-dialog :is(input, select):focus {
+form :is(input, select):focus {
   box-shadow: 0 0 2.5px 1px var(--blueish);
 }
 
-dialog button {
+form button {
   padding: .5em;
   margin: .5em 1em 0.1em 1em;
   font-size: medium;
@@ -346,12 +366,4 @@ dialog button {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 25em;
-  max-width: 90%;
-}
-
-#form-3p button {
-  padding: .5em;
-  margin: .5em 1em 0.1em 1em;
-  font-size: medium;
 }
