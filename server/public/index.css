@@ -69,12 +69,20 @@ button, .button {
   justify-content: center;
   border-radius: 8px;
   background-color: var(--blackish);
-  border-color: var(--buttonColor);
   color: var(--buttonColor);
+  border-color: var(--buttonColor);
+  outline-color: var(--buttonColor);
+  border: none;
   box-shadow: 0 0 2.5px 1px inset var(--buttonColor);
 }
 
-.button:hover {
+button[type="submit"] {
+  outline-width: 1px;
+  outline-style: solid;
+  outline-offset: -3px;
+}
+
+button:hover, .button:hover {
   filter: blur(0.2px) saturate(2);
 }
 
@@ -340,4 +348,10 @@ dialog button {
   justify-content: center;
   width: 25em;
   max-width: 90%;
+}
+
+#form-3p button {
+  padding: .5em;
+  margin: .5em 1em 0.1em 1em;
+  font-size: medium;
 }
