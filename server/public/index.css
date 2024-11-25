@@ -7,6 +7,7 @@
   --whitish: #d4d4d4;
   --offWhite: #aaa;
   --blueish: #569cd6;
+  --lightBlueish: #a5cae9;
   --blueishClear: #569cd620;
   --redish: #ce9178;
   --darkRed: #de6555;
@@ -52,6 +53,10 @@ body a {
 
 body a:hover {
   filter: blur(0.2px) saturate(2);
+}
+
+.home-io {
+  color: var(--lightBlueish);
 }
 
 .home-subtitle {
