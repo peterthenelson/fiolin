@@ -102,46 +102,21 @@ function saveFormToStorage(storage: StorageLike, deployForm: HTMLFormElement) {
     lang.options[lang.selectedIndex].value);
 }
 
-const defaultPy: string = `# Basic script that copies input to output
-import fiolin
-import os
-
-input = fiolin.get_input_basename()
-stem, ext = os.path.splitext(input)
-output = [stem + '-copy' + ext]
-print(f'Copying /input/{input} to /output/{stem}-copy{ext}')
-fiolin.cp(f'/input/{input}', f'/output/{stem}-copy{ext}')
-`;
-let defaultScript: FiolinScript = {
-  meta: {
-    title: 'Fiolin Playground',
-    description: (
-      'Welcome to the Fiolin Playground!\n\nWe\'ve gotten you started by ' +
-      'a simple python script that copies a single input file into the ' +
-      'output folder. If you want more example scripts, you can click "Edit" ' +
-      'on any fiolin script to see the source code. Happy coding!'
-    ),
-  },
-  interface: {
-    inputFiles: 'SINGLE',
-    outputFiles: 'SINGLE'
-  },
-  runtime: {},
-  code: { python: defaultPy }
-};
-
 export interface FiolinComponentOptions {
-  scriptUrl?: string;
+  url?: string;
   showLoading?: boolean;
+  tutorial?: Record<string, FiolinScript>;
   storage?: StorageLike;
 }
 
 export class FiolinComponent {
   private readonly container: HTMLElement;
+  private readonly tutorial?: Record<string, FiolinScript>;
   private readonly storage: StorageLike;
   private readonly scriptTitle: HTMLDivElement;
   private readonly modeButton: HTMLDivElement;
   private readonly deployButton: HTMLDivElement;
+  // TODO: tutorial selector
   private readonly scriptDesc: HTMLPreElement;
   private readonly fileChooser: HTMLInputElement;
   private readonly fileText: HTMLParagraphElement;
@@ -153,6 +128,7 @@ export class FiolinComponent {
 
   constructor(container: HTMLElement, opts?: FiolinComponentOptions) {
     this.container = container;
+    this.tutorial = opts?.tutorial;
     this.storage = opts?.storage || window.localStorage;
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
@@ -185,17 +161,22 @@ export class FiolinComponent {
     try {
       this.fileChooser.disabled = false;
       this.fileChooser.onchange = () => { this.runScript() };
-      let script: FiolinScript = defaultScript;
-      if (opts.scriptUrl) {
+      let script: FiolinScript | undefined;
+      if (opts.url) {
         if (opts.showLoading) {
-          this.scriptTitle.textContent = opts.scriptUrl;
-          this.scriptDesc.textContent = `Fetching script from\n${opts.scriptUrl}`;
+          this.scriptTitle.textContent = opts.url;
+          this.scriptDesc.textContent = `Fetching script from\n${opts.url}`;
         }
-        const resp = await fetch(opts.scriptUrl);
+        const resp = await fetch(opts.url);
         const parsed = await resp.json();
         script = parseAs(pFiolinScript, parsed);
+      } else if (this.tutorial && Object.keys(this.tutorial).length > 0) {
+        // TODO: Use the url hash to pick
+        const first = Object.keys(this.tutorial).sort()[0]
+        script = this.tutorial[first];
+      } else {
+        throw new Error(`FiolinComponent requires either .url or non-empty .tutorial`);
       }
-      console.log(script);
       this.worker.postMessage({ type: 'INSTALL_PACKAGES', script });
       this.scriptTitle.textContent = script.meta.title;
       this.scriptDesc.textContent = script.meta.description;
@@ -203,6 +184,7 @@ export class FiolinComponent {
       this.modeButton.onclick = () => {
         this.container.classList.toggle('dev-mode');
       };
+      // TODO: Set up the tutorial selector
       const dialog = maybeGetByRelIdAs(container, 'deploy-dialog', HTMLDialogElement);
       if (dialog !== null) {
         const deployForm = getByRelIdAs(dialog, 'deploy-form', HTMLFormElement);
@@ -238,7 +220,7 @@ export class FiolinComponent {
       const err = toErr(e);
       console.error(err);
       this.scriptDesc.textContent = (
-        `Failed to fetch script from\n${opts.scriptUrl}\n${err.message}`);
+        `Failed to fetch script from\n${opts.url}\n${err.message}`);
       throw e;
     }
   }

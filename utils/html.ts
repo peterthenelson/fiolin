@@ -5,15 +5,22 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 // Covert x.js or /x.js to /x.js?v=123, supposing that the contents of the file
-// PKG_ROOT/server/public/x.js has a hash of 123.
-export function versionedLink(publicRelativePath: string): string {
-  if (publicRelativePath.at(0) === '/') {
-    publicRelativePath = publicRelativePath.substring(1);
+// PKG_ROOT/server/public/x.js has a hash of 123. Alternately, the contents to
+// be hashed are directly specified.
+export function versionedLink(path: string, contents?: string): string {
+  if (path.at(0) === '/') {
+    path = path.substring(1);
   }
-  const buf = readFileSync(pkgPath(`server/public/${publicRelativePath}`));
-  // Arbitrarily chosen, but it's not crazily long and it's unlikely to collide
-  const hash = createHash('shake256', { outputLength: 6 }).update(buf).digest('base64url');
-  return `/${publicRelativePath}?v=${hash}`;
+  // The hash method is arbitrarily chosen, but it's not crazily long and it's
+  // unlikely to collide.
+  let hash: string = '';
+  if (contents) {
+    hash = createHash('shake256', { outputLength: 6 }).update(contents).digest('base64url');
+  } else {
+    const buf = readFileSync(pkgPath(`server/public/${path}`));
+    hash = createHash('shake256', { outputLength: 6 }).update(buf).digest('base64url');
+  }
+  return `/${path}?v=${hash}`;
 }
 
 function loadSvg(name: string): string {
@@ -122,6 +129,7 @@ export interface FiolinContainerOptions {
   idPrefix?: string;
 }
 
+// TODO: Add tutorial selector
 export function fiolinContainer(options?: FiolinContainerOptions): string {
   options = options || {};
   const idPrefix = options.idPrefix ? options.idPrefix + '-' : '';

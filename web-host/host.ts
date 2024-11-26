@@ -1,12 +1,22 @@
+import { FiolinScript } from '../common/types';
 import { FiolinComponent } from './fiolin-component';
 const monaco = import('./monaco');
 
-export function initFiolin(scriptUrl?: string, showLoading?: boolean): FiolinComponent {
+export interface FromUrlOpts {
+  url: string;
+  showLoading?: boolean;
+}
+
+export interface FromTutorialOpts {
+  tutorial: Record<string, FiolinScript>;
+}
+
+export function initFiolin(opts: FromUrlOpts | FromTutorialOpts): FiolinComponent {
   const container = document.getElementById('container');
   if (container === null) {
     die('#container not present; cannot initFiolin');
   }
-  return new FiolinComponent(container, { scriptUrl, showLoading });
+  return new FiolinComponent(container, opts);
 }
 
 async function colorizeLang(lang: string): Promise<void> {
