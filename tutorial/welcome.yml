@@ -1,0 +1,13 @@
+meta:
+  title: 1. Welcome to Fiolin
+  author: Peter Nelson
+  description: >
+    Welcome to the Fiolin tutorial!
+
+
+    We've gotten you started with a simple script that copies a single input
+    file into the output folder. Try editing it to change the output filename.
+interface:
+  inputFiles: SINGLE
+  outputFiles: SINGLE
+runtime: {}
