@@ -6,6 +6,7 @@ import { pFiolinScript } from '../common/parse-script';
 import { FiolinScript } from '../common/types';
 import { parseAs } from '../common/parse';
 import { TypedWorker } from './typed-worker';
+import type { FiolinScriptEditor } from './monaco';
 const monaco = import('./monaco');
 
 function maybeSelectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T {
@@ -97,9 +98,7 @@ function saveFormToStorage(storage: StorageLike, deployForm: HTMLFormElement) {
     'deploy/gh-pages-branch',
     selectAs(deployForm, '[name="gh-pages-branch"]', HTMLInputElement).value);
   const lang = selectAs(deployForm, 'select[name="lang"]', HTMLSelectElement);
-  storage.setItem(
-    'deploy/lang',
-    lang.options[lang.selectedIndex].value);
+  storage.setItem('deploy/lang', lang.value);
 }
 
 export interface FiolinComponentOptions {
@@ -116,14 +115,15 @@ export class FiolinComponent {
   private readonly scriptTitle: HTMLDivElement;
   private readonly modeButton: HTMLDivElement;
   private readonly deployButton: HTMLDivElement;
-  // TODO: tutorial selector
+  private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
   private readonly fileChooser: HTMLInputElement;
   private readonly fileText: HTMLParagraphElement;
   private readonly scriptEditor: HTMLDivElement;
   private readonly outputTerm: HTMLPreElement;
   private readonly worker: TypedWorker;
-  public readonly script: Promise<FiolinScript>;
+  private readonly editor: Promise<FiolinScriptEditor>;
+  public script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
 
   constructor(container: HTMLElement, opts?: FiolinComponentOptions) {
@@ -133,6 +133,7 @@ export class FiolinComponent {
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
+    this.tutorialSelect = getByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
     this.scriptEditor = getByRelIdAs(container, 'script-editor', HTMLDivElement);
     this.fileChooser = getByRelIdAs(container, 'input-files-chooser', HTMLInputElement);
@@ -146,21 +147,21 @@ export class FiolinComponent {
     this.worker.onmessage = (msg) => {
       this.handleMessage(msg);
     }
-    this.script = this.loadScript(container, opts || {});
+    this.editor = this.setupScriptEditor();
+    this.script = this.loadScript(opts || {});
+    this.setupHandlers();
     this.readyToRun = new Deferred();
   }
 
-  private async setupScriptEditor(content: string): Promise<void> {
-    (await monaco).initMonaco(this.scriptEditor, content, async (value: string) => {
+  private async setupScriptEditor(): Promise<FiolinScriptEditor> {
+    return new (await monaco).FiolinScriptEditor(this.scriptEditor, async (value: string) => {
       const script = await this.script;
       script.code.python = value;
     });
   }
 
-  private async loadScript(container: HTMLElement, opts: FiolinComponentOptions) {
+  private async loadScript(opts: FiolinComponentOptions) {
     try {
-      this.fileChooser.disabled = false;
-      this.fileChooser.onchange = () => { this.runScript() };
       let script: FiolinScript | undefined;
       if (opts.url) {
         if (opts.showLoading) {
@@ -171,49 +172,22 @@ export class FiolinComponent {
         const parsed = await resp.json();
         script = parseAs(pFiolinScript, parsed);
       } else if (this.tutorial && Object.keys(this.tutorial).length > 0) {
-        // TODO: Use the url hash to pick
-        const first = Object.keys(this.tutorial).sort()[0]
-        script = this.tutorial[first];
+        const hash = window.location.hash.substring(1);
+        if (hash !== '' && hash in this.tutorial) {
+          script = this.tutorial[hash];
+          setSelected(this.tutorialSelect, hash);
+        } else {
+          const first = Object.keys(this.tutorial).sort()[0]
+          script = this.tutorial[first];
+          window.location.hash = first;
+        }
       } else {
         throw new Error(`FiolinComponent requires either .url or non-empty .tutorial`);
       }
       this.worker.postMessage({ type: 'INSTALL_PACKAGES', script });
       this.scriptTitle.textContent = script.meta.title;
       this.scriptDesc.textContent = script.meta.description;
-      this.setupScriptEditor(script.code.python);
-      this.modeButton.onclick = () => {
-        this.container.classList.toggle('dev-mode');
-      };
-      // TODO: Set up the tutorial selector
-      const dialog = maybeGetByRelIdAs(container, 'deploy-dialog', HTMLDialogElement);
-      if (dialog !== null) {
-        const deployForm = getByRelIdAs(dialog, 'deploy-form', HTMLFormElement);
-        deployForm.onsubmit = async (event) => {
-          if (event.submitter instanceof HTMLButtonElement &&
-              event.submitter.value === 'cancel') {
-            return;
-          }
-          saveFormToStorage(this.storage, deployForm);
-          const fd = new FormData(deployForm);
-          const opts: DeployOptions = {
-            gh: {
-              userName: getFormValue(fd, 'gh-user-name'),
-              repoName: getFormValue(fd, 'gh-repo-name'),
-              defaultBranch: getFormValue(fd, 'gh-default-branch'),
-              pagesBranch: getFormValue(fd, 'gh-pages-branch'),
-            },
-            scriptId: getFormValue(fd, 'script-id'),
-            lang: fd.get('lang')?.toString() === 'SH' ? 'SH' : 'BAT',
-          };
-          downloadFile(deployScript(await this.script, opts));
-        };
-        this.deployButton.onclick = async () => {
-          selectAs(deployForm, '[name="script-id"]', HTMLInputElement).value = (
-            script.meta.title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-'));
-          populateFormFromStorage(this.storage, deployForm);
-          dialog.showModal();
-        };
-      }
+      (await this.editor).setScript(script);
       return script;
     } catch (e) {
       console.log('Failed to fetch script!');
@@ -225,13 +199,56 @@ export class FiolinComponent {
     }
   }
 
+  private async setupHandlers() {
+    this.fileChooser.onchange = () => { this.runScript() };
+    this.fileChooser.disabled = false;
+    this.modeButton.onclick = () => {
+      this.container.classList.toggle('dev-mode');
+    };
+    // TODO: on hash change (when navigating), do this too.
+    this.tutorialSelect.onchange = async () => {
+      window.location.hash = this.tutorialSelect.value;
+      this.script = this.loadScript({});
+    };
+    this.tutorialSelect.disabled = false;
+    const dialog = getByRelIdAs(this.container, 'deploy-dialog', HTMLDialogElement);
+    const deployForm = getByRelIdAs(dialog, 'deploy-form', HTMLFormElement);
+    deployForm.onsubmit = async (event) => {
+      if (event.submitter instanceof HTMLButtonElement &&
+          event.submitter.value === 'cancel') {
+        return;
+      }
+      saveFormToStorage(this.storage, deployForm);
+      const fd = new FormData(deployForm);
+      const opts: DeployOptions = {
+        gh: {
+          userName: getFormValue(fd, 'gh-user-name'),
+          repoName: getFormValue(fd, 'gh-repo-name'),
+          defaultBranch: getFormValue(fd, 'gh-default-branch'),
+          pagesBranch: getFormValue(fd, 'gh-pages-branch'),
+        },
+        scriptId: getFormValue(fd, 'script-id'),
+        lang: fd.get('lang')?.toString() === 'SH' ? 'SH' : 'BAT',
+      };
+      downloadFile(deployScript(await this.script, opts));
+    };
+    this.deployButton.onclick = async () => {
+      const script = await this.script;
+      selectAs(deployForm, '[name="script-id"]', HTMLInputElement).value = (
+        script.meta.title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-'));
+      populateFormFromStorage(this.storage, deployForm);
+      dialog.showModal();
+    };
+    const script = await this.script;
+  }
+
   private async runScript() {
     this.fileChooser.disabled = true;
     const script = await this.script;
     await this.readyToRun.promise;
     this.container.classList.remove('error');
     this.outputTerm.textContent = '';
-    (await monaco).clearMonacoErrors();
+    (await this.editor).clearErrors();
     const file = this.fileChooser.files![0];
     this.fileText.title = file.name;
     this.fileText.textContent = file.name;
@@ -271,7 +288,7 @@ export class FiolinComponent {
       this.container.classList.remove('running');
       if (typeof msg.lineno !== 'undefined') {
         console.warn(msg.error.message);
-        (await monaco).setMonacoError(msg.lineno, msg.error.message);
+        (await this.editor).setError(msg.lineno, msg.error.message);
       } else {
         console.warn(msg.error);
       }

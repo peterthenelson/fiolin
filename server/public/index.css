@@ -161,7 +161,7 @@ button:focus-visible, .button:focus-visible {
 }
 
 .script-header {
-  height: 2.4em;
+  min-height: 2.4em;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -218,7 +218,7 @@ form label:focus-within  {
   text-shadow: 0 0 3px var(--blueish);
 }
 
-form :is(input, select) {
+:is(form, .script-header) :is(input, select) {
   font-size: medium;
   background-color: var(--medGrey);
   color: var(--whitish);
@@ -226,7 +226,7 @@ form :is(input, select) {
   border-radius: 5px;
 }
 
-form :is(input, select):focus {
+:is(form, .script-header) :is(input, select):focus {
   box-shadow: 0 0 2.5px 1px var(--blueish);
 }
 

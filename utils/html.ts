@@ -3,6 +3,7 @@ import { pkgPath } from './pkg-path';
 import { marked } from 'marked';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { FiolinScript } from '../common/types';
 
 // Covert x.js or /x.js to /x.js?v=123, supposing that the contents of the file
 // PKG_ROOT/server/public/x.js has a hash of 123. Alternately, the contents to
@@ -100,10 +101,10 @@ function deployDialog(): string {
           <label>
             Shell language
             <select name="lang" required>
-              <option value="SH" data-rel-id="sh-lang">
+              <option value="SH">
                 Bash file (Mac, Linux)
               </option>
-              <option value="BAT" data-rel-id="sh-lang">
+              <option value="BAT">
                 Batch file (Windows)
               </option>
             </select>
@@ -118,6 +119,11 @@ function deployDialog(): string {
   `, '        ');
 }
 
+function mkOptions(hashNamePairs: [string, string][], prefix: string): string {
+  const opts = hashNamePairs.map(([p, n]) => `<option value="${p}">${n}</option>`);
+  return indent(opts.join('\n'), prefix);
+}
+
 export interface FiolinContainerOptions {
   // Title for the script (defaults to empty)
   title?: string;
@@ -125,6 +131,8 @@ export interface FiolinContainerOptions {
   desc?: string;
   // Run as script playground (dev mode always on, deploy button instead).
   playground?: boolean;
+  // Tutorials, if any, for playground.
+  tutorial?: Record<string, FiolinScript>;
   // Prefix for any ids (if you want multiple of these in the same page).
   idPrefix?: string;
 }
@@ -135,15 +143,24 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
   const idPrefix = options.idPrefix ? options.idPrefix + '-' : '';
   const dmHidden = options.playground ? 'hidden' : '';
   const depHidden = options.playground ? '' : 'hidden';
+  const hashNamePairs: [string, string][] = (
+    options.tutorial ?
+    Object.entries(options.tutorial).map(([h, s]) => [h, s.meta.title]) :
+    []);
   return redent(`
     <div id="${idPrefix}container" class="container ${options.playground ? 'dev-mode' : ''}">
-      <div class="script-header">
+      <div class="script-header flex-row-wrap">
         <div class="script-title" data-rel-id="script-title">${options.title || ''}</div>
-        <div class="dev-mode-button button ${dmHidden}" data-rel-id="dev-mode-button" title="Developer Mode">
-          ${loadSvg('dev')}
-        </div>
-        <div class="deploy-button button ${depHidden}" data-rel-id="deploy-button" title="Deploy To Github">
-          ${loadSvg('deploy')}
+        <select class="${options.tutorial ? '' : 'hidden'}" data-rel-id="tutorial-select" disabled>
+          ${mkOptions(hashNamePairs, '          ')}
+        </select>
+        <div class="script-buttons">
+          <div class="dev-mode-button button ${dmHidden}" data-rel-id="dev-mode-button" title="Developer Mode">
+            ${loadSvg('dev')}
+          </div>
+          <div class="deploy-button button ${depHidden}" data-rel-id="deploy-button" title="Deploy To Github">
+            ${loadSvg('deploy')}
+          </div>
         </div>
         ${deployDialog()}
       </div>

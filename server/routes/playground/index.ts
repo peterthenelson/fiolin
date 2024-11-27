@@ -3,7 +3,8 @@ import { dedent } from '../../../common/indent';
 import { fiolinContainer, fiolinSharedHeaders, versionedLink } from '../../../utils/html';
 
 export default defineEventHandler(async () => {
-  const contents = JSON.stringify(await loadAllTutorials());
+  const tutorial = await loadAllTutorials();
+  const contents = JSON.stringify(tutorial);
   return dedent(`
     <!DOCTYPE html>
     <html>
@@ -14,7 +15,7 @@ export default defineEventHandler(async () => {
         <script src="${versionedLink('/init-fiol.js')}&tutorialVar=tutorial" type="module" defer></script>
       </head>
       <body>
-        ${fiolinContainer({ playground: true })}
+        ${fiolinContainer({ playground: true, tutorial })}
       </body>
     </html>
   `);

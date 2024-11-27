@@ -6,7 +6,7 @@ import sys
 
 # It's not necessary to use the fiolin utility library to get the input files.
 # You can just look in /input if you want:
-inputs = os.path.listdir('/input')
+inputs = os.listdir('/input')
 assert len(inputs) == 1
 if not inputs[0].endswith('.txt'):
   # sys.exit is a clean way to signal errors to the user without a big stack
@@ -25,16 +25,15 @@ for p in ['/tmp/foo', './foo']:
     with open(p, 'w') as f:
       f.write('foo')
 
-with open(inputs[0]) as f:
+with open(f'/input/{inputs[0]}') as f:
   contents = f.read()
 
-n = math.ceil(len(contents) / 100)
-print(f'Breaking input file into {n} chunks')
-ndigits = len(str(n))
+print(f'Breaking input file into 10 chunks')
+size = len(contents) / 10
 stem, ext = os.path.splitext(inputs[0])
-for i in range(n):
+for i in range(10):
   # Any files written directly into the /output directory will be downloaded
   # when the script finishes. If you want to store a whole hierarchy of files
   # and folders, you should compress them up into a single output zip file.
-  with open(f'/output/{stem}-{str(i+1).zfill(ndigits)}.txt', 'w') as f:
-    f.write(contents[i*100:(i+1)*100])
+  with open(f'/output/{stem}-{str(i+1).zfill(2)}.txt', 'w') as f:
+    f.write(contents[math.floor(i*size):math.floor((i+1)*size)])

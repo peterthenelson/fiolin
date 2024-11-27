@@ -3,6 +3,7 @@ import { toErr } from '../common/errors';
 import { parseAs } from '../common/parse';
 import { InstallPackagesMessage, RunMessage, WorkerMessage } from '../web-utils/types';
 import { pWorkerMessage } from '../web-utils/parse-msg';
+import { FiolinScript } from '../common/types';
 
 // Typed messaging
 const _rawPost = self.postMessage;
@@ -32,6 +33,8 @@ async function load(): Promise<void> {
 }
 const loaded = load();
 
+let toInstall: FiolinScript | undefined;
+
 async function onMessage(msg: WorkerMessage): Promise<void> {
   if (msg.type === 'INSTALL_PACKAGES') {
     await onInstallPackages(msg);
@@ -58,10 +61,15 @@ async function onRun(msg: RunMessage): Promise<void> {
 }
 
 async function onInstallPackages(msg: InstallPackagesMessage): Promise<void> {
+  // Only in javascript would it be remotely plausible for this to be correct.
+  toInstall = msg.script;
   await loaded;
+  if (!toInstall) return;
+  const script = toInstall;
+  toInstall = undefined;
   if (!runner) throw new Error(`runner missing after loaded completed`);
   try {
-    await runner.installPkgs(msg.script);
+    await runner.installPkgs(script);
     postMessage({ type: 'PACKAGES_INSTALLED' });
   } catch (e) {
     postMessage({ type: 'ERROR', error: toErr(e) });
