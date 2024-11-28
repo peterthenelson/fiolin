@@ -1,3 +1,4 @@
+import { NitroRouteConfig } from 'nitropack';
 import { defineNitroConfig } from 'nitropack/config';
 
 // This CSP disallows everything and is the fallback for anything not explicitly
@@ -42,6 +43,13 @@ function csp(policy: string | string[]) {
   return { headers: { 'Content-Security-Policy': policy } };
 }
 
+const loadTutorial: NitroRouteConfig = {
+  headers: {
+    'Content-Type': 'text/javascript',
+    ...csp(noneCsp).headers
+  }
+}
+
 export default defineNitroConfig({
   srcDir: 'server',
   preset: 'cloudflare-pages-static',
@@ -54,7 +62,7 @@ export default defineNitroConfig({
     '/init-fiol.js': csp(indexCsp),
     '/playground/': csp(indexCsp),
     '/playground/index.html': csp(indexCsp),
-    '/playground/index.js': csp(indexCsp),
+    '/playground/load-tutorial': loadTutorial,
     '/third-party/': csp(thirdPartyCsp),
     '/third-party/index.html': csp(thirdPartyCsp),
     '/third-party/index.js': csp(thirdPartyCsp),
@@ -65,4 +73,8 @@ export default defineNitroConfig({
     // (This doesn't, as it ends up applying noneCsp to everything.)
     // '/**': csp(noneCsp),
   },
+  prerender: {
+    routes: ['/', '/playground/load-tutorial'],
+    crawlLinks: true,
+  }
 });
