@@ -21,6 +21,20 @@ export function fileSha256(file: string) {
   return createHash('sha256').update(buf).digest('hex');
 }
 
+export async function listZip(file: string): Promise<string[]> {
+  const zf = await yauzl.open(file);
+  try {
+    const members = [];
+    for await (const entry of zf) {
+      members.push(entry.filename);
+    }
+    members.sort();
+    return members;
+  } finally {
+    await zf.close();
+  }
+}
+
 export async function readFromZip(file: string, member: string): Promise<Buffer> {
   const zf = await yauzl.open(file);
   try {
@@ -40,3 +54,4 @@ export async function readFromZip(file: string, member: string): Promise<Buffer>
     await zf.close();
   }
 }
+

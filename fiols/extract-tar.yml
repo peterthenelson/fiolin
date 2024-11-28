@@ -1,0 +1,19 @@
+meta:
+  title: Extract tar/tar.gz/tar.bz2/tbz2 File
+  author: Peter Nelson
+  description: >
+    Tar files are an alternative to Zip archives. The tar format is often used
+    in conjunction with gzip (gz) or bzip2 (bz2) compression. This tool unzips
+    and unpacks tar archives in your browser. If there are sub-directories
+    inside the tar file, it will convert the whole tar file to a zip file.
+  extensions:
+    - tar
+    - gz
+    - bz2
+    - tar.gz
+    - tar.bz2
+    - tbz2
+interface:
+  inputFiles: SINGLE
+  outputFiles: MULTI
+runtime: {}

@@ -36,7 +36,7 @@ A not-necessarily-exhaustive list of TODOs:
       - Mirror or rotate
       - Image to PDF
       - Convert formats
-    - Extract or convert 7z, cab, jar, rar, tar, tar.gz, tbz2, zip
+    - Extract or convert 7z, cab, jar, rar, zip
     - Convert audio aac, aiff, flac, m4a, mp3, ogg, wav, wma
     - Convert docs djvu, docx, odt, pdf, rtf
     - Convert ebooks azw3, epub, mobi
