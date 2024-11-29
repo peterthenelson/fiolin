@@ -268,9 +268,11 @@ export class FiolinComponent {
       this.readyToRun.resolve();
     } else if (msg.type === 'STDOUT') {
       this.outputTerm.textContent += msg.value + '\n';
+      this.outputTerm.scroll({ top: this.outputTerm.scrollHeight, behavior: 'smooth' });
     } else if (msg.type === 'STDERR') {
       console.warn(msg.value);
       this.outputTerm.textContent += msg.value + '\n';
+      this.outputTerm.scroll({ top: this.outputTerm.scrollHeight, behavior: 'smooth' });
     } else if (msg.type === 'SUCCESS') {
       this.fileChooser.disabled = false;
       this.container.classList.remove('running');
