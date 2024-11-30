@@ -1,0 +1,10 @@
+meta:
+  title: 3. fiolin.tree
+  author: Peter Nelson
+  description: >
+    fiolin.tree is a helpful utility for debugging. It prints out the directory
+    structure in an easy to read way.
+interface:
+  inputFiles: MULTI
+  outputFiles: NONE
+runtime: {}

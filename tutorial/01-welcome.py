@@ -1,4 +1,4 @@
-# Basic script that copies input to output
+"""Basic script that copies input to output."""
 import fiolin
 import os
 

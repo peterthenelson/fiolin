@@ -1,5 +1,8 @@
-# Breaks up long text documents into chunks.
-# (Obviously this has no real practical use.)
+"""Breaks up long text documents into chunks.
+
+Obviously this script has not practical use. It's just demonstrating how the
+file system works.
+"""
 import math
 import os
 import sys
