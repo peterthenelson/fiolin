@@ -48,10 +48,9 @@ A not-necessarily-exhaustive list of TODOs:
   - Bug: canceling file chooser breaks interaction
   - 3p page: modal warnings, dev avatar, localstorage of approvals
   - Editor and playground:
-    - Example chooser for playground.
     - Why is monaco occasionally triggering a request for clipboard permissions?
     - Add some transition animations for the buttons to invite interaction.
-    - Ability to edit script metadata in the editor.
+    - Improve ability to edit script metadata in the editor.
   - Controls:
     - Improve the "simple" file UI to allow for resetting and redownloading, as
       well as different file arities.

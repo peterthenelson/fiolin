@@ -6,7 +6,8 @@ import { pFiolinScript } from '../common/parse-script';
 import { FiolinScript } from '../common/types';
 import { parseAs } from '../common/parse';
 import { TypedWorker } from './typed-worker';
-import type { FiolinScriptEditor } from './monaco';
+import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
+import YAML, { YAMLParseError } from 'yaml';
 const monaco = import('./monaco');
 
 function maybeSelectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T {
@@ -119,6 +120,7 @@ export class FiolinComponent {
   private readonly scriptDesc: HTMLPreElement;
   private readonly fileChooser: HTMLInputElement;
   private readonly fileText: HTMLParagraphElement;
+  private readonly scriptTabs: HTMLDivElement;
   private readonly scriptEditor: HTMLDivElement;
   private readonly outputTerm: HTMLPreElement;
   private readonly worker: TypedWorker;
@@ -135,6 +137,7 @@ export class FiolinComponent {
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
     this.tutorialSelect = getByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
+    this.scriptTabs = getByRelIdAs(container, 'script-editor-tabs', HTMLDivElement);
     this.scriptEditor = getByRelIdAs(container, 'script-editor', HTMLDivElement);
     this.fileChooser = getByRelIdAs(container, 'input-files-chooser', HTMLInputElement);
     this.fileText = getByRelIdAs(container, 'files-panel-text', HTMLParagraphElement);
@@ -154,9 +157,8 @@ export class FiolinComponent {
   }
 
   private async setupScriptEditor(): Promise<FiolinScriptEditor> {
-    return new (await monaco).FiolinScriptEditor(this.scriptEditor, async (value: string) => {
-      const script = await this.script;
-      script.code.python = value;
+    return new (await monaco).FiolinScriptEditor(this.scriptEditor, async (m, v) => {
+      await this.handleScriptUpdate(m, v);
     });
   }
 
@@ -239,7 +241,43 @@ export class FiolinComponent {
       populateFormFromStorage(this.storage, deployForm);
       dialog.showModal();
     };
+    this.scriptTabs.onclick = async (event) => {
+      const editor = await this.editor;
+      if (event.target instanceof HTMLElement && event.target.dataset['model']) {
+        const model = event.target.dataset['model'];
+        if (model !== 'script.py' && model !== 'script.yml') {
+          throw new Error(`Expected data-model to be script.py or script.yml; got ${model}`);
+        }
+        for (const child of this.scriptTabs.children) {
+          child.classList.remove('active');
+        }
+        event.target.classList.add('active');
+        editor.switchTab(model);
+      }
+    };
+  }
+  
+  private async handleScriptUpdate(model: FiolinScriptEditorModel, value: string) {
     const script = await this.script;
+    const editor = await this.editor;
+    if (model === 'script.py') {
+      script.code.python = value;
+    } else {
+      try {
+        const template = YAML.parse(value);
+        const newScript = { code: { python: script.code.python }, ...template };
+        Object.assign(script, parseAs(pFiolinScript, newScript));
+        editor.clearErrors();
+      } catch (e) {
+        if (e instanceof YAMLParseError && e.linePos) {
+          editor.setError('script.yml', e.linePos[0].line, e.message);
+        } else {
+          // TODO: Support some json-schema-like thing to give actual errors for
+          // mismatched types
+          console.error(e);
+        }
+      }
+    }
   }
 
   private async runScript() {
@@ -290,7 +328,7 @@ export class FiolinComponent {
       this.container.classList.remove('running');
       if (typeof msg.lineno !== 'undefined') {
         console.warn(msg.error.message);
-        (await this.editor).setError(msg.lineno, msg.error.message);
+        (await this.editor).setError('script.py', msg.lineno, msg.error.message);
       } else {
         console.warn(msg.error);
       }

@@ -13,6 +13,7 @@ export interface DeployOptions {
   lang: 'SH' | 'BAT';
 }
 
+// TODO: Accept editor contents from yml file instead of just the script obj.
 export function deployScript(script: FiolinScript, opts: DeployOptions): File {
   if (opts.lang === 'SH') {
     const contents = bashScript(script, opts);

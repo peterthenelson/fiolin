@@ -4,6 +4,7 @@
 
 :root {
   --blackish: #151515;
+  --lessBlackish: #181818;
   --whitish: #d4d4d4;
   --offWhite: #aaa;
   --blueish: #569cd6;
@@ -11,12 +12,14 @@
   --blueishClear: #569cd620;
   --redish: #ce9178;
   --darkRed: #de6555;
+  --darkerGrey: #1e1e1e;
   --darkGrey: #303030;
   --medGrey: #404040;
   --lightGrey: #8a8a8a;
   --greenish: #608b4e;
   --buttonColor: var(--blueish);
   --fuzzSvg: url(/fuzz.svg);
+  --tabHeight: 26px;
 }
 
 .flex-col-wrap {
@@ -261,21 +264,63 @@ form button {
   }
 }
 
-.script-editor {
+.script-editor-frame {
   display: none;
+  flex-direction: column;
   width: 100%;
   height: 25em;
   margin-bottom: 1em;
   box-shadow: 0 0 2.5px 1px var(--greenish);
 }
 
-.error .script-editor {
+.error .script-editor-frame {
   box-shadow: 0 0 2.5px 1px var(--darkRed);
 }
 
-.dev-mode .script-editor {
+.dev-mode .script-editor-frame {
   display: flex;
   width: 100%;
+}
+
+.script-editor-tabs {
+  position: relative;
+  display: flex;
+  width: 100%;
+  background-color: var(--lessBlackish);
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.script-editor-tabs:after {
+  content: "";
+  position: absolute;
+  top: calc(var(--tabHeight) - 1px);
+  width: 100%;
+  height: 1px;
+  background-color: var(--medGrey);
+  z-index: 1;
+}
+
+.script-editor-tab {
+  border-right: 1px solid var(--medGrey);
+  background-color: var(--lessBlackish);
+  width: 10em;
+  height: var(--tabHeight);
+  font-family: monospace;
+  text-align: center;
+  align-content: center;
+}
+
+.script-editor-tab.active {
+  border-top: 2px solid var(--blueish);
+  border-bottom: 2px solid var(--darkerGrey);
+  background-color: var(--darkerGrey);
+  z-index: 2;
+}
+
+.script-editor {
+  width: 100%;
+  height: 23em;
 }
 
 .files-label {

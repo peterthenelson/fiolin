@@ -3,9 +3,11 @@
 import 'monaco-editor/esm/vs/editor/editor.all.js';
 import 'monaco-editor/esm/vs/basic-languages/python/python.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/shell/shell.contribution.js';
+import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution.js';
 import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
 import { FiolinScript } from '../common/types';
+import YAML from 'yaml';
 
 self.MonacoEnvironment = {
   getWorkerUrl: function (moduleId, label) {
@@ -49,14 +51,24 @@ const narrowOpts: monaco.editor.IStandaloneEditorConstructionOptions = {
   },
 };
 
+export type FiolinScriptEditorModel = 'script.py' | 'script.yml';
+
 export class FiolinScriptEditor {
   // TODO: Two models, one yaml and one py, with corresponding methods and
   // callbacks.
   private readonly py: monaco.editor.ITextModel;
+  private pyState: monaco.editor.ICodeEditorViewState | null;
+  private readonly yml: monaco.editor.ITextModel;
+  private ymlState: monaco.editor.ICodeEditorViewState | null;
+  private currentModel: FiolinScriptEditorModel;
   private readonly editor: monaco.editor.IStandaloneCodeEditor;
 
-  constructor(elem: HTMLElement, onchange?: (value: string) => void) {
+  constructor(elem: HTMLElement, onchange?: (model: FiolinScriptEditorModel, value: string) => void) {
     this.py = monaco.editor.createModel('', 'python', monaco.Uri.parse('file:///script.py'));
+    this.pyState = null;
+    this.yml = monaco.editor.createModel('', 'yaml', monaco.Uri.parse('file:///script.yml'));
+    this.ymlState = null;
+    this.currentModel = 'script.py';
     this.editor = monaco.editor.create(elem, {
       model: this.py,
       theme: 'vs-dark',
@@ -65,25 +77,57 @@ export class FiolinScriptEditor {
     });
     if (onchange) {
       this.py.onDidChangeContent(() => {
-        onchange(this.py.getValue());
+        onchange('script.py', this.py.getValue());
+      });
+      this.yml.onDidChangeContent(() => {
+        onchange('script.yml', this.yml.getValue());
       });
     }
   }
 
+  switchTab(model: FiolinScriptEditorModel) {
+    if (model === this.currentModel) {
+      return;
+    }
+    this.currentModel = model;
+    let newModel: monaco.editor.ITextModel;
+    let newState: monaco.editor.ICodeEditorViewState | null;
+    if (model === 'script.py') {
+      this.ymlState = this.editor.saveViewState();
+      newModel = this.py;
+      newState = this.pyState;
+    } else {
+      this.pyState = this.editor.saveViewState();
+      newModel = this.yml;
+      newState = this.ymlState;
+    }
+    this.editor.setModel(newModel);
+		this.editor.restoreViewState(newState);
+		this.editor.focus();
+  }
+
   setScript(script: FiolinScript) {
     this.py.setValue(script.code.python);
+    const { code, ...scriptNoCode } = script;
+    this.yml.setValue(YAML.stringify(scriptNoCode));
+  }
+
+  getContents(): Map<FiolinScriptEditorModel, string> {
+    return new Map([['script.py', this.py.getValue()], ['script.yml', this.yml.getValue()]]);
   }
 
   clearErrors() {
     monaco.editor.setModelMarkers(this.py, 'fiolin', []);
+    monaco.editor.setModelMarkers(this.yml, 'fiolin', []);
   }
 
-  setError(lineno: number, msg: string) {
-    const line = this.py.getLineContent(lineno);
+  setError(model: FiolinScriptEditorModel, lineno: number, msg: string) {
+    const m = model === 'script.py' ? this.py : this.yml;
+    const line = m.getLineContent(lineno);
     const startCol = 1 + (line.match(/^\s*/)?.[0]?.length || 0);
     const endCol = 1 + line.length - (line.match(/\s*$/)?.[0]?.length || 0);
     console.log(line, startCol, endCol);
-    monaco.editor.setModelMarkers(this.py, 'fiolin', [{
+    monaco.editor.setModelMarkers(m, 'fiolin', [{
       severity: monaco.MarkerSeverity.Error,
       message: msg,
       startLineNumber: lineno,
