@@ -145,6 +145,8 @@ export function colorize(e: HTMLElement, lang: string): Promise<void> {
     lang = 'shell';
   } else if (lang === 'json') {
     lang = 'application/json';
+  } else if (lang === 'yml') {
+    lang = 'yaml';
   }
   return monaco.editor.colorizeElement(e, { mimeType: lang, theme: 'vs-dark' });
 }

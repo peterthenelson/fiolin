@@ -67,16 +67,14 @@ using will work, visit [PyPI](https://pypi.org), find your package, look at the
 `py3-none-any.whl`. If so, you're good.
 
 In order to use a package, you need to explicitly list it in the runtime section
-of your Fiolin script json:
+of your Fiolin script yaml:
 
-```json
-{
-  // ...
-  "runtime": {
-    "pyPkgs": [{ "type": "PYPI", "name": "mypkg" }]
-  }
-  // ...
-}
+```yml
+# ...
+runtime:
+  pythonPkgs:
+    - type: PYPI
+      name: mypkg
 ```
 
 TODO: Adding WASM stuff

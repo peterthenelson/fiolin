@@ -29,7 +29,7 @@ async function colorizeLang(lang: string): Promise<void> {
 
 export async function colorizeExamples(): Promise<void> {
   await Promise.all([
-    colorizeLang('py'), colorizeLang('json'), colorizeLang('sh')
+    colorizeLang('py'), colorizeLang('json'), colorizeLang('sh'), colorizeLang('yml'),
   ]);
 }
 
