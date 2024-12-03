@@ -10,7 +10,7 @@ export interface DeployOptions {
     pagesBranch: string;
   }
   scriptId: string;
-  lang: 'SH' | 'BAT';
+  lang: 'SH' | 'PS1';
 }
 
 // TODO: Accept editor contents from yml file instead of just the script obj.
@@ -18,9 +18,9 @@ export function deployScript(script: FiolinScript, opts: DeployOptions): File {
   if (opts.lang === 'SH') {
     const contents = bashScript(script, opts);
     return new File([new Blob([contents])], 'deploy-to-github.sh');
-  } else if (opts.lang === 'BAT') {
-    const contents = batFile(script, opts);
-    return new File([new Blob([contents])], 'deploy-to-github.bat');
+  } else if (opts.lang === 'PS1') {
+    const contents = ps1File(script, opts);
+    return new File([new Blob([contents])], 'deploy-to-github.ps1');
   } else {
     throw new Error(`Unrecognized lang options: ${opts.lang}`);
   }
@@ -49,6 +49,7 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
       echo "  https://cli.github.com"
       exit 1
     fi
+    gh auth status -a
     git_commit_p() {
       local message="$1"
       if git diff --cached --quiet; then
@@ -127,9 +128,116 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
   `);
 }
 
-function batFile(script: FiolinScript, opts: DeployOptions): string {
+function ps1File(script: FiolinScript, opts: DeployOptions): string {
+  const json = JSON.stringify(script, null, 2);
+  const { code, ...scriptNoCode } = script;
+  const yml = YAML.stringify(scriptNoCode);
   return dedent(`
-    echo "TODO: IMPLEMENT BATCH FILE"
-    exit /b 1
+    Set-StrictMode -Version Latest
+    $ErrorActionPreference = "Stop"
+    $USERNAME = "${opts.gh.userName}"
+    $REPONAME = "${opts.gh.repoName}"
+    $MAINBRANCH = "${opts.gh.defaultBranch}"
+    $PAGESBRANCH = "${opts.gh.pagesBranch}"
+    $REPOURL = "https://github.com/$USERNAME/$REPONAME.git"
+    $FIOLID = "${opts.scriptId}"
+    if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+      Write-Host "Please install the github cli tool before running this:" -ForegroundColor Red
+      Write-Host "  https://cli.github.com" -ForegroundColor Red
+      exit 1
+    }
+    function Invoke-Strict() {
+      if ($args.Count -eq 0) {
+        throw "Must supply some arguments."
+      }
+      $command = $args[0]
+      $commandArgs = @()
+      if ($args.Count -gt 1) {
+        $commandArgs = $args[1..($args.Count - 1)]
+      }
+      & $command $commandArgs
+      $result = $LastExitCode
+      if ($result) {
+        throw "$command $commandArgs exited with code $result."
+      }
+    }
+    Invoke-Strict gh auth status -a
+    function git_commit_p {
+      param ($message)
+      git diff --cached --quiet
+      if ($LastExitCode) {
+        Invoke-Strict git -c user.name="deploy-to-gh" -c user.email="noreply@fiolin.org" commit -m $message
+      } else {
+        Write-Host "No changes staged" -ForegroundColor Yellow
+      }
+    }
+    function with_retries {
+      param ($cmd, $retries, $retry_msg, $fail_msg)
+      for ($i = 0; $i -lt $retries; $i++) {
+        try {
+          Invoke-Expression $cmd
+          if ($LastExitCode) {
+            Write-Host $retry_msg -ForegroundColor Yellow
+            Start-Sleep -Seconds 1
+          } else {
+            return $true
+          }
+        } catch {
+          Write-Host $retry_msg -ForegroundColor Yellow
+          Start-Sleep -Seconds 1
+        }
+      }
+      Write-Host $fail_msg -ForegroundColor Red
+      exit 1
+      return $false
+    }
+    function clone_or_create {
+      param ($repo)
+      if (-not (git ls-remote $repo)) {
+        Invoke-Strict gh repo create $repo --public -p "peterthenelson/fiolin-template"
+        $MAINBRANCH = "main"
+        Write-Host "Waiting for $repo to be created..." -ForegroundColor Green
+        with_retries "git ls-remote --exit-code $repo -b $MAINBRANCH" 5 "Still waiting for repo branch main to be created..." "Searching for main branch on remote failed 5 times"
+      }
+      Invoke-Strict git clone $repo
+    }
+    $TMPDIR = [System.IO.Path]::GetTempPath()
+    $TMPDIR = Join-Path -Path $TMPDIR -ChildPath ([Guid]::NewGuid().ToString())
+    New-Item -ItemType Directory -Force -Path $TMPDIR
+    Set-Location -Path $TMPDIR
+    clone_or_create $REPOURL
+    Set-Location -Path $REPONAME
+    New-Item -ItemType Directory -Force -Path "fiols"
+    $fiolYmlPath = "fiols\\$FIOLID.yml"
+    $fiolPyPath = "fiols\\$FIOLID.py"
+    @"
+    ${indent(yml, '    ')}
+    "@ | Set-Content -Path $fiolYmlPath
+    @"
+    ${indent(code.python, '    ')}
+    "@ | Set-Content -Path $fiolPyPath
+    Invoke-Strict git add .
+    git_commit_p "Add $FIOLID yml/py to repository"
+    Invoke-Strict git push -u origin $MAINBRANCH
+    Invoke-Strict git checkout -b $PAGESBRANCH
+    # Ignore failure
+    git pull origin $PAGESBRANCH
+    Invoke-Strict git ls-files | Where-Object {$_ -notmatch '\.json$'} | ForEach-Object { Invoke-Strict git rm $_ }
+    $fiolJsonPath = "$FIOLID.json"
+    @"
+    ${indent(json, '    ')}
+    "@ | Set-Content -Path $fiolJsonPath
+    Invoke-Strict git add .
+    git_commit_p "Publish $FIOLID.json to gh-pages"
+    Invoke-Strict git push origin $PAGESBRANCH
+    with_retries "Invoke-WebRequest -Uri https://$USERNAME.github.io/$REPONAME/$FIOLID.json | Out-Null" 100 "Still waiting for github pages deployment to be live..." "Waiting for github pages deployment failed 5 times"
+    Write-Host " "
+    Write-Host "You now have your very own repository of fiolin scripts. Check out" -ForegroundColor Green
+    Write-Host "the README to see how to continue developing your scripts locally:" -ForegroundColor Green
+    Write-Host "  https://github.com/$USERNAME/$REPONAME" -ForegroundColor Green
+    Write-Host "Your script has been published on github pages:" -ForegroundColor Green
+    Write-Host "  https://$USERNAME.github.io/$REPONAME/$FIOLID.json" -ForegroundColor Green
+    Write-Host "You (and others) can run your script on fiolin.org:" -ForegroundColor Green
+    Write-Host "  https://fiolin.org/third-party?gh=$USERNAME/$REPONAME/$FIOLID" -ForegroundColor Green
   `);
 }

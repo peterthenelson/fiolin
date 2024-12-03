@@ -78,10 +78,10 @@ function populateFormFromStorage(storage: StorageLike, deployForm: HTMLFormEleme
     storage.getItem('deploy/gh-pages-branch') || 'gh-pages');
   const lang = storage.getItem('deploy/lang');
   const langSel = selectAs(deployForm, '[name="lang"]', HTMLSelectElement);
-  if (lang === 'BAT' || lang === 'SH') {
+  if (lang === 'SH' || lang === 'PS1') {
     setSelected(langSel, lang);
   } else if (navigator.platform.startsWith('Win')) {
-    setSelected(langSel, 'BAT');
+    setSelected(langSel, 'PS1');
   }
 }
 
@@ -222,6 +222,7 @@ export class FiolinComponent {
       }
       saveFormToStorage(this.storage, deployForm);
       const fd = new FormData(deployForm);
+      const lang = fd.get('lang')?.toString() === 'SH' ? 'SH' : 'PS1';
       const opts: DeployOptions = {
         gh: {
           userName: getFormValue(fd, 'gh-user-name'),
@@ -230,7 +231,7 @@ export class FiolinComponent {
           pagesBranch: getFormValue(fd, 'gh-pages-branch'),
         },
         scriptId: getFormValue(fd, 'script-id'),
-        lang: fd.get('lang')?.toString() === 'SH' ? 'SH' : 'BAT',
+        lang
       };
       downloadFile(deployScript(await this.script, opts));
     };

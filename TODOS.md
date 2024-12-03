@@ -56,4 +56,5 @@ A not-necessarily-exhaustive list of TODOs:
       well as different file arities.
     - Advanced UI options other than the "simple" version.
   - Deployment:
-    - Bat/PS1 file version of script.
+    - PS1 and SH files shouldn't exit immediately on failure or success (to
+      accomodate the case when you double-click them to run)

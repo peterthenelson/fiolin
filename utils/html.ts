@@ -104,8 +104,8 @@ function deployDialog(): string {
               <option value="SH">
                 Bash file (Mac, Linux)
               </option>
-              <option value="BAT">
-                Batch file (Windows)
+              <option value="PS1">
+                Powershell file (Windows)
               </option>
             </select>
           </label>
