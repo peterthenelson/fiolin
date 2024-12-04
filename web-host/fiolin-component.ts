@@ -237,8 +237,9 @@ export class FiolinComponent {
     };
     this.deployButton.onclick = async () => {
       const script = await this.script;
+      const slug = script.meta.title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-');
       selectAs(deployForm, '[name="script-id"]', HTMLInputElement).value = (
-        script.meta.title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-'));
+        slug.match(/^\d+/) ? '' : slug);
       populateFormFromStorage(this.storage, deployForm);
       dialog.showModal();
     };
