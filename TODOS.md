@@ -3,7 +3,7 @@ A not-necessarily-exhaustive list of TODOs:
   - Get unjs/nitro#2814 merged/released and then revert my local changes.
   - Set up tests involving the web server(s) and playwright to check that the
     security properties hold.
-  - HSTS for prod? Any updates to headers for wasm files?
+  - Any updates to headers for wasm files?
   - Maybe switch the release to a different branch and make the building/testing
     all happen locally and then just copy dist to a different branch. Also,
     use a different folder than dist, since I'll need that for the npm package.
