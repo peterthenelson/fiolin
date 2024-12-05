@@ -412,6 +412,11 @@ form button {
   box-shadow: 0 0 2.5px 1px var(--darkRed);
 }
 
+.footer {
+  font-size: small;
+  margin-bottom: 1em;
+}
+
 #form-3p {
   display: flex;
   flex-direction: column;

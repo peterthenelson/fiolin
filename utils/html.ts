@@ -137,7 +137,6 @@ export interface FiolinContainerOptions {
   idPrefix?: string;
 }
 
-// TODO: Add tutorial selector
 export function fiolinContainer(options?: FiolinContainerOptions): string {
   options = options || {};
   const idPrefix = options.idPrefix ? options.idPrefix + '-' : '';
@@ -186,6 +185,11 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
       </div>
       <div class="script-output">
         <pre class="output-term" data-rel-id="output-term">Loading...</pre>
+      </div>
+      <div class="flow-row-wrap footer">
+        <a href="/">Return Home</a>
+        <span>&nbsp;</span>
+        <a href="https://github.com/peterthenelson/fiolin/issues/new">Report Bug</a>
       </div>
     </div>
   `, '    ');

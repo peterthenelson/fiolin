@@ -42,8 +42,6 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert ebooks azw3, epub, mobi
     - Convert video?
 - Frontend
-  - Link to home
-  - File an issue button
   - Landing page: autocomplete
   - Bug: canceling file chooser breaks interaction
   - 3p page: modal warnings, dev avatar, localstorage of approvals
