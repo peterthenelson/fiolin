@@ -4,7 +4,7 @@ import { Deferred } from '../common/deferred';
 import { getErrMsg, toErr } from '../common/errors';
 import { pFiolinScript } from '../common/parse-script';
 import { FiolinScript } from '../common/types';
-import { parseAs } from '../common/parse';
+import { parseAs, ParseError } from '../common/parse';
 import { TypedWorker } from './typed-worker';
 import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
 import YAML, { YAMLParseError } from 'yaml';
@@ -162,6 +162,19 @@ export class FiolinComponent {
     });
   }
 
+  private async updateUiForScript(script: FiolinScript) {
+    this.scriptTitle.textContent = script.meta.title;
+    this.scriptDesc.textContent = script.meta.description;
+    this.container.classList.remove('input-files-none')
+    this.container.classList.remove('input-files-single');
+    this.container.classList.remove('input-files-multi');
+    this.container.classList.add(`input-files-${script.interface.inputFiles.toLowerCase()}`);
+    this.container.classList.remove('output-files-none')
+    this.container.classList.remove('output-files-single');
+    this.container.classList.remove('output-files-multi');
+    this.container.classList.add(`output-files-${script.interface.outputFiles.toLowerCase()}`);
+  }
+
   private async loadScript(opts: FiolinComponentOptions) {
     try {
       let script: FiolinScript | undefined;
@@ -187,8 +200,7 @@ export class FiolinComponent {
         throw new Error(`FiolinComponent requires either .url or non-empty .tutorial`);
       }
       this.worker.postMessage({ type: 'INSTALL_PACKAGES', script });
-      this.scriptTitle.textContent = script.meta.title;
-      this.scriptDesc.textContent = script.meta.description;
+      this.updateUiForScript(script);
       (await this.editor).setScript(script);
       return script;
     } catch (e) {
@@ -269,13 +281,26 @@ export class FiolinComponent {
         const template = YAML.parse(value);
         const newScript = { code: { python: script.code.python }, ...template };
         Object.assign(script, parseAs(pFiolinScript, newScript));
+        this.updateUiForScript(script);
         editor.clearErrors();
       } catch (e) {
         if (e instanceof YAMLParseError && e.linePos) {
           editor.setError('script.yml', e.linePos[0].line, e.message);
+          this.scriptDesc.textContent = e.message;
+        } else if (e instanceof ParseError) {
+          const lines = value.split(/\n/);
+          const field = e.objPath.parts.at(-1);
+          const fieldRe = new RegExp(`^\\s*${field}:`);
+          for (let i = 0; field && i < lines.length; i++) {
+            if (lines[i].match(fieldRe)) {
+              editor.setError('script.yml', i + 1, e.message);
+            }
+          }
+          this.scriptDesc.textContent = e.message;
+        } else if (e instanceof Error) {
+          console.error(e);
+          this.scriptDesc.textContent = e.message;
         } else {
-          // TODO: Support some json-schema-like thing to give actual errors for
-          // mismatched types
           console.error(e);
         }
       }

@@ -1,21 +1,30 @@
 // Half-assed validation/parsing library for javascript objects.
 export function parseAs<T>(type: Parser<T>, v: unknown): T {
-  return type(new ObjPath(''), v);
+  return type(new ObjPath([]), v);
+}
+
+export class ParseError extends Error {
+  public readonly objPath: ObjPath;
+
+  constructor(objPath: ObjPath, message: string) {
+    super(message);
+    this.objPath = objPath;
+  }
 }
 
 export class ObjPath {
-  public readonly path: string;
+  public readonly parts: ReadonlyArray<string>;
 
-  constructor(path: string) {
-    this.path = path;
+  constructor(parts: ReadonlyArray<string>) {
+    this.parts = parts;
   }
 
   err(beAMsg: string): Error {
-    return new Error(`Expected ${this.path} to ${beAMsg}`);
+    return new ParseError(this, `Expected ${this.parts.join('.')} to ${beAMsg}`);
   }
 
   _(part: string): ObjPath {
-    return new ObjPath(`${this.path}.${part}`);
+    return new ObjPath(this.parts.concat(part));
   }
 }
 
