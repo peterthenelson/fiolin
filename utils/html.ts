@@ -154,10 +154,10 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
           ${mkOptions(hashNamePairs, '          ')}
         </select>
         <div class="script-buttons">
-          <div class="dev-mode-button button ${dmHidden}" data-rel-id="dev-mode-button" title="Developer Mode">
+          <div class="dev-mode-button circle-button button ${dmHidden}" data-rel-id="dev-mode-button" title="Developer Mode">
             ${loadSvg('dev')}
           </div>
-          <div class="deploy-button button ${depHidden}" data-rel-id="deploy-button" title="Deploy To Github">
+          <div class="deploy-button circle-button button ${depHidden}" data-rel-id="deploy-button" title="Deploy To Github">
             ${loadSvg('deploy')}
           </div>
         </div>
@@ -175,11 +175,15 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
         </div>
       </div>
       <div class="script-controls">
-        <label for="${idPrefix}input-files-chooser" class="files-label">
-          <div class="files-panel button">
-            <p class="files-panel-text" data-rel-id="files-panel-text">Choose An Input File</p>
+        <label class="files-label">
+          <div class="files-panel button flex-row-wrap">
+            <span class="files-panel-text input-files-text" data-rel-id="input-files-text"></span>
+            <div class="circle-button button" data-rel-id="run-button" title="Run Script">
+              ${loadSvg('run')}
+            </div>
+            <span class="files-panel-text output-files-text" data-rel-id="output-files-text"></span>
           </div>
-          <input type="file" id="${idPrefix}input-files-chooser" data-rel-id="input-files-chooser" disabled />
+          <input type="file" data-rel-id="input-files-chooser" disabled />
         </label>
         <!-- TODO -->
       </div>

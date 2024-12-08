@@ -48,7 +48,6 @@ A not-necessarily-exhaustive list of TODOs:
   - Editor and playground:
     - Why is monaco occasionally triggering a request for clipboard permissions?
     - Add some transition animations for the buttons to invite interaction.
-    - Improve ability to edit script metadata in the editor.
   - Controls:
     - Improve the "simple" file UI to allow for resetting and redownloading, as
       well as different file arities.

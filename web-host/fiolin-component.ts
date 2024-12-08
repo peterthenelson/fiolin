@@ -119,7 +119,8 @@ export class FiolinComponent {
   private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
   private readonly fileChooser: HTMLInputElement;
-  private readonly fileText: HTMLParagraphElement;
+  private readonly inputFileText: HTMLSpanElement;
+  private readonly outputFileText: HTMLSpanElement;
   private readonly scriptTabs: HTMLDivElement;
   private readonly scriptEditor: HTMLDivElement;
   private readonly outputTerm: HTMLPreElement;
@@ -140,7 +141,8 @@ export class FiolinComponent {
     this.scriptTabs = getByRelIdAs(container, 'script-editor-tabs', HTMLDivElement);
     this.scriptEditor = getByRelIdAs(container, 'script-editor', HTMLDivElement);
     this.fileChooser = getByRelIdAs(container, 'input-files-chooser', HTMLInputElement);
-    this.fileText = getByRelIdAs(container, 'files-panel-text', HTMLParagraphElement);
+    this.inputFileText = getByRelIdAs(container, 'input-files-text', HTMLSpanElement);
+    this.outputFileText = getByRelIdAs(container, 'output-files-text', HTMLSpanElement);
     this.outputTerm = getByRelIdAs(container, 'output-term', HTMLPreElement);
     this.worker = new TypedWorker('/bundle/worker.js', { type: 'classic' });
     this.worker.onerror = (e) => {
@@ -173,6 +175,16 @@ export class FiolinComponent {
     this.container.classList.remove('output-files-single');
     this.container.classList.remove('output-files-multi');
     this.container.classList.add(`output-files-${script.interface.outputFiles.toLowerCase()}`);
+    if (script.interface.inputFiles === 'NONE') {
+      this.fileChooser.disabled = true;
+      this.fileChooser.multiple = false;
+    } else if (script.interface.inputFiles === 'SINGLE') {
+      this.fileChooser.disabled = false;
+      this.fileChooser.multiple = false;
+    } else {
+      this.fileChooser.disabled = false;
+      this.fileChooser.multiple = true;
+    }
   }
 
   private async loadScript(opts: FiolinComponentOptions) {
@@ -314,15 +326,23 @@ export class FiolinComponent {
     this.container.classList.remove('error');
     this.outputTerm.textContent = '';
     (await this.editor).clearErrors();
-    const file = this.fileChooser.files![0];
-    this.fileText.title = file.name;
-    this.fileText.textContent = file.name;
-    this.container.classList.add('running');
-    this.worker.postMessage({
-      type: 'RUN',
-      script,
-      request: { inputs: [file], argv: '' }
-    });
+    this.outputFileText.title = '';
+    this.outputFileText.textContent = '';
+    if (this.fileChooser.files === null || this.fileChooser.files.length === 0) {
+      this.inputFileText.title = 'Choose File';
+      this.inputFileText.textContent = 'Choose File';
+      this.container.classList.add('error');
+    } else {
+      const fstring = Array.from(this.fileChooser.files, (f) => f.name).join();
+      this.inputFileText.title = fstring;
+      this.inputFileText.textContent = fstring;
+      this.container.classList.add('running');
+      this.worker.postMessage({
+        type: 'RUN',
+        script,
+        request: { inputs: Array.from(this.fileChooser.files), argv: '' }
+      });
+    }
   }
 
   private async handleMessage(msg: WorkerMessage): Promise<void> {
@@ -342,6 +362,8 @@ export class FiolinComponent {
       this.fileChooser.disabled = false;
       this.container.classList.remove('running');
       if (msg.response.outputs.length > 0) {
+        this.outputFileText.textContent = msg.response.outputs.map((f) => f.name).join();
+        this.outputFileText.title = msg.response.outputs.map((f) => f.name).join();
         for (const f of msg.response.outputs) {
           downloadFile(f);
         }

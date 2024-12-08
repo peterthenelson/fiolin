@@ -177,12 +177,15 @@ button:focus-visible, .button:focus-visible {
   text-shadow: 0 0 2px var(--blueish);
 }
 
-.dev-mode-button, .deploy-button {
-  margin-left: auto;
+.circle-button {
   width: 2em;
   height: 2em;
   border-radius: 1em;
   padding: 0.2em;
+}
+
+.dev-mode-button, .deploy-button {
+  margin-left: auto;
 }
 
 .dev-mode :is(.dev-mode-button, .deploy-button) {
@@ -326,7 +329,7 @@ form button {
 .files-label {
   display: inline-block;
   position: relative;
-  height: 3em;
+  min-height: 3em;
   width: 100%;
 }
 
@@ -377,10 +380,19 @@ form button {
 }
 
 .files-panel-text {
-  width: 100%;
   overflow: hidden;
+  max-width: calc(50% - 1em);
+  flex: 4;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.input-files-text {
+  text-align: left;
+}
+
+.output-files-text {
+  text-align: right;
 }
 
 .files-label:hover .files-panel {
