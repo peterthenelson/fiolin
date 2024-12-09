@@ -1,6 +1,6 @@
-import { parseAs } from "../common/parse";
-import { pWorkerMessage } from "../web-utils/parse-msg";
-import { WorkerMessage } from "../web-utils/types";
+import { parseAs } from '../common/parse';
+import { pWorkerMessage } from '../web-utils/parse-msg';
+import { WorkerMessage } from '../web-utils/types';
 
 export class TypedWorker {
   private readonly worker: Worker;

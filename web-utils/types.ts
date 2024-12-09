@@ -1,4 +1,4 @@
-import { FiolinRunRequest, FiolinRunResponse, FiolinScript } from "../common/types";
+import { FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../common/types';
 
 export type WorkerMessage = (
   LoadedMessage | StdoutMessage | StderrMessage | InstallPackagesMessage |

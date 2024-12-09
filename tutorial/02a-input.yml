@@ -5,5 +5,5 @@ meta:
     /input: Files selected by the user are mounted here.
 interface:
   inputFiles: SINGLE
-  outputFiles: MULTI
+  outputFiles: ANY
 runtime: {}

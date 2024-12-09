@@ -15,5 +15,5 @@ meta:
     - tbz2
 interface:
   inputFiles: SINGLE
-  outputFiles: MULTI
+  outputFiles: ANY
 runtime: {}

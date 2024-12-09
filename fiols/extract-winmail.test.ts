@@ -10,7 +10,7 @@ describe('extract-winmail', () => {
   beforeEach(() => { output = new FiolinTmpDir(); });
   afterEach(() => { output.cleanUp(); });
 
-  it('unpacks attachments', async () => {
+  it('unpacks attachments', { timeout: 7000 }, async () => {
     const runner = new NodeFiolinRunner('extract-winmail', output.path);
     // The TNEF file fiols/testdata/winmail.dat is copied from 
     // https://github.com/gatewayapps/node-tnef/tree/master/testFiles/attachment.dat

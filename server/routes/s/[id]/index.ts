@@ -1,6 +1,6 @@
-import { loadScript } from "../../../../utils/config";
-import { dedent } from "../../../../common/indent";
-import { fiolinContainer, fiolinSharedHeaders, versionedLink } from "../../../../utils/html";
+import { loadScript } from '../../../../utils/config';
+import { dedent } from '../../../../common/indent';
+import { fiolinContainer, fiolinSharedHeaders, versionedLink } from '../../../../utils/html';
 
 export default defineEventHandler((event) => {
   const name = getRouterParam(event, 'id')

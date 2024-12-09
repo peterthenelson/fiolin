@@ -1,4 +1,4 @@
-import { loadScript } from "../../../../utils/config";
+import { loadScript } from '../../../../utils/config';
 
 export default defineEventHandler((event) => {
   const name = getRouterParam(event, 'id')

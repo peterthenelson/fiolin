@@ -1,4 +1,4 @@
-import { FiolinScript } from "./fiolin-script";
+import { FiolinScript } from './fiolin-script';
 
 // Used for encapsulating running a script.
 export interface FiolinRunRequest {

@@ -10,7 +10,7 @@ function mkScript(python: string, pkgNames?: string[]): FiolinScript {
   }
   return {
     meta: { title: 'title', description: 'desc' },
-    interface: { inputFiles: 'MULTI', outputFiles: 'MULTI' },
+    interface: { inputFiles: 'ANY', outputFiles: 'ANY' },
     runtime,
     code: { python: dedent(python) },
   };

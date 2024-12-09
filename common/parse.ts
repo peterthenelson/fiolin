@@ -78,9 +78,9 @@ export function pArr<V>(elem: Parser<V>): Parser<V[]> {
   };
 }
 
-export function pFileEnum(p: ObjPath, v: unknown): 'NONE' | 'SINGLE' | 'MULTI' {
-  if (v === 'NONE' || v === 'SINGLE' || v === 'MULTI') return v;
-  throw p.err(`be 'NONE' | 'SINGLE' | 'MULTI'; got ${v}`);
+export function pFileEnum(p: ObjPath, v: unknown): 'NONE' | 'SINGLE' | 'MULTI' | 'ANY' {
+  if (v === 'NONE' || v === 'SINGLE' || v === 'MULTI' || v === 'ANY') return v;
+  throw p.err(`be 'NONE' | 'SINGLE' | 'MULTI' | 'ANY'; got ${v}`);
 }
 
 export function pOnlyKeys(p: ObjPath, o: object, keys: string[]) {

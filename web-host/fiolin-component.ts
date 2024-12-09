@@ -170,10 +170,12 @@ export class FiolinComponent {
     this.container.classList.remove('input-files-none')
     this.container.classList.remove('input-files-single');
     this.container.classList.remove('input-files-multi');
+    this.container.classList.remove('input-files-any');
     this.container.classList.add(`input-files-${script.interface.inputFiles.toLowerCase()}`);
     this.container.classList.remove('output-files-none')
     this.container.classList.remove('output-files-single');
     this.container.classList.remove('output-files-multi');
+    this.container.classList.remove('output-files-any');
     this.container.classList.add(`output-files-${script.interface.outputFiles.toLowerCase()}`);
     if (script.interface.inputFiles === 'NONE') {
       this.fileChooser.disabled = true;
@@ -181,6 +183,9 @@ export class FiolinComponent {
     } else if (script.interface.inputFiles === 'SINGLE') {
       this.fileChooser.disabled = false;
       this.fileChooser.multiple = false;
+    } else if (script.interface.inputFiles === 'MULTI') {
+      this.fileChooser.disabled = false;
+      this.fileChooser.multiple = true;
     } else {
       this.fileChooser.disabled = false;
       this.fileChooser.multiple = true;

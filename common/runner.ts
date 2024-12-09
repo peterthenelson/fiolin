@@ -87,6 +87,8 @@ export class PyodideRunner implements FiolinRunner {
       throw new Error(`Script expects no input files; got ${inputs.length}`);
     } else if (script.interface.inputFiles === 'SINGLE' && inputs.length !== 1) {
       throw new Error(`Script expects one input file; got ${inputs.length}`);
+    } else if (script.interface.inputFiles === 'MULTI' && inputs.length <= 1) {
+      throw new Error(`Script expects multiple files; got ${inputs.length}`);
     }
     this._console.log('Mounting inputs to /input');
     if (!this._pyodide) {
@@ -109,6 +111,8 @@ export class PyodideRunner implements FiolinRunner {
       throw new Error(`Script expected to produce no output files; got ${nOutputs}`);
     } else if (script.interface.outputFiles === 'SINGLE' && nOutputs !== 1) {
       throw new Error(`Script expected to produce one output file; got ${nOutputs}`);
+    } else if (script.interface.outputFiles === 'MULTI' && nOutputs <= 1) {
+      throw new Error(`Script expected to produce multiple files; got ${nOutputs}`);
     }
     this._console.log('Extracting outputs from /output');
     if (!this._pyodide) {

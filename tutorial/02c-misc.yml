@@ -7,5 +7,5 @@ meta:
     /home: The default current directory.
 interface:
   inputFiles: SINGLE
-  outputFiles: MULTI
+  outputFiles: ANY
 runtime: {}

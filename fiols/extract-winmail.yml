@@ -8,7 +8,7 @@ meta:
     - tnef
 interface:
   inputFiles: SINGLE
-  outputFiles: MULTI
+  outputFiles: ANY
 runtime:
   pythonPkgs:
     - type: PYPI

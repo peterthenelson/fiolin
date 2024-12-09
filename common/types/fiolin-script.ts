@@ -32,10 +32,10 @@ export interface FiolinScriptMeta {
 
 // How the fiolin UI is meant to communicate with the embedded script.
 export interface FiolinScriptInterface {
-  // Does the script take 0, 1, or any number of files as input?
-  inputFiles: 'NONE' | 'SINGLE' | 'MULTI';
-  // Does the script produce 0, 1, or any number of files as output?
-  outputFiles: 'NONE' | 'SINGLE' | 'MULTI';
+  // Does the script take 0, 1, >1, or any number of files as input?
+  inputFiles: 'NONE' | 'SINGLE' | 'MULTI' | 'ANY';
+  // Does the script produce 0, 1, >1, or any number of files as output?
+  outputFiles: 'NONE' | 'SINGLE' | 'MULTI' | 'ANY';
   // TODO: extend w/stuff about flags, console output, and/or canvas
 }
 

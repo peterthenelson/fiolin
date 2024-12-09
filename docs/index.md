@@ -137,8 +137,8 @@ complex file-chooser components, manual run buttons, etc.
 
 The `interface` section of the `FiolinScript` type is used to configure this
 behavior. The basic options are for how many input and output files you expect.
-`'NONE'` means no files, `'SINGLE'` means exactly one file, and `'MULTI'` means
-any number of files.
+`'NONE'` means no files, `'SINGLE'` means exactly one file, `'MULTI'` means more
+than one file, and `'ANY'` means any number of files.
 
 TODO: Update once there are more interesting options
 
