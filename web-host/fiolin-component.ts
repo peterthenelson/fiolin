@@ -177,17 +177,10 @@ export class FiolinComponent {
     this.container.classList.remove('output-files-multi');
     this.container.classList.remove('output-files-any');
     this.container.classList.add(`output-files-${script.interface.outputFiles.toLowerCase()}`);
-    if (script.interface.inputFiles === 'NONE') {
-      this.fileChooser.disabled = true;
+    if (script.interface.inputFiles === 'NONE' ||
+        script.interface.inputFiles === 'SINGLE') {
       this.fileChooser.multiple = false;
-    } else if (script.interface.inputFiles === 'SINGLE') {
-      this.fileChooser.disabled = false;
-      this.fileChooser.multiple = false;
-    } else if (script.interface.inputFiles === 'MULTI') {
-      this.fileChooser.disabled = false;
-      this.fileChooser.multiple = true;
     } else {
-      this.fileChooser.disabled = false;
       this.fileChooser.multiple = true;
     }
   }
@@ -231,7 +224,22 @@ export class FiolinComponent {
   }
 
   private async setupHandlers() {
-    this.fileChooser.onchange = () => { this.runScript() };
+    this.fileChooser.onclick = async (event) => {
+      const script = await this.script;
+      if (script.interface.inputFiles === 'NONE') {
+        event.preventDefault();
+        this.runScript([]);
+      }
+    };
+    this.fileChooser.onchange = (event) => {
+      const files: File[] = [];
+      if (this.fileChooser.files !== null) {
+        for (const f of this.fileChooser.files) {
+          files.push(f);
+        }
+      }
+      this.runScript(files);
+    };
     this.fileChooser.disabled = false;
     this.modeButton.onclick = () => {
       this.container.classList.toggle('dev-mode');
@@ -324,7 +332,7 @@ export class FiolinComponent {
     }
   }
 
-  private async runScript() {
+  private async runScript(files: File[]) {
     this.fileChooser.disabled = true;
     const script = await this.script;
     await this.readyToRun.promise;
@@ -333,19 +341,21 @@ export class FiolinComponent {
     (await this.editor).clearErrors();
     this.outputFileText.title = '';
     this.outputFileText.textContent = '';
-    if (this.fileChooser.files === null || this.fileChooser.files.length === 0) {
+    if ((files === null || files.length === 0) &&
+        script.interface.inputFiles !== 'NONE') {
       this.inputFileText.title = 'Choose File';
       this.inputFileText.textContent = 'Choose File';
       this.container.classList.add('error');
+      this.fileChooser.disabled = false;
     } else {
-      const fstring = Array.from(this.fileChooser.files, (f) => f.name).join();
+      const fstring = files.map((f) => f.name).join(', ');
       this.inputFileText.title = fstring;
       this.inputFileText.textContent = fstring;
       this.container.classList.add('running');
       this.worker.postMessage({
         type: 'RUN',
         script,
-        request: { inputs: Array.from(this.fileChooser.files), argv: '' }
+        request: { inputs: files, argv: '' }
       });
     }
   }

@@ -43,14 +43,12 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert video?
 - Frontend
   - Landing page: autocomplete
-  - Bug: canceling file chooser breaks interaction
   - 3p page: modal warnings, dev avatar, localstorage of approvals
   - Editor and playground:
     - Why is monaco occasionally triggering a request for clipboard permissions?
     - Add some transition animations for the buttons to invite interaction.
   - Controls:
-    - Improve the "simple" file UI to allow for resetting and redownloading, as
-      well as different file arities.
+    - Improve the "simple" file UI to allow for resetting and redownloading.
     - Advanced UI options other than the "simple" version.
   - Deployment:
     - PS1 and SH files shouldn't exit immediately on failure or success (to
