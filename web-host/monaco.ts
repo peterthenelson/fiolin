@@ -54,8 +54,6 @@ const narrowOpts: monaco.editor.IStandaloneEditorConstructionOptions = {
 export type FiolinScriptEditorModel = 'script.py' | 'script.yml';
 
 export class FiolinScriptEditor {
-  // TODO: Two models, one yaml and one py, with corresponding methods and
-  // callbacks.
   private readonly py: monaco.editor.ITextModel;
   private pyState: monaco.editor.ICodeEditorViewState | null;
   private readonly yml: monaco.editor.ITextModel;
@@ -73,6 +71,7 @@ export class FiolinScriptEditor {
       model: this.py,
       theme: 'vs-dark',
       automaticLayout: true,
+      tabSize: 2,
       ...(isNarrow() ? narrowOpts : {})
     });
     if (onchange) {
@@ -102,7 +101,9 @@ export class FiolinScriptEditor {
       newState = this.ymlState;
     }
     this.editor.setModel(newModel);
-		this.editor.restoreViewState(newState);
+    if (newState !== null) {
+      this.editor.restoreViewState(newState);
+    }
 		this.editor.focus();
   }
 
