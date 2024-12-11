@@ -25,9 +25,10 @@ function pMeta(p: ObjPath, v: unknown): FiolinScriptMeta {
 
 function pInterface(p: ObjPath, v: unknown): FiolinScriptInterface {
   const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['inputFiles', 'outputFiles']);
+  pOnlyKeys(p, o, ['inputFiles', 'inputAccept', 'outputFiles']);
   return {
     ...pProp(p, o, 'inputFiles', pFileEnum),
+    ...pPropU(p, o, 'inputAccept', pStr),
     ...pProp(p, o, 'outputFiles', pFileEnum),
   };
 }

@@ -34,6 +34,9 @@ export interface FiolinScriptMeta {
 export interface FiolinScriptInterface {
   // Does the script take 0, 1, >1, or any number of files as input?
   inputFiles: 'NONE' | 'SINGLE' | 'MULTI' | 'ANY';
+  // What file types should the file input control accept?
+  // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
+  inputAccept?: string;
   // Does the script produce 0, 1, >1, or any number of files as output?
   outputFiles: 'NONE' | 'SINGLE' | 'MULTI' | 'ANY';
   // TODO: extend w/stuff about flags, console output, and/or canvas

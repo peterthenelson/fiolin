@@ -8,6 +8,7 @@ meta:
     - tnef
 interface:
   inputFiles: SINGLE
+  inputAccept: .dat,.tnef
   outputFiles: ANY
 runtime:
   pythonPkgs:

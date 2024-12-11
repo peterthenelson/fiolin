@@ -183,6 +183,7 @@ export class FiolinComponent {
     } else {
       this.fileChooser.multiple = true;
     }
+    this.fileChooser.accept = script.interface.inputAccept || '';
   }
 
   private async loadScript(opts: FiolinComponentOptions) {

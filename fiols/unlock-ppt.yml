@@ -8,5 +8,6 @@ meta:
     - pptx
 interface:
   inputFiles: SINGLE
+  inputAccept: .pptx
   outputFiles: SINGLE
 runtime: {}

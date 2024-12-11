@@ -12,10 +12,12 @@ def get_mode_and_base(tarpath):
     return 'r:gz', os.path.basename(tarpath)[:-7]
   elif tarpath.endswith('.tar.bz2'):
     return 'r:bz2', os.path.basename(tarpath)[:-8]
+  elif tarpath.endswith('.tgz'):
+    return 'r:gz', os.path.basename(tarpath)[:-5]
   elif tarpath.endswith('.tbz2'):
     return 'r:bz2', os.path.basename(tarpath)[:-5]
   else:
-    sys.exit(f'${tarpath} should end in .tar, .tar.gz, .tar.bz2, or .tbz2')
+    sys.exit(f'${tarpath} should end in .tar, .tar.gz, .tar.bz2, .tgz, or .tbz2')
 
 def has_subdirs(outdir):
   items = os.listdir(outdir)

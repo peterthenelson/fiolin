@@ -12,8 +12,10 @@ meta:
     - bz2
     - tar.gz
     - tar.bz2
+    - tgz
     - tbz2
 interface:
   inputFiles: SINGLE
+  inputAccept: .tar,.gz,.bz2,.tar.gz,.tar.bz2,.tgz,.tbz2
   outputFiles: ANY
 runtime: {}
