@@ -1,0 +1,12 @@
+meta:
+  title: 3a. Multiple inputs (or none!)
+  author: Peter Nelson
+  description: >
+    The scripts we've written so far all take a single input file, but we can
+    configure fiolin to accept multiple inputs (or none at all).
+interface:
+  # TODO: Change this and see how it affects the UI and what guarantees you can
+  # expect of files mounted under /input.
+  inputFiles: SINGLE
+  outputFiles: NONE
+runtime: {}

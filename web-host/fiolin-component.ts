@@ -343,7 +343,8 @@ export class FiolinComponent {
     this.outputFileText.title = '';
     this.outputFileText.textContent = '';
     if ((files === null || files.length === 0) &&
-        script.interface.inputFiles !== 'NONE') {
+        (script.interface.inputFiles !== 'NONE' &&
+         script.interface.inputFiles !== 'ANY')) {
       this.inputFileText.title = 'Choose File';
       this.inputFileText.textContent = 'Choose File';
       this.container.classList.add('error');
