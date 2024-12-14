@@ -1,5 +1,5 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime } from './types';
+import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, WasmLoader } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
 import { getFiolinPy, getWrapperPy } from './pylib';
 
@@ -8,6 +8,7 @@ export interface ConsoleLike { log(s: string): void, error(s: string): void };
 export interface PyodideRunnerOptions {
   console?: ConsoleLike;
   indexUrl?: string;
+  loaders?: Record<string, WasmLoader>;
 }
 
 function cmpPkg(a: FiolinPyPackage, b: FiolinPyPackage): number {
@@ -46,6 +47,7 @@ export class PyodideRunner implements FiolinRunner {
   private readonly _console: ConsoleLike;
   private _stdout: string;
   private _stderr: string;
+  private _loaders: Record<string, WasmLoader>;
   public loaded: Promise<void>;
 
   constructor(options?: PyodideRunnerOptions) {
@@ -64,6 +66,7 @@ export class PyodideRunner implements FiolinRunner {
       }
     };
     this._indexUrl = options?.indexUrl;
+    this._loaders = options?.loaders || {};
     this.loaded = this.load();
   }
 
@@ -139,6 +142,13 @@ export class PyodideRunner implements FiolinRunner {
       indexURL: this._indexUrl,
       jsglobals: this._shared,
     });
+    // TODO: Integrate this with package (pre)loading. Also automatically write
+    // python loading/export scripts.
+    console.log(this._loaders);
+    for (const [k, v] of Object.entries(this._loaders)) {
+      this._shared[k] = await v.loadModule();
+      console.log(this._shared[k]);
+    }
     this._pyodide.setStdout({ batched: (s) => { this._console.log(s) } });
     this._pyodide.setStderr({ batched: (s) => { this._console.error(s) } });
   }

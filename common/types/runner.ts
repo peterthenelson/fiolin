@@ -29,6 +29,10 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   [key: string]: any;
 }
 
+export abstract class WasmLoader {
+  abstract loadModule(): Promise<any>;
+}
+
 export interface FiolinRunner {
   // Install any necessary external packages to run the script. If the runner
   // has previously installed packages, then compares the requested packages to

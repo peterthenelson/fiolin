@@ -17,11 +17,15 @@ function monacoWorker(path: string): RollupOptions {
   };
 }
 
-function copyCodicons() {
+function directCopies() {
   return copy({
     targets: [
       {
         src: 'node_modules/monaco-editor/esm/vs/base/browser/ui/codicons/codicon/codicon.ttf',
+        dest: 'server/public/bundle',
+      },
+      {
+        src: 'node_modules/@imagemagick/magick-wasm/dist/magick.wasm',
         dest: 'server/public/bundle',
       },
     ],
@@ -40,7 +44,7 @@ const config: RollupOptions[] = [
     },
     plugins: [
       css({ output: 'host.css' }),
-      copyCodicons(),
+      directCopies(),
       typescript(),
       nodeResolve(),
       terser(),
@@ -59,7 +63,7 @@ const config: RollupOptions[] = [
         pyodide: pyodideImportStub
       },
     },
-    plugins: [typescript(), terser()],
+    plugins: [typescript(), nodeResolve(), terser()],
   },
 ];
 

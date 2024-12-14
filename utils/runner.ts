@@ -1,9 +1,11 @@
 import { PyodideRunner } from '../common/runner';
 import { FiolinRunRequest, FiolinScript } from '../common/types';
+import { ImageMagickLoader } from '../common/image-magick';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pkgPath } from './pkg-path';
 import { loadScript } from './config';
+import { readFileSync } from 'node:fs';
 
 // Convenience wrapper around PyodideRunner that reads input paths to Files and
 // write the output Files into the given directory.
@@ -15,9 +17,13 @@ export class NodeFiolinRunner {
   constructor(fiolName: string, outputDir: string) {
     this.script = loadScript(fiolName);
     this.outputDir = outputDir;
-    // For some mysterious reason this is needed but only in tests. But it
-    // doesn't seem to break the run command, so whatever.
-    this._runner = new PyodideRunner({ indexUrl: pkgPath('node_modules/pyodide') });
+    const magick = readFileSync(pkgPath('node_modules/@imagemagick/magick-wasm/dist/magick.wasm'));
+    // For some mysterious reason the indexUrl is needed but only in tests. But
+    // it doesn't seem to break the run command, so whatever.
+    this._runner = new PyodideRunner({
+      indexUrl: pkgPath('node_modules/pyodide'),
+      loaders: { 'ImageMagick': new ImageMagickLoader(magick) },
+    });
   }
 
   async runWithLocalFs(inputPaths: string[], requestOther: Omit<FiolinRunRequest, 'inputs'>): Promise<string[]> {

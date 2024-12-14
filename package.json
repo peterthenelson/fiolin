@@ -19,6 +19,7 @@
     "nitropack": "latest"
   },
   "dependencies": {
+    "@imagemagick/magick-wasm": "^0.0.32",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.1",
