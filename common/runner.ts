@@ -144,11 +144,11 @@ export class PyodideRunner implements FiolinRunner {
     });
     // TODO: Integrate this with package (pre)loading. Also automatically write
     // python loading/export scripts.
-    console.log(this._loaders);
-    for (const [k, v] of Object.entries(this._loaders)) {
-      this._shared[k] = await v.loadModule();
-      console.log(this._shared[k]);
-    }
+    // TODO: Reenable when CSP is actually serving correctly.
+    //for (const [k, v] of Object.entries(this._loaders)) {
+    //  this._shared[k] = await v.loadModule();
+    //  console.log(this._shared[k]);
+    //}
     this._pyodide.setStdout({ batched: (s) => { this._console.log(s) } });
     this._pyodide.setStderr({ batched: (s) => { this._console.error(s) } });
   }
