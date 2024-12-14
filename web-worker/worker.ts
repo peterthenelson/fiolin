@@ -1,10 +1,10 @@
 import { PyodideRunner } from '../common/runner';
 import { toErr } from '../common/errors';
 import { parseAs } from '../common/parse';
-import { ImageMagickLoader } from '../common/image-magick';
 import { InstallPackagesMessage, RunMessage, WorkerMessage } from '../web-utils/types';
+import { onlineWasmLoaders } from '../web-utils/loaders';
 import { pWorkerMessage } from '../web-utils/parse-msg';
-import { FiolinScript, WasmLoader } from '../common/types';
+import { FiolinScript } from '../common/types';
 
 // Typed messaging
 const _rawPost = self.postMessage;
@@ -24,9 +24,7 @@ async function load(): Promise<void> {
         log: (s) => postMessage({ type: 'STDOUT', value: s }),
         error: (s) => postMessage({ type: 'STDERR', value: s }),
       },
-      loaders: {
-        'ImageMagick': new ImageMagickLoader(new URL('/bundle/magick.wasm', self.location.href)),
-      },
+      loaders: onlineWasmLoaders(),
     });
     await tmp.loaded;
     runner = tmp;

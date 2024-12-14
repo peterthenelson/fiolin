@@ -1,40 +1,35 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, WasmLoader } from './types';
+import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
 import { getFiolinPy, getWrapperPy } from './pylib';
+import { cmpSet } from './cmp';
 
 export interface ConsoleLike { log(s: string): void, error(s: string): void };
 
 export interface PyodideRunnerOptions {
   console?: ConsoleLike;
   indexUrl?: string;
-  loaders?: Record<string, WasmLoader>;
+  loaders?: Record<string, FiolinWasmLoader>;
 }
 
-function cmpPkg(a: FiolinPyPackage, b: FiolinPyPackage): number {
-  if (a.type < b.type) {
-    return -1;
-  } else if (a.type > b.type) {
-    return 1;
-  } else if (a.name < b.name) {
-    return -1
-  } else if (a.name > b.name) {
-    return 1;
-  } else {
-    return 0;
-  }
+function pyPkgKey(v: FiolinPyPackage): any[] {
+  return [v.type, v.name];
+}
+
+function wasmModKey(v: FiolinWasmModule): any[] {
+  return [v.name];
 }
 
 function packagesDiffer(a: FiolinScriptRuntime, b: FiolinScriptRuntime): boolean {
-  const aPkgs: FiolinPyPackage[] = a.pythonPkgs || [];
-  const bPkgs: FiolinPyPackage[] = b.pythonPkgs || [];
-  if (aPkgs.length !== bPkgs.length) return true;
-  aPkgs.sort(cmpPkg);
-  bPkgs.sort(cmpPkg);
-  for (let i = 0; i < aPkgs.length; i++) {
-    if (cmpPkg(aPkgs[i], bPkgs[i]) !== 0) {
-      return true;
-    }
+  {
+    const aPkgs: FiolinPyPackage[] = a.pythonPkgs || [];
+    const bPkgs: FiolinPyPackage[] = b.pythonPkgs || [];
+    if (cmpSet(aPkgs, bPkgs, pyPkgKey) !== 0) return true;
+  }
+  {
+    const aMods: FiolinWasmModule[] = a.wasmModules || [];
+    const bMods: FiolinWasmModule[] = b.wasmModules || [];
+    if (cmpSet(aMods, bMods, wasmModKey) !== 0) return true;
   }
   return false;
 }
@@ -47,7 +42,7 @@ export class PyodideRunner implements FiolinRunner {
   private readonly _console: ConsoleLike;
   private _stdout: string;
   private _stderr: string;
-  private _loaders: Record<string, WasmLoader>;
+  private _loaders: Record<string, FiolinWasmLoader>;
   public loaded: Promise<void>;
 
   constructor(options?: PyodideRunnerOptions) {
@@ -142,13 +137,6 @@ export class PyodideRunner implements FiolinRunner {
       indexURL: this._indexUrl,
       jsglobals: this._shared,
     });
-    // TODO: Integrate this with package (pre)loading. Also automatically write
-    // python loading/export scripts.
-    // TODO: Reenable when CSP is actually serving correctly.
-    //for (const [k, v] of Object.entries(this._loaders)) {
-    //  this._shared[k] = await v.loadModule();
-    //  console.log(this._shared[k]);
-    //}
     this._pyodide.setStdout({ batched: (s) => { this._console.log(s) } });
     this._pyodide.setStderr({ batched: (s) => { this._console.error(s) } });
   }
@@ -159,18 +147,19 @@ export class PyodideRunner implements FiolinRunner {
       throw new Error(`this._pyodide should be present after loading!`)
     }
     const pkgs: FiolinPyPackage[] = script.runtime.pythonPkgs || [];
-    if (pkgs.length === 0) {
-      this._console.log('No packages to be installed');
+    const mods: FiolinWasmModule[] = script.runtime.wasmModules || [];
+    if (pkgs.length === 0 && mods.length === 0) {
+      this._console.log('No packages/modules to be installed');
       return;
     }
     if (typeof this._installed !== 'undefined') {
       if (packagesDiffer(this._installed, script.runtime)) {
         this._console.log(
-          'Required packages differ from those installed; reloading pyodide');
+          'Required packages/modules differ from those installed; reloading pyodide');
         this.loaded = this.load();
         await this.loaded;
       } else {
-        this._console.log('Required packages already installed')
+        this._console.log('Required packages/modules already installed')
         return;
       }
     }
@@ -183,7 +172,7 @@ export class PyodideRunner implements FiolinRunner {
       }
       await this._pyodide.loadPackage('micropip');
       const micropip = this._pyodide.pyimport('micropip');
-      for (const pkg of (script.runtime.pythonPkgs || [])) {
+      for (const pkg of pkgs) {
         if (pkg.type === 'PYPI') {
           this._console.log(`Installing package ${pkg.name}`);
           await micropip.install(pkg.name, { deps: true });
@@ -191,7 +180,18 @@ export class PyodideRunner implements FiolinRunner {
           throw new Error(`Unknown package type: ${pkg.type}`);
         }
       }
-      this._console.log(`Finished installing packages`);
+      this._console.log(`${mods.length} wasm modules to be installed`);
+      for (const mod of mods) {
+        if (mod.name in this._loaders) {
+          this._console.log(`Installing module ${mod.name}`);
+          const pystub = this._loaders[mod.name].pyWrapper(mod.name);
+          writeFile(this._pyodide, `/home/pyodide/${mod.name}.py`, pystub);
+          this._shared[mod.name] = await this._loaders[mod.name].loadModule();
+        } else {
+          throw new Error(`Unknown module: ${mod.name}`);
+        }
+      }
+      this._console.log(`Finished installing packages/modules`);
       this._installed = structuredClone(script.runtime);
     } finally {
       this._shared['Object'] = undefined;

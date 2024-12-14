@@ -1,5 +1,5 @@
 import { pArr, ObjPath, pFileEnum, pObj, pOnlyKeys, pProp, pPropU, pStr } from './parse';
-import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface, FiolinPyPackage } from './types';
+import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface, FiolinPyPackage, FiolinWasmModule } from './types';
 
 export function pFiolinScript(p: ObjPath, v: unknown): FiolinScript {
   const o: object = pObj(p, v);
@@ -42,14 +42,21 @@ function pPyPkg(p: ObjPath, v: unknown): FiolinPyPackage {
       throw p.err(`be PYPI; got ${v}`);
     }),
     ...pProp(p, o, 'name', pStr),
-  }
+  };
+}
+
+function pWasmMod(p: ObjPath, v: unknown): FiolinWasmModule {
+  const o: object = pObj(p, v);
+  pOnlyKeys(p, o, ['name']);
+  return { ...pProp(p, o, 'name', pStr) };
 }
 
 function pRuntime(p: ObjPath, v: unknown): FiolinScriptRuntime {
   const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['pythonPkgs']);
+  pOnlyKeys(p, o, ['pythonPkgs', 'wasmModules']);
   return {
     ...pPropU(p, o, 'pythonPkgs', pArr(pPyPkg)),
+    ...pPropU(p, o, 'wasmModules', pArr(pWasmMod)),
   };
 }
 

@@ -29,7 +29,10 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   [key: string]: any;
 }
 
-export abstract class WasmLoader {
+export abstract class FiolinWasmLoader {
+  pyWrapper(moduleName: string): string {
+    return `import js\nfor k, v in js.${moduleName}.object_entries():\n  globals()[k] = v\n`;
+  }
   abstract loadModule(): Promise<any>;
 }
 

@@ -47,7 +47,8 @@ export interface FiolinScriptInterface {
 export interface FiolinScriptRuntime {
   // External python packages that must be installed for the script to run.
   pythonPkgs?: FiolinPyPackage[];
-  // TODO: extend w/stuff about wasm
+  // Wasm-based dependencies (that are included with fiolin).
+  wasmModules?: FiolinWasmModule[];
 }
 
 // A python package required by the script to run.
@@ -55,6 +56,12 @@ export interface FiolinPyPackage {
   // The type of python package (currently can only be PYPI).
   type: 'PYPI';
   // The name of the python package.
+  name: string;
+}
+
+// A wasm module and associated js code. The available modules can be seen in
+// ../../utils/loaders.ts and ../../web-utils/loaders.ts.
+export interface FiolinWasmModule {
   name: string;
 }
 

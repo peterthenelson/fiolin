@@ -2,11 +2,23 @@ import { describe, expect, it } from 'vitest';
 import { PyodideRunner } from './runner';
 import { FiolinScript, FiolinScriptRuntime } from './types';
 import { dedent } from './indent';
+import { ImageMagickLoader } from './image-magick';
+import { readFileSync } from 'node:fs';
 
-function mkScript(python: string, pkgNames?: string[]): FiolinScript {
+interface mkScriptOptions {
+  pkgs?: string[];
+  mods?: string[];
+}
+
+function mkScript(python: string, options?: mkScriptOptions): FiolinScript {
   const runtime: FiolinScriptRuntime = {};
-  if (pkgNames && pkgNames.length > 0) {
-    runtime.pythonPkgs = pkgNames.map((n) => ({ type: 'PYPI', name: n }))
+  const pkgs = options?.pkgs || [];
+  if (pkgs.length > 0) {
+    runtime.pythonPkgs = pkgs.map((n) => ({ type: 'PYPI', name: n }))
+  }
+  const mods = options?.mods || [];
+  if (mods.length > 0) {
+    runtime.wasmModules = mods.map((n) => ({ name: n }))
   }
   return {
     meta: { title: 'title', description: 'desc' },
@@ -33,13 +45,32 @@ const indexUrl = (() => {
   return parts.join('/');
 })();
 
+const loaders = (() => {
+  const testPath = expect.getState().testPath;
+  if (!testPath) {
+    throw new Error('Unable to resolve testPath');
+  }
+  const parts = testPath.split('/');
+  // Drop the /common/runner.test.ts and add the path to pyodide
+  parts.pop();
+  parts.pop();
+  parts.push('node_modules/@imagemagick/magick-wasm/dist/magick.wasm');
+  return {
+    'imagemagick': new ImageMagickLoader(readFileSync(parts.join('/'))),
+  };
+})();
+
+function mkRunner(): PyodideRunner {
+  return new PyodideRunner({ indexUrl, loaders });
+}
+
 function multiRe(...res: RegExp[]): RegExp {
   return new RegExp(res.map((r) => r.source).join(''), 's');
 }
 
 describe('PyodideRunner', () => {
   it('runs', async () => {
-    const runner = new PyodideRunner({ indexUrl });
+    const runner = mkRunner();
     const script = mkScript('print("hello")');
     const response = await runner.run(script, { inputs: [], argv: '' });
     expect(response.error).toBeUndefined();
@@ -48,7 +79,7 @@ describe('PyodideRunner', () => {
 
   describe('error handling', () => {
     it('reports exceptions and line numbers', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       const script = mkScript(`
         print('ok') # line 2
         raise Exception('not ok') # line 3
@@ -61,7 +92,7 @@ describe('PyodideRunner', () => {
     });
 
     it('reports non-zero sys.exit as error with message', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       {
         const script = mkScript(`
           import sys
@@ -86,7 +117,7 @@ describe('PyodideRunner', () => {
   });
 
   it('resets the file system between runs', async () => {
-    const runner = new PyodideRunner({ indexUrl });
+    const runner = mkRunner();
     const script = mkScript(`
       import fiolin
       import os
@@ -137,7 +168,7 @@ describe('PyodideRunner', () => {
 
   describe('checks number of input/output files', () => {
     it('checks inputs when inputFiles NONE', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       const script = mkScript('print("hello")');
       script.interface = { inputFiles: 'NONE', outputFiles: 'NONE' };
       {
@@ -152,7 +183,7 @@ describe('PyodideRunner', () => {
     });
 
     it('checks inputs when inputFiles SINGLE', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       const script = mkScript('import fiolin; print(fiolin.get_input_basename())');
       script.interface = { inputFiles: 'SINGLE', outputFiles: 'NONE' };
       const [foo, bar] = [mkFile('foo', 'foo'), mkFile('bar', 'bar')];
@@ -173,7 +204,7 @@ describe('PyodideRunner', () => {
     });
 
     it('checks outputs when outputFiles NONE', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       const saveNFiles = mkScript(`
         import fiolin
         for i in range(int(fiolin.argv()[0])):
@@ -193,7 +224,7 @@ describe('PyodideRunner', () => {
     });
 
     it('checks outputs when outputFiles SINGLE', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       const saveNFiles = mkScript(`
         import fiolin
         for i in range(int(fiolin.argv()[0])):
@@ -218,15 +249,15 @@ describe('PyodideRunner', () => {
     });
   });
 
-  describe('package installation', () => {
+  describe('python package installation', () => {
     it('automatically installs pkgs', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       const script = mkScript(`
         import idna
         import sys
         # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
         print(idna.encode('ドメイン.テスト'), file=sys.stderr)
-      `, ['idna']);
+      `, { pkgs: ['idna'] });
       const response = await runner.run(script, { inputs: [], argv: '' });
       expect(response.error).toBeUndefined();
       expect(response.stderr.trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
@@ -238,31 +269,31 @@ describe('PyodideRunner', () => {
     });
 
     it('can manually preinstall pkgs', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       const script = mkScript(`
         import idna
         import sys
         # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
         print(idna.encode('ドメイン.テスト'), file=sys.stderr)
-      `, ['idna']);
+      `, { pkgs: ['idna'] });
       await runner.installPkgs(script);
       const response = await runner.run(script, { inputs: [], argv: '' });
       expect(response.error).toBeUndefined();
       expect(response.stderr.trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
       expect(response.stdout).toMatch(multiRe(
         /Resetting FS.*/,
-        /Required packages already installed.*/,
+        /Required packages\/modules already installed.*/,
       ));
     });
 
     it('avoids redundant pkg installation', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       const script = mkScript(`
         import idna
         import sys
         # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
         print(idna.encode('ドメイン.テスト'), file=sys.stderr)
-      `, ['idna']);
+      `, { pkgs: ['idna'] });
       {
         const response = await runner.run(script, { inputs: [], argv: '' });
         expect(response.error).toBeUndefined();
@@ -277,19 +308,19 @@ describe('PyodideRunner', () => {
         expect(response.error).toBeUndefined();
         expect(response.stdout).toMatch(multiRe(
           /Resetting FS.*/,
-          /Required packages already installed.*/,
+          /Required packages\/modules already installed.*/,
         ));
       }
     });
 
     it('reloads the interpreter when pkgs change', async () => {
-      const runner = new PyodideRunner({ indexUrl });
+      const runner = mkRunner();
       const script = mkScript(`
         import idna
         import sys
         # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
         print(idna.encode('ドメイン.テスト'), file=sys.stderr)
-      `, ['idna']);
+      `, { pkgs: ['idna'] });
       {
         const response = await runner.run(script, { inputs: [], argv: '' });
         expect(response.error).toBeUndefined();
@@ -305,10 +336,72 @@ describe('PyodideRunner', () => {
         expect(response.error).toBeUndefined();
         expect(response.stdout).toMatch(multiRe(
           /Resetting FS.*/,
-          /Required packages differ from those installed.*/,
+          /Required packages\/modules differ from those installed.*/,
           /2 python packages to be installed.*/,
           /Installing package idna.*/,
           /Installing package six.*/
+        ));
+      }
+    });
+  });
+
+  describe('wasm module installation', () => {
+    it('automatically installs mods', async () => {
+      const runner = mkRunner();
+      const script = mkScript(`
+        import imagemagick
+        import sys
+        print(imagemagick.Magick.imageMagickVersion, file=sys.stderr)
+      `, { mods: ['imagemagick'] });
+      const response = await runner.run(script, { inputs: [], argv: '' });
+      expect(response.error).toBeUndefined();
+      expect(response.stderr.trim()).toMatch(/ImageMagick.*imagemagick.org/);
+      expect(response.stdout).toMatch(multiRe(
+        /Resetting FS.*/,
+        /1 wasm modules to be installed.*/,
+        /Installing module imagemagick.*/
+      ));
+    });
+
+    it('can manually preinstall mods', async () => {
+      const runner = mkRunner();
+      const script = mkScript(`
+        import imagemagick
+        import sys
+        print(imagemagick.Magick.imageMagickVersion, file=sys.stderr)
+      `, { mods: ['imagemagick'] });
+      await runner.installPkgs(script);
+      const response = await runner.run(script, { inputs: [], argv: '' });
+      expect(response.error).toBeUndefined();
+      expect(response.stderr.trim()).toMatch(/ImageMagick.*imagemagick.org/);
+      expect(response.stdout).toMatch(multiRe(
+        /Resetting FS.*/,
+        /Required packages\/modules already installed.*/,
+      ));
+    });
+
+    it('avoids redundant mod installation', async () => {
+      const runner = mkRunner();
+      const script = mkScript(`
+        import imagemagick
+        import sys
+        print(imagemagick.Magick.imageMagickVersion, file=sys.stderr)
+      `, { mods: ['imagemagick'] });
+      {
+        const response = await runner.run(script, { inputs: [], argv: '' });
+        expect(response.error).toBeUndefined();
+        expect(response.stdout).toMatch(multiRe(
+          /Resetting FS.*/,
+          /1 wasm modules to be installed.*/,
+          /Installing module imagemagick.*/
+        ));
+      }
+      {
+        const response = await runner.run(script, { inputs: [], argv: '' });
+        expect(response.error).toBeUndefined();
+        expect(response.stdout).toMatch(multiRe(
+          /Resetting FS.*/,
+          /Required packages\/modules already installed.*/,
         ));
       }
     });
