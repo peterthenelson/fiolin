@@ -33,7 +33,7 @@ const thirdPartyCsp = commonCsp.concat('connect-src *');
 const workerCsp = [
   "default-src 'self'",
   "script-src 'wasm-unsafe-eval' https://cdn.jsdelivr.net",
-  'connect-src https://cdn.jsdelivr.net https://pypi.org https://files.pythonhosted.org'
+  "connect-src 'self' https://cdn.jsdelivr.net https://pypi.org https://files.pythonhosted.org"
 ];
 
 function csp(policy: string | string[]) {
