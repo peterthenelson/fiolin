@@ -62,6 +62,7 @@ export interface FiolinPyPackage {
 // A wasm module and associated js code. The available modules can be seen in
 // ../../utils/loaders.ts and ../../web-utils/loaders.ts.
 export interface FiolinWasmModule {
+  // The name of the wasm module (see the loaders for supported values).
   name: string;
 }
 
