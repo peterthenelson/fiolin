@@ -1,1 +1,1 @@
-npm clean-install --progress=false && npm build
+npm clean-install --progress=false && npm run build
