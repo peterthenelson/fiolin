@@ -1,0 +1,4 @@
+{
+  "host": "/bundle/host.js",
+  "worker": "/bundle/worker.js"
+}

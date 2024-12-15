@@ -104,6 +104,7 @@ function saveFormToStorage(storage: StorageLike, deployForm: HTMLFormElement) {
 
 export interface FiolinComponentOptions {
   url?: string;
+  workerEndpoint?: string;
   showLoading?: boolean;
   tutorial?: Record<string, FiolinScript>;
   storage?: StorageLike;
@@ -144,7 +145,7 @@ export class FiolinComponent {
     this.inputFileText = getByRelIdAs(container, 'input-files-text', HTMLSpanElement);
     this.outputFileText = getByRelIdAs(container, 'output-files-text', HTMLSpanElement);
     this.outputTerm = getByRelIdAs(container, 'output-term', HTMLPreElement);
-    this.worker = new TypedWorker('/bundle/worker.js', { type: 'classic' });
+    this.worker = new TypedWorker(opts?.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
     this.worker.onerror = (e) => {
       console.error(getErrMsg(e));
       this.outputTerm.textContent = getErrMsg(e);

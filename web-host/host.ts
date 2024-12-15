@@ -11,12 +11,20 @@ export interface FromTutorialOpts {
   tutorial: Record<string, FiolinScript>;
 }
 
-export function initFiolin(opts: FromUrlOpts | FromTutorialOpts): FiolinComponent {
+export async function initFiolin(opts: FromUrlOpts | FromTutorialOpts): Promise<FiolinComponent> {
+  let endpoints: Record<string, string> = {};
+  try {
+    const resp = await fetch(`/bundle/versions.json?v=${Math.random()}`);
+    endpoints = await resp.json();
+  } catch (e) {
+    console.error('Failed to load version file for endpoints');
+    console.error(e);
+  }
   const container = document.getElementById('container');
   if (container === null) {
     die('#container not present; cannot initFiolin');
   }
-  return new FiolinComponent(container, opts);
+  return new FiolinComponent(container, { workerEndpoint: endpoints.worker, ...opts });
 }
 
 async function colorizeLang(lang: string): Promise<void> {
