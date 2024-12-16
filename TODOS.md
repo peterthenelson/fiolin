@@ -11,13 +11,14 @@ A not-necessarily-exhaustive list of TODOs:
     package so that people can import fiolin from their fiolin-template cloned
     projects and do local development. Update the repo template as needed.
 - Core functionality
+  - Debug logging vs stdout
   - Some kind of flag parsing functionality
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
+      - Fix unsafe-eval issue with imagemagick
   - Some kind of (interactive?) canvas functionality
 - Scripts
   - Playground examples
-    - Demonstrating input/output arity
     - Demonstrating PyPI packages
     - Demonstrating ImageMagick or some WASM thing
     - Demonstrating advanced UI
