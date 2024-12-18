@@ -1,6 +1,5 @@
 """Handling zero, one, or multiple input files."""
 import fiolin
-import os
 
 # TODO: This currently will always print one file. Change over the Yaml tab, and
 # change the inputFiles option. Valid options are: NONE, SINGLE, MULTI, ANY. See

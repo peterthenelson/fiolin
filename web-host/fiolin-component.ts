@@ -226,6 +226,12 @@ export class FiolinComponent {
   }
 
   private async setupHandlers() {
+    this.fileChooser.oncancel = async () => {
+      const script = await this.script;
+      if (script.interface.inputFiles === 'ANY') {
+        this.runScript([]);
+      }
+    }
     this.fileChooser.onclick = async (event) => {
       const script = await this.script;
       if (script.interface.inputFiles === 'NONE') {
@@ -233,7 +239,7 @@ export class FiolinComponent {
         this.runScript([]);
       }
     };
-    this.fileChooser.onchange = (event) => {
+    this.fileChooser.onchange = () => {
       const files: File[] = [];
       if (this.fileChooser.files !== null) {
         for (const f of this.fileChooser.files) {

@@ -5,7 +5,5 @@ meta:
     As with input files, we can reconfigure the expected number of output files.
 interface:
   inputFiles: NONE
-  # TODO: Change this and see how it affects the UI and what happens when you
-  # produce different numbers of files under /output.
   outputFiles: NONE
 runtime: {}
