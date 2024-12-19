@@ -44,6 +44,18 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
     PAGESBRANCH="${opts.gh.pagesBranch}"
     REPOURL="https://github.com/$USERNAME/$REPONAME.git"
     FIOLID="${opts.scriptId}"
+    echo "This script will deploy script $FIOLID to github.com/$USERNAME/$REPONAME"
+    echo "Press return to continue."
+    read
+    exit_trap() {
+      local status="$?"
+      if [ $status -ne 0 ]; then
+        echo "Deploy script failed. See error messages above."
+      fi
+      read
+      exit $status
+    }
+    trap exit_trap EXIT
     if ! which gh >/dev/null; then
       echo "Please install the github cli tool before running this:"
       echo "  https://cli.github.com"
@@ -141,10 +153,19 @@ function ps1File(script: FiolinScript, opts: DeployOptions): string {
     $PAGESBRANCH = "${opts.gh.pagesBranch}"
     $REPOURL = "https://github.com/$USERNAME/$REPONAME.git"
     $FIOLID = "${opts.scriptId}"
+    Write-Host "This script will deploy script $FIOLID to github.com/$USERNAME/$REPONAME" -ForegroundColor Green
+    Write-Host "Press return to continue." -ForegroundColor Green
+    $null = Read-Host
+    trap {
+      Write-Host "$_" -ForegroundColor Red
+      Write-Host "Deploy script failed. See error messages above." -ForegroundColor Red
+      $null = Read-Host
+    }
     if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
       Write-Host "Please install the github cli tool before running this:" -ForegroundColor Red
       Write-Host "  https://cli.github.com" -ForegroundColor Red
-      exit 1
+      $null = Read-Host
+      Exit 1
     }
     function Invoke-Strict() {
       if ($args.Count -eq 0) {
@@ -188,7 +209,8 @@ function ps1File(script: FiolinScript, opts: DeployOptions): string {
         }
       }
       Write-Host $fail_msg -ForegroundColor Red
-      exit 1
+      $null = Read-Host
+      Exit 1
       return $false
     }
     function clone_or_create {
@@ -239,5 +261,6 @@ function ps1File(script: FiolinScript, opts: DeployOptions): string {
     Write-Host "  https://$USERNAME.github.io/$REPONAME/$FIOLID.json" -ForegroundColor Green
     Write-Host "You (and others) can run your script on fiolin.org:" -ForegroundColor Green
     Write-Host "  https://fiolin.org/third-party?gh=$USERNAME/$REPONAME/$FIOLID" -ForegroundColor Green
+    $null = Read-Host
   `);
 }
