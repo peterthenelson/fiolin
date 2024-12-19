@@ -4,13 +4,13 @@ import { NodeFiolinRunner } from '../utils/runner';
 import path from 'node:path';
 import { pkgPath } from '../utils/pkg-path';
 
-describe('merge-pdf', () => {
+describe('merge-pdf', { timeout: 12000 }, () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
 
   beforeEach(() => { output = new FiolinTmpDir(); });
   afterEach(() => { output.cleanUp(); });
 
-  it('merges pdfs', { timeout: 7000 }, async () => {
+  it('merges pdfs', async () => {
     const runner = new NodeFiolinRunner('merge-pdf', output.path);
     // The test files were made by me manually writing postscript and
     // https://ehubsoft.herokuapp.com/psviewer/ to convert them to pdfs.

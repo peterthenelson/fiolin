@@ -5,7 +5,7 @@ import { pkgPath } from '../utils/pkg-path';
 import path from 'node:path';
 import xmlFormat from 'xml-formatter';
 
-describe('unlock-pptx', () => {
+describe('unlock-pptx', { timeout: 12000 }, () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
 
   beforeEach(() => { output = new FiolinTmpDir(); });

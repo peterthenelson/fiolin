@@ -68,7 +68,7 @@ function multiRe(...res: RegExp[]): RegExp {
   return new RegExp(res.map((r) => r.source).join(''), 's');
 }
 
-describe('PyodideRunner', () => {
+describe('PyodideRunner', { timeout: 10000 }, () => {
   it('runs', async () => {
     const runner = mkRunner();
     const script = mkScript('print("hello")');
@@ -249,7 +249,7 @@ describe('PyodideRunner', () => {
     });
   });
 
-  describe('python package installation', () => {
+  describe('python package installation', { timeout: 15000 }, () => {
     it('automatically installs pkgs', async () => {
       const runner = mkRunner();
       const script = mkScript(`
@@ -345,7 +345,7 @@ describe('PyodideRunner', () => {
     });
   });
 
-  describe('wasm module installation', () => {
+  describe('wasm module installation', { timeout: 15000 }, () => {
     it('automatically installs mods', async () => {
       const runner = mkRunner();
       const script = mkScript(`

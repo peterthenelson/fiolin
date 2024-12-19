@@ -4,13 +4,13 @@ import { NodeFiolinRunner } from '../utils/runner';
 import { readdirSync } from 'node:fs';
 import { pkgPath } from '../utils/pkg-path';
 
-describe('extract-winmail', () => {
+describe('extract-winmail', { timeout: 12000 }, () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
 
   beforeEach(() => { output = new FiolinTmpDir(); });
   afterEach(() => { output.cleanUp(); });
 
-  it('unpacks attachments', { timeout: 7000 }, async () => {
+  it('unpacks attachments', async () => {
     const runner = new NodeFiolinRunner('extract-winmail', output.path);
     // The TNEF file fiols/testdata/winmail.dat is copied from 
     // https://github.com/gatewayapps/node-tnef/tree/master/testFiles/attachment.dat

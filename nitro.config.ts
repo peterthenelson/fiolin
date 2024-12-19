@@ -24,9 +24,8 @@ const indexCsp = commonCsp.concat([
 ]);
 
 // The 3p host/UI page additionally needs to fetch scripts from github.
-// TODO: Switch to just whitelisting github specifically (and doing a dev-only
-// thing to allow localhost:3001).
-const thirdPartyCsp = commonCsp.concat('connect-src *');
+// (and the dev version needs to hit localhost)
+const thirdPartyCsp = commonCsp.concat('connect-src https://*.github.io http://localhost:3001');
 
 // The worker/script runner can use WASM and access pyodide and pypi packages.
 // TODO: Can this be narrowed?
