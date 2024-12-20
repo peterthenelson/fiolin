@@ -7,10 +7,11 @@ export interface FiolinRunRequest {
   // TODO: Add a debug section
 }
 
+export type FiolinLogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
+
 export interface FiolinRunResponse {
   outputs: File[];
-  stdout: string;
-  stderr: string;
+  log: [FiolinLogLevel, string][];
   error?: Error;
   lineno?: number;
 }

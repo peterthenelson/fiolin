@@ -1,10 +1,15 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule } from './types';
+import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
 import { getFiolinPy, getWrapperPy } from './pylib';
 import { cmpSet } from './cmp';
 
-export interface ConsoleLike { log(s: string): void, error(s: string): void };
+export interface ConsoleLike {
+  debug(s: string): void;
+  info(s: string): void;
+  warn(s: string): void;
+  error(s: string): void;
+};
 
 export interface PyodideRunnerOptions {
   console?: ConsoleLike;
@@ -40,24 +45,30 @@ export class PyodideRunner implements FiolinRunner {
   private _installed?: FiolinScriptRuntime;
   private readonly _indexUrl?: string;
   private readonly _console: ConsoleLike;
-  private _stdout: string;
-  private _stderr: string;
+  private _log: [FiolinLogLevel, string][];
   private _loaders: Record<string, FiolinWasmLoader>;
   public loaded: Promise<void>;
 
   constructor(options?: PyodideRunnerOptions) {
     this._shared = { inputs: [], outputs: [], argv: '' };
     const innerConsole: ConsoleLike = options?.console || console;
-    this._stdout = '';
-    this._stderr = '';
+    this._log = [];
     this._console = {
-      log: (s) => {
-        innerConsole.log(s);
-        this._stdout += s + '\n';
+      debug: (s) => {
+        innerConsole.debug(s);
+        this._log.push(['DEBUG', s]);
+      },
+      info: (s) => {
+        innerConsole.info(s);
+        this._log.push(['INFO', s]);
+      },
+      warn: (s) => {
+        innerConsole.warn(s);
+        this._log.push(['WARN', s]);
       },
       error: (s) => {
         innerConsole.error(s);
-        this._stderr += s + '\n';
+        this._log.push(['ERROR', s]);
       }
     };
     this._indexUrl = options?.indexUrl;
@@ -66,7 +77,7 @@ export class PyodideRunner implements FiolinRunner {
   }
 
   private resetFs() {
-    this._console.log('Resetting FS');
+    this._console.debug('Resetting FS');
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present before resetFs!`)
     }
@@ -88,7 +99,7 @@ export class PyodideRunner implements FiolinRunner {
     } else if (script.interface.inputFiles === 'MULTI' && inputs.length <= 1) {
       throw new Error(`Script expects multiple files; got ${inputs.length}`);
     }
-    this._console.log('Mounting inputs to /input');
+    this._console.debug('Mounting inputs to /input');
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present before resetFs!`);
     }
@@ -98,7 +109,7 @@ export class PyodideRunner implements FiolinRunner {
       this._shared.inputs.push(input.name);
       writeFile(this._pyodide, `/input/${input.name}`, inBytes);
     }
-    this._console.log('Setting up python files');
+    this._console.debug('Setting up python files');
     writeFile(this._pyodide, `/home/pyodide/fiolin.py`, getFiolinPy(this._pyodide));
     writeFile(this._pyodide, `/home/pyodide/script.py`, script.code.python);
   }
@@ -112,7 +123,7 @@ export class PyodideRunner implements FiolinRunner {
     } else if (script.interface.outputFiles === 'MULTI' && nOutputs <= 1) {
       throw new Error(`Script expected to produce multiple files; got ${nOutputs}`);
     }
-    this._console.log('Extracting outputs from /output');
+    this._console.debug('Extracting outputs from /output');
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present before resetFs!`)
     }
@@ -137,7 +148,7 @@ export class PyodideRunner implements FiolinRunner {
       indexURL: this._indexUrl,
       jsglobals: this._shared,
     });
-    this._pyodide.setStdout({ batched: (s) => { this._console.log(s) } });
+    this._pyodide.setStdout({ batched: (s) => { this._console.info(s) } });
     this._pyodide.setStderr({ batched: (s) => { this._console.error(s) } });
   }
 
@@ -149,41 +160,41 @@ export class PyodideRunner implements FiolinRunner {
     const pkgs: FiolinPyPackage[] = script.runtime.pythonPkgs || [];
     const mods: FiolinWasmModule[] = script.runtime.wasmModules || [];
     if (pkgs.length === 0 && mods.length === 0) {
-      this._console.log('No packages/modules to be installed');
+      this._console.debug('No packages/modules to be installed');
       return;
     }
     if (typeof this._installed !== 'undefined') {
       if (packagesDiffer(this._installed, script.runtime)) {
-        this._console.log(
+        this._console.debug(
           'Required packages/modules differ from those installed; reloading pyodide');
         this.loaded = this.load();
         await this.loaded;
       } else {
-        this._console.log('Required packages/modules already installed')
+        this._console.debug('Required packages/modules already installed')
         return;
       }
     }
     try {
-      this._console.log(`${pkgs.length} python packages to be installed`);
+      this._console.debug(`${pkgs.length} python packages to be installed`);
       this._shared['Object'] = Object;
       this._shared['fetch'] = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-        this._console.log(`micropip fetching ${input}`);
+        this._console.debug(`micropip fetching ${input}`);
         return fetch(input, init);
       }
       await this._pyodide.loadPackage('micropip');
       const micropip = this._pyodide.pyimport('micropip');
       for (const pkg of pkgs) {
         if (pkg.type === 'PYPI') {
-          this._console.log(`Installing package ${pkg.name}`);
+          this._console.debug(`Installing package ${pkg.name}`);
           await micropip.install(pkg.name, { deps: true });
         } else {
           throw new Error(`Unknown package type: ${pkg.type}`);
         }
       }
-      this._console.log(`${mods.length} wasm modules to be installed`);
+      this._console.debug(`${mods.length} wasm modules to be installed`);
       for (const mod of mods) {
         if (mod.name in this._loaders) {
-          this._console.log(`Installing module ${mod.name}`);
+          this._console.debug(`Installing module ${mod.name}`);
           const pystub = this._loaders[mod.name].pyWrapper(mod.name);
           writeFile(this._pyodide, `/home/pyodide/${mod.name}.py`, pystub);
           this._shared[mod.name] = await this._loaders[mod.name].loadModule();
@@ -191,7 +202,7 @@ export class PyodideRunner implements FiolinRunner {
           throw new Error(`Unknown module: ${mod.name}`);
         }
       }
-      this._console.log(`Finished installing packages/modules`);
+      this._console.debug(`Finished installing packages/modules`);
       this._installed = structuredClone(script.runtime);
     } finally {
       this._shared['Object'] = undefined;
@@ -205,12 +216,11 @@ export class PyodideRunner implements FiolinRunner {
       throw new Error(`this._pyodide should be present after loading!`)
     }
     if (forceReload) {
-      this._console.log('Reloading interpreter');
+      this._console.debug('Reloading interpreter');
       this.loaded = this.load();
       await this.loaded;
     }
-    this._stdout = '';
-    this._stderr = '';
+    this._log = [];
     this.resetShared();
     this._shared.argv = request.argv;
     try {
@@ -218,20 +228,20 @@ export class PyodideRunner implements FiolinRunner {
       await this.installPkgs(script);
       await this._pyodide.loadPackagesFromImports(script.code.python);
       await this.mountInputs(script, request.inputs);
-      this._console.log('Executing script.py');
+      this._console.debug('Executing script.py');
       await this._pyodide.runPythonAsync(getWrapperPy());
       if (this._shared.errorMsg) {
         return {
-          outputs: [], stdout: this._stdout, stderr: this._stderr,
+          outputs: [], log: this._log,
           error: new Error(this._shared.errorMsg), lineno: this._shared.errorLine
         };
       }
       const outputs = this.extractOutputs(script);
-      return { outputs, stdout: this._stdout, stderr: this._stderr };
+      return { outputs, log: this._log };
     } catch (e) {
       const error = toErrWithErrno(e);
       return {
-        outputs: [], stdout: this._stdout, stderr: this._stderr, error
+        outputs: [], log: this._log, error
       };
     }
   }

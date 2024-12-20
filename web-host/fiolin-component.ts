@@ -3,7 +3,7 @@ import { DeployOptions, deployScript } from './deploy-gen';
 import { Deferred } from '../common/deferred';
 import { getErrMsg, toErr } from '../common/errors';
 import { pFiolinScript } from '../common/parse-script';
-import { FiolinScript } from '../common/types';
+import { FiolinLogLevel, FiolinScript } from '../common/types';
 import { parseAs, ParseError } from '../common/parse';
 import { TypedWorker } from './typed-worker';
 import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
@@ -125,6 +125,7 @@ export class FiolinComponent {
   private readonly scriptTabs: HTMLDivElement;
   private readonly scriptEditor: HTMLDivElement;
   private readonly outputTerm: HTMLPreElement;
+  private readonly log: [FiolinLogLevel, string][];
   private readonly worker: TypedWorker;
   private readonly editor: Promise<FiolinScriptEditor>;
   public script: Promise<FiolinScript>;
@@ -145,6 +146,7 @@ export class FiolinComponent {
     this.inputFileText = getByRelIdAs(container, 'input-files-text', HTMLSpanElement);
     this.outputFileText = getByRelIdAs(container, 'output-files-text', HTMLSpanElement);
     this.outputTerm = getByRelIdAs(container, 'output-term', HTMLPreElement);
+    this.log = [];
     this.worker = new TypedWorker(opts?.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
     this.worker.onerror = (e) => {
       console.error(getErrMsg(e));
@@ -346,6 +348,7 @@ export class FiolinComponent {
     await this.readyToRun.promise;
     this.container.classList.remove('error');
     this.outputTerm.textContent = '';
+    this.log.length = 0;
     (await this.editor).clearErrors();
     this.outputFileText.title = '';
     this.outputFileText.textContent = '';
@@ -375,12 +378,9 @@ export class FiolinComponent {
     } else if (msg.type === 'PACKAGES_INSTALLED') {
       await this.script;
       this.readyToRun.resolve();
-    } else if (msg.type === 'STDOUT') {
-      this.outputTerm.textContent += msg.value + '\n';
-      this.outputTerm.scroll({ top: this.outputTerm.scrollHeight, behavior: 'smooth' });
-    } else if (msg.type === 'STDERR') {
-      console.warn(msg.value);
-      this.outputTerm.textContent += msg.value + '\n';
+    } else if (msg.type === 'LOG') {
+      this.log.push([msg.level, msg.value]);
+      this.outputTerm.textContent += msg.level[0] + ': ' + msg.value + '\n';
       this.outputTerm.scroll({ top: this.outputTerm.scrollHeight, behavior: 'smooth' });
     } else if (msg.type === 'SUCCESS') {
       this.fileChooser.disabled = false;

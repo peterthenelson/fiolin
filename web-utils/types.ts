@@ -1,19 +1,15 @@
-import { FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../common/types';
+import { FiolinLogLevel, FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../common/types';
 
 export type WorkerMessage = (
-  LoadedMessage | StdoutMessage | StderrMessage | InstallPackagesMessage |
+  LoadedMessage | LogMessage | InstallPackagesMessage |
   PackagesInstalledMessage | RunMessage | SuccessMessage | ErrorMessage
 );
 
 export interface LoadedMessage { type: 'LOADED' }
 
-export interface StdoutMessage {
-  type: 'STDOUT';
-  value: string;
-}
-
-export interface StderrMessage {
-  type: 'STDERR';
+export interface LogMessage {
+  type: 'LOG';
+  level: FiolinLogLevel;
   value: string;
 }
 

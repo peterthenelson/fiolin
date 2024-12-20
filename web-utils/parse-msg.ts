@@ -1,17 +1,16 @@
 import { pObj, ObjPath, pInst, pNum, pOnlyKeys, pProp, pPropU, pStr, pStrLit } from '../common/parse';
 import { pFiolinScript } from '../common/parse-script';
 import { pFiolinRunRequest, pFiolinRunResponse } from '../common/parse-run';
-import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, StderrMessage, StdoutMessage, SuccessMessage, WorkerMessage } from './types';
+import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, LogMessage, SuccessMessage, WorkerMessage } from './types';
+import { FiolinLogLevel } from '../common/types';
 
 export function pWorkerMessage(p: ObjPath, v: unknown): WorkerMessage {
   const o: object = pObj(p, v);
   const type: string = pProp(p, o, 'type', pStr).type;
   if (type === 'LOADED') {
     return pLoadedMessage(p, v);
-  } else if (type === 'STDOUT') {
-    return pStdoutMessage(p, v);
-  } else if (type === 'STDERR') {
-    return pStderrMessage(p, v);
+  } else if (type === 'LOG') {
+    return pLogMessage(p, v);
   } else if (type === 'INSTALL_PACKAGES') {
     return pInstallPackagesMessage(p, v);
   } else if (type === 'PACKAGES_INSTALLED') {
@@ -35,20 +34,17 @@ export function pLoadedMessage(p: ObjPath, v: unknown): LoadedMessage {
   };
 }
 
-export function pStdoutMessage(p: ObjPath, v: unknown): StdoutMessage {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type', 'value']);
-  return {
-    ...pProp(p, o, 'type', pStrLit('STDOUT')),
-    ...pProp(p, o, 'value', pStr),
-  };
+function pLevel(p: ObjPath, v: unknown): FiolinLogLevel {
+  if (v === 'DEBUG' || v === 'INFO' || v === 'WARN' || v === 'ERROR') return v;
+  throw p.err(`be DEBUG/INFO/WARN/ERROR, got ${v}`);
 }
 
-export function pStderrMessage(p: ObjPath, v: unknown): StderrMessage {
+export function pLogMessage(p: ObjPath, v: unknown): LogMessage {
   const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type', 'value']);
+  pOnlyKeys(p, o, ['type', 'level', 'value']);
   return {
-    ...pProp(p, o, 'type', pStrLit('STDERR')),
+    ...pProp(p, o, 'type', pStrLit('LOG')),
+    ...pProp(p, o, 'level', pLevel),
     ...pProp(p, o, 'value', pStr),
   };
 }

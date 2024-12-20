@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PyodideRunner } from './runner';
-import { FiolinScript, FiolinScriptRuntime } from './types';
+import { FiolinRunResponse, FiolinScript, FiolinScriptRuntime } from './types';
 import { dedent } from './indent';
 import { ImageMagickLoader } from './image-magick';
 import { readFileSync } from 'node:fs';
@@ -68,13 +68,21 @@ function multiRe(...res: RegExp[]): RegExp {
   return new RegExp(res.map((r) => r.source).join(''), 's');
 }
 
+function getDebug(resp: FiolinRunResponse): string {
+  return resp.log.filter(([ll, _]) => ll === 'DEBUG').map(([_, v]) => v + '\n').join('');
+}
+
+function getStdout(resp: FiolinRunResponse): string {
+  return resp.log.filter(([ll, _]) => ll === 'INFO').map(([_, v]) => v + '\n').join('');
+}
+
 describe('PyodideRunner', { timeout: 10000 }, () => {
   it('runs', async () => {
     const runner = mkRunner();
     const script = mkScript('print("hello")');
     const response = await runner.run(script, { inputs: [], argv: '' });
     expect(response.error).toBeUndefined();
-    expect(response.stdout).toMatch(/hello/);
+    expect(getStdout(response)).toMatch(/hello/);
   });
 
   describe('error handling', () => {
@@ -96,13 +104,13 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
       {
         const script = mkScript(`
           import sys
-          print('prints', file=sys.stderr)
+          print('prints')
           sys.exit(0) # exits but not treated as an error
-          print('does not print', file=sys.stderr)
+          print('does not print')
         `);
         const response = await runner.run(script, { inputs: [], argv: '' });
         expect(response.error).toBeUndefined();
-        expect(response.stderr).toEqual('prints\n');
+        expect(getStdout(response)).toEqual('prints\n');
       }
       {
         const script = mkScript(`
@@ -126,7 +134,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
       def dump(dir):
         for dirpath, _, filenames in os.walk(dir):
           for f in filenames:
-            print(os.path.join(dirpath, f), file=sys.stderr)
+            print(os.path.join(dirpath, f))
       dump('/input')
       dump('/output')
       # Copy inputs to outputs
@@ -139,7 +147,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         argv: ''
       });
       expect(response.error).toBeUndefined();
-      expect(response.stderr.trim().split('\n')).toEqual(['/input/foo']);
+      expect(getStdout(response).trim().split('\n')).toEqual(['/input/foo']);
       expect(response.outputs.length).toEqual(1);
       expect(response.outputs[0].name).toEqual('foo');
       expect(await response.outputs[0].text()).toEqual('first foo');
@@ -153,7 +161,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         argv: ''
       });
       expect(response.error).toBeUndefined();
-      expect(response.stderr.trim().split('\n').sort()).toEqual(
+      expect(getStdout(response).trim().split('\n').sort()).toEqual(
         ['/input/bar', '/input/foo']);
       expect(response.outputs.length).toEqual(2);
       expect(response.outputs.map((f) => f.name).sort()).toEqual(
@@ -256,12 +264,12 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         import idna
         import sys
         # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
-        print(idna.encode('ドメイン.テスト'), file=sys.stderr)
+        print(idna.encode('ドメイン.テスト'))
       `, { pkgs: ['idna'] });
       const response = await runner.run(script, { inputs: [], argv: '' });
       expect(response.error).toBeUndefined();
-      expect(response.stderr.trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
-      expect(response.stdout).toMatch(multiRe(
+      expect(getStdout(response).trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
+      expect(getDebug(response)).toMatch(multiRe(
         /Resetting FS.*/,
         /1 python packages to be installed.*/,
         /Installing package idna.*/
@@ -274,13 +282,13 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         import idna
         import sys
         # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
-        print(idna.encode('ドメイン.テスト'), file=sys.stderr)
+        print(idna.encode('ドメイン.テスト'))
       `, { pkgs: ['idna'] });
       await runner.installPkgs(script);
       const response = await runner.run(script, { inputs: [], argv: '' });
       expect(response.error).toBeUndefined();
-      expect(response.stderr.trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
-      expect(response.stdout).toMatch(multiRe(
+      expect(getStdout(response).trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
+      expect(getDebug(response)).toMatch(multiRe(
         /Resetting FS.*/,
         /Required packages\/modules already installed.*/,
       ));
@@ -297,7 +305,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
       {
         const response = await runner.run(script, { inputs: [], argv: '' });
         expect(response.error).toBeUndefined();
-        expect(response.stdout).toMatch(multiRe(
+        expect(getDebug(response)).toMatch(multiRe(
           /Resetting FS.*/,
           /1 python packages to be installed.*/,
           /Installing package idna.*/
@@ -306,7 +314,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
       {
         const response = await runner.run(script, { inputs: [], argv: '' });
         expect(response.error).toBeUndefined();
-        expect(response.stdout).toMatch(multiRe(
+        expect(getDebug(response)).toMatch(multiRe(
           /Resetting FS.*/,
           /Required packages\/modules already installed.*/,
         ));
@@ -324,7 +332,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
       {
         const response = await runner.run(script, { inputs: [], argv: '' });
         expect(response.error).toBeUndefined();
-        expect(response.stdout).toMatch(multiRe(
+        expect(getDebug(response)).toMatch(multiRe(
           /Resetting FS.*/,
           /1 python packages to be installed.*/,
           /Installing package idna.*/
@@ -334,7 +342,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         script.runtime.pythonPkgs?.push({ type: 'PYPI', name: 'six' });
         const response = await runner.run(script, { inputs: [], argv: '' });
         expect(response.error).toBeUndefined();
-        expect(response.stdout).toMatch(multiRe(
+        expect(getDebug(response)).toMatch(multiRe(
           /Resetting FS.*/,
           /Required packages\/modules differ from those installed.*/,
           /2 python packages to be installed.*/,
@@ -351,12 +359,12 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
       const script = mkScript(`
         import imagemagick
         import sys
-        print(imagemagick.Magick.imageMagickVersion, file=sys.stderr)
+        print(imagemagick.Magick.imageMagickVersion)
       `, { mods: ['imagemagick'] });
       const response = await runner.run(script, { inputs: [], argv: '' });
       expect(response.error).toBeUndefined();
-      expect(response.stderr.trim()).toMatch(/ImageMagick.*imagemagick.org/);
-      expect(response.stdout).toMatch(multiRe(
+      expect(getStdout(response).trim()).toMatch(/ImageMagick.*imagemagick.org/);
+      expect(getDebug(response)).toMatch(multiRe(
         /Resetting FS.*/,
         /1 wasm modules to be installed.*/,
         /Installing module imagemagick.*/
@@ -368,13 +376,13 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
       const script = mkScript(`
         import imagemagick
         import sys
-        print(imagemagick.Magick.imageMagickVersion, file=sys.stderr)
+        print(imagemagick.Magick.imageMagickVersion)
       `, { mods: ['imagemagick'] });
       await runner.installPkgs(script);
       const response = await runner.run(script, { inputs: [], argv: '' });
       expect(response.error).toBeUndefined();
-      expect(response.stderr.trim()).toMatch(/ImageMagick.*imagemagick.org/);
-      expect(response.stdout).toMatch(multiRe(
+      expect(getStdout(response).trim()).toMatch(/ImageMagick.*imagemagick.org/);
+      expect(getDebug(response)).toMatch(multiRe(
         /Resetting FS.*/,
         /Required packages\/modules already installed.*/,
       ));
@@ -390,7 +398,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
       {
         const response = await runner.run(script, { inputs: [], argv: '' });
         expect(response.error).toBeUndefined();
-        expect(response.stdout).toMatch(multiRe(
+        expect(getDebug(response)).toMatch(multiRe(
           /Resetting FS.*/,
           /1 wasm modules to be installed.*/,
           /Installing module imagemagick.*/
@@ -399,7 +407,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
       {
         const response = await runner.run(script, { inputs: [], argv: '' });
         expect(response.error).toBeUndefined();
-        expect(response.stdout).toMatch(multiRe(
+        expect(getDebug(response)).toMatch(multiRe(
           /Resetting FS.*/,
           /Required packages\/modules already installed.*/,
         ));

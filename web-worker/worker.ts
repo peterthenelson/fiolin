@@ -21,8 +21,10 @@ async function load(): Promise<void> {
   try {
     const tmp = new PyodideRunner({
       console: {
-        log: (s) => postMessage({ type: 'STDOUT', value: s }),
-        error: (s) => postMessage({ type: 'STDERR', value: s }),
+        debug: (s) => postMessage({ type: 'LOG', level: 'DEBUG', value: s }),
+        info: (s) => postMessage({ type: 'LOG', level: 'INFO', value: s }),
+        warn: (s) => postMessage({ type: 'LOG', level: 'WARN', value: s }),
+        error: (s) => postMessage({ type: 'LOG', level: 'ERROR', value: s }),
       },
       loaders: onlineWasmLoaders(),
     });

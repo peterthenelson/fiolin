@@ -10,7 +10,6 @@ A not-necessarily-exhaustive list of TODOs:
     package so that people can import fiolin from their fiolin-template cloned
     projects and do local development. Update the repo template as needed.
 - Core functionality
-  - Debug logging vs stdout
   - Some kind of flag parsing functionality
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
@@ -48,6 +47,7 @@ A not-necessarily-exhaustive list of TODOs:
     - Why is monaco occasionally triggering a request for clipboard permissions?
     - Add some transition animations for the buttons to invite interaction.
   - Controls:
+    - Filtering in output terminal by log level
     - Improve the "simple" file UI to allow for resetting and redownloading.
     - Advanced UI options other than the "simple" version.
   - Deployment:
