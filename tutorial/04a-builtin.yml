@@ -1,0 +1,15 @@
+meta:
+  title: 4a. Built-in python libraries and packages
+  author: Peter Nelson
+  description: >
+    Pyodide includes the python system libraries, along with pre-built versions
+    of these common packages: https://pyodide.org/en/stable/usage/packages-in-pyodide.html
+
+
+    No special configuration is needed to use these; just import them in your
+    python script and go!
+interface:
+  inputAccept: image/*
+  inputFiles: SINGLE
+  outputFiles: NONE
+runtime: {}
