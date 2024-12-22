@@ -1,0 +1,13 @@
+meta:
+  title: 3b. Limiting to particular file extensions
+  author: Peter Nelson
+  description: >
+    The inputAccept attribute can be used to configure the file chooser to only
+    show files of a particular type (e.g., .jpg) or a whole category of types
+    (e.g., image/*). See
+    https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept for
+    more details on unique file type specifiers.
+interface:
+  inputFiles: SINGLE
+  outputFiles: NONE
+runtime: {}

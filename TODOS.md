@@ -17,7 +17,6 @@ A not-necessarily-exhaustive list of TODOs:
   - Some kind of (interactive?) canvas functionality
 - Scripts
   - Playground examples
-    - Demonstrating inputAccept
     - Demonstrating matplotlib (after I get it to work)
     - Demonstrating PyPI packages
     - Demonstrating ImageMagick or some WASM thing

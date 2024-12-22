@@ -1,5 +1,5 @@
 meta:
-  title: 3b. Number of output files
+  title: 3c. Number of output files
   author: Peter Nelson
   description: >
     As with input files, we can reconfigure the expected number of output files.
