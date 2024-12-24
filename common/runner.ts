@@ -224,9 +224,9 @@ export class PyodideRunner implements FiolinRunner {
     this.resetShared();
     this._shared.argv = request.argv;
     try {
-      this.resetFs();
       await this.installPkgs(script);
       await this._pyodide.loadPackagesFromImports(script.code.python);
+      this.resetFs();
       await this.mountInputs(script, request.inputs);
       this._console.debug('Executing script.py');
       await this._pyodide.runPythonAsync(getWrapperPy());

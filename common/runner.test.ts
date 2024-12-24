@@ -257,7 +257,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
     });
   });
 
-  describe('python package installation', { timeout: 15000 }, () => {
+  describe('python package installation', { timeout: 25000 }, () => {
     it('automatically installs pkgs', async () => {
       const runner = mkRunner();
       const script = mkScript(`
@@ -266,13 +266,13 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
         print(idna.encode('ドメイン.テスト'))
       `, { pkgs: ['idna'] });
-      const response = await runner.run(script, { inputs: [], argv: '' });
+      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
       expect(getDebug(response)).toMatch(multiRe(
-        /Resetting FS.*/,
         /1 python packages to be installed.*/,
-        /Installing package idna.*/
+        /Installing package idna.*/,
+        /Resetting FS.*/
       ));
     });
 
@@ -285,12 +285,12 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         print(idna.encode('ドメイン.テスト'))
       `, { pkgs: ['idna'] });
       await runner.installPkgs(script);
-      const response = await runner.run(script, { inputs: [], argv: '' });
+      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
       expect(getDebug(response)).toMatch(multiRe(
-        /Resetting FS.*/,
         /Required packages\/modules already installed.*/,
+        /Resetting FS.*/
       ));
     });
 
@@ -303,20 +303,20 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         print(idna.encode('ドメイン.テスト'), file=sys.stderr)
       `, { pkgs: ['idna'] });
       {
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
-          /Resetting FS.*/,
           /1 python packages to be installed.*/,
-          /Installing package idna.*/
+          /Installing package idna.*/,
+          /Resetting FS.*/
         ));
       }
       {
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
-          /Resetting FS.*/,
           /Required packages\/modules already installed.*/,
+          /Resetting FS.*/
         ));
       }
     });
@@ -330,30 +330,30 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         print(idna.encode('ドメイン.テスト'), file=sys.stderr)
       `, { pkgs: ['idna'] });
       {
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
-          /Resetting FS.*/,
           /1 python packages to be installed.*/,
-          /Installing package idna.*/
+          /Installing package idna.*/,
+          /Resetting FS.*/
         ));
       }
       {
         script.runtime.pythonPkgs?.push({ type: 'PYPI', name: 'six' });
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
-          /Resetting FS.*/,
           /Required packages\/modules differ from those installed.*/,
           /2 python packages to be installed.*/,
           /Installing package idna.*/,
-          /Installing package six.*/
+          /Installing package six.*/,
+          /Resetting FS.*/
         ));
       }
     });
   });
 
-  describe('wasm module installation', { timeout: 15000 }, () => {
+  describe('wasm module installation', { timeout: 25000 }, () => {
     it('automatically installs mods', async () => {
       const runner = mkRunner();
       const script = mkScript(`
@@ -361,13 +361,13 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         import sys
         print(imagemagick.Magick.imageMagickVersion)
       `, { mods: ['imagemagick'] });
-      const response = await runner.run(script, { inputs: [], argv: '' });
+      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim()).toMatch(/ImageMagick.*imagemagick.org/);
       expect(getDebug(response)).toMatch(multiRe(
-        /Resetting FS.*/,
         /1 wasm modules to be installed.*/,
-        /Installing module imagemagick.*/
+        /Installing module imagemagick.*/,
+        /Resetting FS.*/
       ));
     });
 
@@ -379,12 +379,12 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         print(imagemagick.Magick.imageMagickVersion)
       `, { mods: ['imagemagick'] });
       await runner.installPkgs(script);
-      const response = await runner.run(script, { inputs: [], argv: '' });
+      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim()).toMatch(/ImageMagick.*imagemagick.org/);
       expect(getDebug(response)).toMatch(multiRe(
-        /Resetting FS.*/,
         /Required packages\/modules already installed.*/,
+        /Resetting FS.*/
       ));
     });
 
@@ -396,20 +396,20 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
         print(imagemagick.Magick.imageMagickVersion, file=sys.stderr)
       `, { mods: ['imagemagick'] });
       {
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
-          /Resetting FS.*/,
           /1 wasm modules to be installed.*/,
-          /Installing module imagemagick.*/
+          /Installing module imagemagick.*/,
+          /Resetting FS.*/
         ));
       }
       {
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
-          /Resetting FS.*/,
           /Required packages\/modules already installed.*/,
+          /Resetting FS.*/
         ));
       }
     });

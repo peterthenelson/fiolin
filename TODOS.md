@@ -46,7 +46,6 @@ A not-necessarily-exhaustive list of TODOs:
   - 3p page: modal warnings, dev avatar, localstorage of approvals
   - Editor and playground:
     - Bug where bad package pre-install prevents any future actions from working
-    - Bug on reload/install where input file doesn't mount (errno=44)
     - Why is monaco occasionally triggering a request for clipboard permissions?
     - Add some transition animations for the buttons to invite interaction.
   - Controls:
