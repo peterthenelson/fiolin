@@ -1,0 +1,15 @@
+meta:
+  title: 4c. PyPI pure-Python packages
+  author: Peter Nelson
+  description: >
+    You can configure fiolin to install packages from PyPI. They must, however,
+    be pure python and not have any compiled C code. See here for more details:
+    https://pyodide.org/en/stable/usage/faq.html#why-can-t-micropip-find-a-pure-python-wheel-for-a-package
+interface:
+  inputAccept: .pdf
+  inputFiles: SINGLE
+  outputFiles: SINGLE
+runtime:
+  pythonPkgs:
+    - type: PYPI
+      name: idna

@@ -15,10 +15,14 @@ import traceback
 def argv():
   return list(js.argv.split())
 
-def get_input_basename():
-  """Gets the (assumed to be single) input file basename."""
+def get_input_basename(suffix=''):
+  """Gets the (assumed to be single) input file basename.
+  
+  Optionally adds a suffix, which is helpful for making output file names.
+  """
   if len(js.inputs):
-    return js.inputs[0]
+    stem, ext = os.path.splitext(js.inputs[0])
+    return stem + suffix + ext
   else:
     raise ValueError(
       f'Expected a single input file but got {js.inputs}; get_input_basename() ' +

@@ -5,7 +5,7 @@ documentation for more information.
 """
 def argv():
   return []
-def get_input_basename():
+def get_input_basename(suffix=''):
   return ''
 def get_input_path():
   return ''
