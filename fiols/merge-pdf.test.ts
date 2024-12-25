@@ -4,7 +4,7 @@ import { NodeFiolinRunner } from '../utils/runner';
 import path from 'node:path';
 import { pkgPath } from '../utils/pkg-path';
 
-describe('merge-pdf', { timeout: 12000 }, () => {
+describe('merge-pdf', () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
 
   beforeEach(() => { output = new FiolinTmpDir(); });

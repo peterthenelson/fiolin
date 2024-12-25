@@ -1,1 +1,1 @@
-npm test -- --no-watch --test-timeout=30000
+npm test -- --no-watch

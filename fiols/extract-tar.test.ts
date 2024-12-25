@@ -4,7 +4,7 @@ import { NodeFiolinRunner } from '../utils/runner';
 import { readdirSync } from 'node:fs';
 import { pkgPath } from '../utils/pkg-path';
 
-describe('extract-tar', { timeout: 12000 }, () => {
+describe('extract-tar', () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
 
   beforeEach(() => { output = new FiolinTmpDir(); });

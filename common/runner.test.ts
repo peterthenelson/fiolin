@@ -76,7 +76,7 @@ function getStdout(resp: FiolinRunResponse): string {
   return resp.log.filter(([ll, _]) => ll === 'INFO').map(([_, v]) => v + '\n').join('');
 }
 
-describe('PyodideRunner', { timeout: 10000 }, () => {
+describe('PyodideRunner', () => {
   it('runs', async () => {
     const runner = mkRunner();
     const script = mkScript('print("hello")');
@@ -257,7 +257,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
     });
   });
 
-  describe('python package installation', { timeout: 25000 }, () => {
+  describe('python package installation', () => {
     it('automatically installs pkgs', async () => {
       const runner = mkRunner();
       const script = mkScript(`
@@ -353,7 +353,7 @@ describe('PyodideRunner', { timeout: 10000 }, () => {
     });
   });
 
-  describe('wasm module installation', { timeout: 25000 }, () => {
+  describe('wasm module installation', () => {
     it('automatically installs mods', async () => {
       const runner = mkRunner();
       const script = mkScript(`
