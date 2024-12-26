@@ -1,5 +1,5 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule } from './types';
+import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule, InstallPkgsError } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
 import { getFiolinPy, getWrapperPy } from './pylib';
 import { cmpSet } from './cmp';
@@ -186,9 +186,13 @@ export class PyodideRunner implements FiolinRunner {
       for (const pkg of pkgs) {
         if (pkg.type === 'PYPI') {
           this._console.debug(`Installing package ${pkg.name}`);
-          await micropip.install(pkg.name, { deps: true });
+          try {
+            await micropip.install(pkg.name, { deps: true });
+          } catch (cause) {
+            throw new InstallPkgsError('Failed to install package', { cause });
+          }
         } else {
-          throw new Error(`Unknown package type: ${pkg.type}`);
+          throw new InstallPkgsError(`Unknown package type: ${pkg.type}`);
         }
       }
       this._console.debug(`${mods.length} wasm modules to be installed`);
@@ -197,9 +201,13 @@ export class PyodideRunner implements FiolinRunner {
           this._console.debug(`Installing module ${mod.name}`);
           const pystub = this._loaders[mod.name].pyWrapper(mod.name);
           writeFile(this._pyodide, `/home/pyodide/${mod.name}.py`, pystub);
-          this._shared[mod.name] = await this._loaders[mod.name].loadModule();
+          try {
+            this._shared[mod.name] = await this._loaders[mod.name].loadModule();
+          } catch (cause) {
+            throw new InstallPkgsError('Failed to install module', { cause });
+          }
         } else {
-          throw new Error(`Unknown module: ${mod.name}`);
+          throw new InstallPkgsError(`Unknown module: ${mod.name}`);
         }
       }
       this._console.debug(`Finished installing packages/modules`);

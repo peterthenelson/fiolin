@@ -37,6 +37,13 @@ export abstract class FiolinWasmLoader {
   abstract loadModule(): Promise<any>;
 }
 
+export class InstallPkgsError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'InstallPkgsError';
+  }
+}
+
 export interface FiolinRunner {
   // Install any necessary external packages to run the script. If the runner
   // has previously installed packages, then compares the requested packages to

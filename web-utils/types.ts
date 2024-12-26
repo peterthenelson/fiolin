@@ -1,4 +1,5 @@
 import { FiolinLogLevel, FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../common/types';
+import { toErr } from '../common/errors';
 
 export type WorkerMessage = (
   LoadedMessage | LogMessage | InstallPackagesMessage |
@@ -34,5 +35,12 @@ export interface SuccessMessage {
 export interface ErrorMessage {
   type: 'ERROR';
   error: Error;
+  name?: string;
   lineno?: number;
+}
+
+export function mkErrorMessage(e: unknown, lineno?: number): ErrorMessage {
+  const em: ErrorMessage = { type: 'ERROR', error: toErr(e), lineno };
+  em.name = em.error.name;
+  return em;
 }

@@ -12,4 +12,4 @@ interface:
 runtime:
   pythonPkgs:
     - type: PYPI
-      name: idna
+      name: wrong-pkg

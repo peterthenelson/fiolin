@@ -8,6 +8,7 @@ export class ParseError extends Error {
 
   constructor(objPath: ObjPath, message: string) {
     super(message);
+    this.name = 'ParseError';
     this.objPath = objPath;
   }
 }

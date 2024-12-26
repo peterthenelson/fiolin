@@ -87,10 +87,15 @@ export function pSuccessMessage(p: ObjPath, v: unknown): SuccessMessage {
 
 export function pErrorMessage(p: ObjPath, v: unknown): ErrorMessage {
   const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type', 'error', 'lineno']);
-  return {
+  pOnlyKeys(p, o, ['type', 'error', 'name', 'lineno']);
+  const em = {
     ...pProp(p, o, 'type', pStrLit('ERROR')),
     ...pProp(p, o, 'error', pInst(Error)),
+    ...pProp(p, o, 'name', pStr),
     ...pPropU(p, o, 'lineno', pNum),
   };
+  if (em.name) {
+    em.error.name = em.name;
+  }
+  return em;
 }

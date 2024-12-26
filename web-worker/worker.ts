@@ -1,10 +1,9 @@
 import { PyodideRunner } from '../common/runner';
-import { toErr } from '../common/errors';
 import { parseAs } from '../common/parse';
-import { InstallPackagesMessage, RunMessage, WorkerMessage } from '../web-utils/types';
+import { mkErrorMessage, InstallPackagesMessage, RunMessage, WorkerMessage } from '../web-utils/types';
 import { onlineWasmLoaders } from '../web-utils/loaders';
 import { pWorkerMessage } from '../web-utils/parse-msg';
-import { FiolinScript } from '../common/types';
+import { FiolinScript, InstallPkgsError } from '../common/types';
 
 // Typed messaging
 const _rawPost = self.postMessage;
@@ -32,7 +31,7 @@ async function load(): Promise<void> {
     runner = tmp;
     postMessage({ type: 'LOADED' });
   } catch (e) {
-    postMessage({ type: 'ERROR', error: toErr(e) });
+    postMessage(mkErrorMessage(e));
   }
 }
 const loaded = load();
@@ -55,12 +54,12 @@ async function onRun(msg: RunMessage): Promise<void> {
   try {
     const response = await runner.run(msg.script, msg.request);
     if (response.error) {
-      postMessage({ type: 'ERROR', error: response.error, lineno: response.lineno });
+      postMessage(mkErrorMessage(response.error, response.lineno));
     } else {
       postMessage({ type: 'SUCCESS', response });
     }
   } catch (e) {
-    postMessage({ type: 'ERROR', error: toErr(e) });
+    postMessage(mkErrorMessage(e));
   }
 }
 
@@ -76,6 +75,6 @@ async function onInstallPackages(msg: InstallPackagesMessage): Promise<void> {
     await runner.installPkgs(script);
     postMessage({ type: 'PACKAGES_INSTALLED' });
   } catch (e) {
-    postMessage({ type: 'ERROR', error: toErr(e) });
+    postMessage(mkErrorMessage(e));
   }
 }

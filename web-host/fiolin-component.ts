@@ -406,6 +406,11 @@ export class FiolinComponent {
         console.warn(msg.error);
       }
       this.outputTerm.textContent = msg.error.toString();
+      // Counterintuitive, but we want to unblock running, as it will just
+      // attempt to reinstall on run.
+      if (msg.error.name === 'InstallPkgsError') {
+        this.readyToRun.resolve();
+      }
     } else {
       this.container.classList.add('error');
       this.outputTerm.textContent = `Unexpected event data: ${msg}`;
