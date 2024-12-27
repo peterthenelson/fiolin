@@ -344,6 +344,7 @@ export class FiolinComponent {
 
   private async runScript(files: File[]) {
     this.fileChooser.disabled = true;
+    this.fileChooser.value = '';
     const script = await this.script;
     await this.readyToRun.promise;
     this.container.classList.remove('error');

@@ -49,7 +49,7 @@ A not-necessarily-exhaustive list of TODOs:
     - Add some transition animations for the buttons to invite interaction.
   - Controls:
     - Filtering in output terminal by log level
-    - Improve the "simple" file UI to allow for resetting and redownloading.
+    - Improve the "simple" file UI to better work for multiple files
     - Advanced UI options other than the "simple" version.
   - Deployment:
     - Deploy script in the template package.json
