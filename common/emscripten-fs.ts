@@ -1,7 +1,19 @@
-import { PyodideInterface } from 'pyodide';
 import { toErr } from './errors';
 
+function pathJoin(x: string, y: string): string {
+  if (x.charAt(x.length - 1) === '/') {
+    return x + y;
+  } else {
+    return x + '/' + y;
+  }
+}
+
 export function toErrWithErrno(e: unknown, prefix?: string): Error {
+  console.warn(typeof e);
+  console.warn(e === null);
+  console.warn('errno' in (e as object));
+  console.warn((e as Record<string, any>)['errno']);
+  console.warn(e);
   if (typeof e === 'object' && e !== null && 'errno' in e) {
     // TODO: Actually translate the errnos to human readable form
     const s = prefix ? prefix + ': ' : '';
@@ -17,27 +29,27 @@ function isNotFound(e: unknown): boolean {
   return typeof e === 'object' && e !== null && 'errno' in e && e.errno === 44;
 }
 
-export function mkDir(pyodide: PyodideInterface, path: string) {
+export function mkDir(fs: any, path: string) {
   try {
-    pyodide.FS.mkdir(path);
+    fs.mkdir(path);
   } catch (e) {
     throw toErrWithErrno(e, `mkDir("${path}") failed`);
   }
 }
 
-export function rmRf(pyodide: PyodideInterface, path: string) {
+export function rmRf(fs: any, path: string) {
   try {
-    const stats = pyodide.FS.stat(path);
-    if (pyodide.FS.isDir(stats.mode)) {
-      for (const f of pyodide.FS.readdir(path)) {
+    const stats = fs.stat(path);
+    if (fs.isDir(stats.mode)) {
+      for (const f of fs.readdir(path)) {
         const filePath = path + '/' + f;
         if (filePath !== path + '/.' && filePath !== path + '/..') {
-          rmRf(pyodide, filePath);
+          rmRf(fs, filePath);
         }
       }
-      pyodide.FS.rmdir(path);
+      fs.rmdir(path);
     } else {
-      pyodide.FS.unlink(path);
+      fs.unlink(path);
     }
   } catch (e) {
     if (isNotFound(e)) return;
@@ -45,18 +57,52 @@ export function rmRf(pyodide: PyodideInterface, path: string) {
   }
 }
 
-export function readFile(pyodide: PyodideInterface, path: string): ArrayBuffer {
+export function readFile(fs: any, path: string): ArrayBuffer {
   try {
-    return pyodide.FS.readFile(path);
+    return fs.readFile(path);
   } catch (e) {
     throw toErrWithErrno(e, `readFile("${path}") failed`);
   }
 }
 
-export function writeFile(pyodide: PyodideInterface, path: string, contents: string | ArrayBuffer) {
+export function writeFile(fs: any, path: string, contents: string | ArrayBuffer) {
   try {
-    return pyodide.FS.writeFile(path, contents);
+    return fs.writeFile(path, contents);
   } catch (e) {
     throw toErrWithErrno(e, `writeFile("${path}") failed`);
   }
+}
+
+export function listDir(fs: any, path: string, recursive?: boolean): string[] {
+  const files: string[] = [];
+  const dirs: string[] = [path];
+  while (dirs.length > 0) {
+    path = dirs.pop()!;
+    let dlist: string[] = [];
+    try {
+      dlist = fs.readdir(path);
+    } catch (e) {
+      throw toErrWithErrno(e, `readdir("${path}") failed`);
+    }
+    for (let f of dlist) {
+      if (f === '.' || f === '..') continue;
+      f = pathJoin(path, f);
+      console.log(f);
+      files.push(f);
+      // Note: bug in emscripten file system; /proc/self/fd doesn't (yet)
+      // support stat action.
+      if (recursive && f !== '/proc/self/fd') {
+        let isDir = false;
+        try {
+          isDir = fs.isDir(fs.stat(f).mode);
+        } catch (e) {
+          throw toErrWithErrno(e, `stat("${f}") failed`);
+        }
+        if (isDir) {
+          dirs.push(f);
+        }
+      }
+    }
+  }
+  return files;
 }
