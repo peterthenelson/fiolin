@@ -3,12 +3,17 @@ import { parseAs } from '../common/parse';
 import { mkErrorMessage, InstallPackagesMessage, RunMessage, WorkerMessage } from '../web-utils/types';
 import { onlineWasmLoaders } from '../web-utils/loaders';
 import { pWorkerMessage } from '../web-utils/parse-msg';
-import { FiolinScript, InstallPkgsError } from '../common/types';
+import { FiolinScript } from '../common/types';
 
 // Typed messaging
 const _rawPost = self.postMessage;
 function postMessage(msg: WorkerMessage) {
-  _rawPost(msg);
+  try {
+    _rawPost(msg);
+  } catch (e) {
+    console.error(`Failed to postMessage with argument ${msg}; ${e}`);
+    _rawPost(mkErrorMessage(new Error('Unserializable message')));
+  }
 }
 self.onmessage = async (e) => {
   const msg: WorkerMessage = parseAs(pWorkerMessage, e.data);

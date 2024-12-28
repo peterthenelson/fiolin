@@ -9,11 +9,6 @@ function pathJoin(x: string, y: string): string {
 }
 
 export function toErrWithErrno(e: unknown, prefix?: string): Error {
-  console.warn(typeof e);
-  console.warn(e === null);
-  console.warn('errno' in (e as object));
-  console.warn((e as Record<string, any>)['errno']);
-  console.warn(e);
   if (typeof e === 'object' && e !== null && 'errno' in e) {
     // TODO: Actually translate the errnos to human readable form
     const s = prefix ? prefix + ': ' : '';

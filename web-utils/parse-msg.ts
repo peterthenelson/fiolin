@@ -95,7 +95,11 @@ export function pErrorMessage(p: ObjPath, v: unknown): ErrorMessage {
     ...pPropU(p, o, 'lineno', pNum),
   };
   if (em.name) {
-    em.error.name = em.name;
+    try {
+      em.error.name = em.name;
+    } catch (e) {
+      console.error(`Failed to set name field of ${em.error} to ${em.name}`);
+    }
   }
   return em;
 }
