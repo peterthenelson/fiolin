@@ -14,6 +14,7 @@ A not-necessarily-exhaustive list of TODOs:
   - Get some other emscripten binary working in the same file-system as pyodide.
     (xpdf? imagemagick?)
       - Fix unsafe-eval issue with imagemagick
+      - Figure out how to actually read image files in imagemagick
   - Some kind of (interactive?) canvas functionality
 - Scripts
   - Playground examples

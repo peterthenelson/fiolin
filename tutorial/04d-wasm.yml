@@ -1,0 +1,13 @@
+meta:
+  title: 4d. Wasm modules
+  author: Peter Nelson
+  description: >
+    You can configure fiolin to install some pre-selected WASM modules. This
+    currently is limited to imagemagick, although there are some bugs that still
+    need to be ironed out.
+interface:
+  inputFiles: NONE
+  outputFiles: SINGLE
+runtime:
+  wasmModules:
+    - name: wrong-module

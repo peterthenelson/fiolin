@@ -29,9 +29,10 @@ const thirdPartyCsp = commonCsp.concat('connect-src https://*.github.io http://l
 
 // The worker/script runner can use WASM and access pyodide and pypi packages.
 // TODO: Can this be narrowed?
+// TODO: Get imagemagick to work without unsafe-eval
 const workerCsp = [
   "default-src 'self'",
-  "script-src 'wasm-unsafe-eval' https://cdn.jsdelivr.net",
+  "script-src 'unsafe-eval' 'wasm-unsafe-eval' https://cdn.jsdelivr.net",
   "connect-src 'self' https://cdn.jsdelivr.net https://pypi.org https://files.pythonhosted.org"
 ];
 
