@@ -1,3 +1,4 @@
+import type { PyodideInterface } from 'pyodide';
 import { FiolinScript } from './fiolin-script';
 
 // Used for encapsulating running a script.
@@ -34,7 +35,7 @@ export abstract class FiolinWasmLoader {
   pyWrapper(moduleName: string): string {
     return `import js\nfor k, v in js.${moduleName}.object_entries():\n  globals()[k] = v\n`;
   }
-  abstract loadModule(): Promise<any>;
+  abstract loadModule(pyodide: PyodideInterface): Promise<any>;
 }
 
 export class InstallPkgsError extends Error {

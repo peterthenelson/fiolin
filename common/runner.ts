@@ -202,7 +202,7 @@ export class PyodideRunner implements FiolinRunner {
           const pystub = this._loaders[mod.name].pyWrapper(mod.name);
           writeFile(this._pyodide.FS, `/home/pyodide/${mod.name}.py`, pystub);
           try {
-            this._shared[mod.name] = await this._loaders[mod.name].loadModule();
+            this._shared[mod.name] = await this._loaders[mod.name].loadModule(this._pyodide);
           } catch (cause) {
             throw new InstallPkgsError('Failed to install module', { cause });
           }

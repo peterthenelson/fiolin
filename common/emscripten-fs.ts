@@ -20,7 +20,7 @@ export function toErrWithErrno(e: unknown, prefix?: string): Error {
   return toErr(e);
 }
 
-function isNotFound(e: unknown): boolean {
+export function isNotFound(e: unknown): boolean {
   return typeof e === 'object' && e !== null && 'errno' in e && e.errno === 44;
 }
 

@@ -11,16 +11,14 @@ A not-necessarily-exhaustive list of TODOs:
     projects and do local development. Update the repo template as needed.
 - Core functionality
   - Some kind of flag parsing functionality
-  - Get some other emscripten binary working in the same file-system as pyodide.
-    (xpdf? imagemagick?)
+  - Get some emscripten binaries working in the same file-system as pyodide.
+    (imagemagick done; maybe a document or ffmpeg one next)
       - Fix unsafe-eval issue with imagemagick
-      - Figure out how to actually read image files in imagemagick
+      - Figure out how to pass in bytes to imagemagick read
   - Some kind of (interactive?) canvas functionality
 - Scripts
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)
-    - Demonstrating PyPI packages
-    - Demonstrating ImageMagick or some WASM thing
     - Demonstrating advanced UI
   - More file-conversion scripts for real tasks
     - SVG recolor
