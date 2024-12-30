@@ -25,7 +25,6 @@ A not-necessarily-exhaustive list of TODOs:
     - Extracting text and tables from PDFs
     - ImageMagick:
       - Resize / adjust quality of / trim image
-      - View or strip EXIF / other metadata
       - Make ICOs
       - Make thumbnails
       - Montage, append

@@ -1,0 +1,16 @@
+meta:
+  title: Strip Exif Data 
+  author: Peter Nelson
+  description: >
+    Strip out the potentially privacy compromising metadata from your pictures.
+  extensions:
+    - jpg
+    - jpeg
+    - png
+    - tiff
+    - tif
+interface:
+  inputFiles: SINGLE
+  inputAccept: .jpg,.jpeg,.png,.tiff,.tif
+  outputFiles: SINGLE
+runtime: {}

@@ -1,4 +1,4 @@
-import { PyodideRunner } from '../common/runner';
+import { ConsoleLike, PyodideRunner } from '../common/runner';
 import { FiolinRunRequest, FiolinScript } from '../common/types';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -13,12 +13,13 @@ export class NodeFiolinRunner {
   public readonly outputDir: string;
   private readonly _runner: PyodideRunner;
 
-  constructor(fiolName: string, outputDir: string) {
+  constructor(fiolName: string, outputDir: string, console?: ConsoleLike) {
     this.script = loadScript(fiolName);
     this.outputDir = outputDir;
     // For some mysterious reason the indexUrl is needed but only in tests. But
     // it doesn't seem to break the run command, so whatever.
     this._runner = new PyodideRunner({
+      console,
       indexUrl: pkgPath('node_modules/pyodide'),
       loaders: offlineWasmLoaders(),
     });
