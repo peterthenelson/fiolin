@@ -80,7 +80,7 @@ describe('PyodideRunner', () => {
   it('runs', async () => {
     const runner = mkRunner();
     const script = mkScript('print("hello")');
-    const response = await runner.run(script, { inputs: [], argv: '' });
+    const response = await runner.run(script, { inputs: [] });
     expect(response.error).toBeUndefined();
     expect(getStdout(response)).toMatch(/hello/);
   });
@@ -93,7 +93,7 @@ describe('PyodideRunner', () => {
         raise Exception('not ok') # line 3
         print('ok again') # line 4
       `);
-      const response = await runner.run(script, { inputs: [], argv: '' });
+      const response = await runner.run(script, { inputs: [] });
       expect(response.error).not.toBeUndefined();
       expect(response.error?.message).toMatch(/raise Exception\('not ok'\)/);
       expect(response.lineno).toEqual(3);
@@ -108,7 +108,7 @@ describe('PyodideRunner', () => {
           sys.exit(0) # exits but not treated as an error
           print('does not print')
         `);
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [] });
         expect(response.error).toBeUndefined();
         expect(getStdout(response)).toEqual('prints\n');
       }
@@ -117,7 +117,7 @@ describe('PyodideRunner', () => {
           import sys
           sys.exit('error message') # treated like exception, but no stack trace
         `);
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [] });
         expect(response.error).not.toBeUndefined();
         expect(response.error?.message).toEqual('error message')
       }
@@ -144,7 +144,6 @@ describe('PyodideRunner', () => {
     {
       const response = await runner.run(script, {
         inputs: [mkFile('foo', 'first foo')],
-        argv: ''
       });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim().split('\n')).toEqual(['/input/foo']);
@@ -158,7 +157,6 @@ describe('PyodideRunner', () => {
           mkFile('foo', 'foo two'),
           mkFile('bar', 'barian')
         ],
-        argv: ''
       });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim().split('\n').sort()).toEqual(
@@ -180,11 +178,11 @@ describe('PyodideRunner', () => {
       const script = mkScript('print("hello")');
       script.interface = { inputFiles: 'NONE', outputFiles: 'NONE' };
       {
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [] });
         expect(response.error).toBeUndefined();
       }
       {
-        const response = await runner.run(script, { inputs: [mkFile('x', 'x')], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('x', 'x')] });
         expect(response.error).not.toBeUndefined();
         expect(response.error?.message).toMatch(/no input files; got 1/);
       }
@@ -196,16 +194,16 @@ describe('PyodideRunner', () => {
       script.interface = { inputFiles: 'SINGLE', outputFiles: 'NONE' };
       const [foo, bar] = [mkFile('foo', 'foo'), mkFile('bar', 'bar')];
       {
-        const response = await runner.run(script, { inputs: [foo], argv: '' });
+        const response = await runner.run(script, { inputs: [foo] });
         expect(response.error).toBeUndefined();
       }
       {
-        const response = await runner.run(script, { inputs: [], argv: '' });
+        const response = await runner.run(script, { inputs: [] });
         expect(response.error).not.toBeUndefined();
         expect(response.error?.message).toMatch(/one input file; got 0/);
       }
       {
-        const response = await runner.run(script, { inputs: [foo, bar], argv: '' });
+        const response = await runner.run(script, { inputs: [foo, bar] });
         expect(response.error).not.toBeUndefined();
         expect(response.error?.message).toMatch(/one input file; got 2/);
       }
@@ -215,17 +213,17 @@ describe('PyodideRunner', () => {
       const runner = mkRunner();
       const saveNFiles = mkScript(`
         import fiolin
-        for i in range(int(fiolin.argv()[0])):
+        for i in range(int(fiolin.args()['n'])):
           with open(f'/output/out{i}', 'w') as f:
             f.write('foo')
       `);
       saveNFiles.interface = { inputFiles: 'NONE', outputFiles: 'NONE' };
       {
-        const response = await runner.run(saveNFiles, { inputs: [], argv: '0' });
+        const response = await runner.run(saveNFiles, { inputs: [], args: { 'n': '0' } });
         expect(response.error).toBeUndefined();
       }
       {
-        const response = await runner.run(saveNFiles, { inputs: [], argv: '1' });
+        const response = await runner.run(saveNFiles, { inputs: [], args: { 'n': '1' } });
         expect(response.error).not.toBeUndefined();
         expect(response.error?.message).toMatch(/no output files; got 1/);
       }
@@ -235,22 +233,22 @@ describe('PyodideRunner', () => {
       const runner = mkRunner();
       const saveNFiles = mkScript(`
         import fiolin
-        for i in range(int(fiolin.argv()[0])):
+        for i in range(int(fiolin.args()['n'])):
           with open(f'/output/out{i}', 'w') as f:
             f.write('foo')
       `);
       saveNFiles.interface = { inputFiles: 'NONE', outputFiles: 'SINGLE' };
       {
-        const response = await runner.run(saveNFiles, { inputs: [], argv: '1' });
+        const response = await runner.run(saveNFiles, { inputs: [], args: { 'n': '1' } });
         expect(response.error).toBeUndefined();
       }
       {
-        const response = await runner.run(saveNFiles, { inputs: [], argv: '0' });
+        const response = await runner.run(saveNFiles, { inputs: [], args: { 'n': '0' } });
         expect(response.error).not.toBeUndefined();
         expect(response.error?.message).toMatch(/one output file; got 0/);
       }
       {
-        const response = await runner.run(saveNFiles, { inputs: [], argv: '2' });
+        const response = await runner.run(saveNFiles, { inputs: [], args: { 'n': '2 '} });
         expect(response.error).not.toBeUndefined();
         expect(response.error?.message).toMatch(/one output file; got 2/);
       }
@@ -266,7 +264,7 @@ describe('PyodideRunner', () => {
         # Example from the docs; prints b'xn--eckwd4c7c.xn--zckzah'
         print(idna.encode('ドメイン.テスト'))
       `, { pkgs: ['idna'] });
-      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
       expect(getDebug(response)).toMatch(multiRe(
@@ -285,7 +283,7 @@ describe('PyodideRunner', () => {
         print(idna.encode('ドメイン.テスト'))
       `, { pkgs: ['idna'] });
       await runner.installPkgs(script);
-      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim()).toEqual("b'xn--eckwd4c7c.xn--zckzah'");
       expect(getDebug(response)).toMatch(multiRe(
@@ -303,7 +301,7 @@ describe('PyodideRunner', () => {
         print(idna.encode('ドメイン.テスト'), file=sys.stderr)
       `, { pkgs: ['idna'] });
       {
-        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
           /1 python packages to be installed.*/,
@@ -312,7 +310,7 @@ describe('PyodideRunner', () => {
         ));
       }
       {
-        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
           /Required packages\/modules already installed.*/,
@@ -330,7 +328,7 @@ describe('PyodideRunner', () => {
         print(idna.encode('ドメイン.テスト'), file=sys.stderr)
       `, { pkgs: ['idna'] });
       {
-        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
           /1 python packages to be installed.*/,
@@ -340,7 +338,7 @@ describe('PyodideRunner', () => {
       }
       {
         script.runtime.pythonPkgs?.push({ type: 'PYPI', name: 'six' });
-        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
           /Required packages\/modules differ from those installed.*/,
@@ -361,7 +359,7 @@ describe('PyodideRunner', () => {
         import sys
         print(imagemagick.Magick.imageMagickVersion)
       `, { mods: ['imagemagick'] });
-      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim()).toMatch(/ImageMagick.*imagemagick.org/);
       expect(getDebug(response)).toMatch(multiRe(
@@ -379,7 +377,7 @@ describe('PyodideRunner', () => {
         print(imagemagick.Magick.imageMagickVersion)
       `, { mods: ['imagemagick'] });
       await runner.installPkgs(script);
-      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+      const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
       expect(response.error).toBeUndefined();
       expect(getStdout(response).trim()).toMatch(/ImageMagick.*imagemagick.org/);
       expect(getDebug(response)).toMatch(multiRe(
@@ -396,7 +394,7 @@ describe('PyodideRunner', () => {
         print(imagemagick.Magick.imageMagickVersion, file=sys.stderr)
       `, { mods: ['imagemagick'] });
       {
-        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
           /1 wasm modules to be installed.*/,
@@ -405,7 +403,7 @@ describe('PyodideRunner', () => {
         ));
       }
       {
-        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')], argv: '' });
+        const response = await runner.run(script, { inputs: [mkFile('foo', 'foo')] });
         expect(response.error).toBeUndefined();
         expect(getDebug(response)).toMatch(multiRe(
           /Required packages\/modules already installed.*/,

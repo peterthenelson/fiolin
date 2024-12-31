@@ -11,9 +11,11 @@ import re
 import sys
 import traceback
 
-# TODO: Actual arg parsing
-def argv():
-  return list(js.argv.split())
+def args():
+  """Get the args dictionary."""
+  if not js.args:
+    return {}
+  return dict(js.args.object_entries())
 
 def get_input_basename(suffix=''):
   """Gets the (assumed to be single) input file basename.

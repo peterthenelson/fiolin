@@ -4,4 +4,4 @@ inputs = []
 outputs = []
 errorMsg = None
 errorLine = None
-argv = ''
+args = {}

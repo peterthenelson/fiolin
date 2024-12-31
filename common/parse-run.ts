@@ -1,12 +1,12 @@
-import { pArr, ObjPath, pInst, pNum, pOnlyKeys, pProp, pPropU, pStr, pObj } from './parse';
+import { pArr, ObjPath, pInst, pNum, pOnlyKeys, pProp, pPropU, pRec, pStr, pObj } from './parse';
 import { FiolinLogLevel, FiolinRunRequest, FiolinRunResponse } from './types';
 
 export function pFiolinRunRequest(p: ObjPath, v: unknown): FiolinRunRequest {
   const o: Object = pObj(p, v);
-  pOnlyKeys(p, o, ['inputs', 'argv']);
+  pOnlyKeys(p, o, ['inputs', 'args']);
   return {
     ...pProp(p, o, 'inputs', pArr(pInst(File))),
-    ...pProp(p, o, 'argv', pStr),
+    ...pPropU(p, o, 'args', pRec(pStr)),
   };
 }
 

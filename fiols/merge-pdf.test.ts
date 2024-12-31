@@ -18,7 +18,7 @@ describe('merge-pdf', () => {
       pkgPath('fiols/testdata/loss.pdf'),
       pkgPath('fiols/testdata/loss (1).pdf'),
     ];
-    const outputs = await runner.runWithLocalFs(inputs, { argv: '' });
+    const outputs = await runner.runWithLocalFs(inputs, {});
     outputs.sort();
     expect(outputs).toEqual(['loss-merged.pdf']);
     expect(fileSha256(path.join(output.path, 'loss-merged.pdf'))).toEqual(

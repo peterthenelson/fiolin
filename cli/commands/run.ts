@@ -16,6 +16,32 @@ function validateInputs(inputs: undefined | string | boolean | string[]): string
   }
 }
 
+function validateOneArg(s: string): [string, string] {
+  const i = s.indexOf('=');
+  if (i < 0) {
+    throw new Error(`Each --arg must have an equals sign, but got ${s}`);
+  }
+  return [s.substring(0, i), s.substring(i + 1)];
+}
+
+function validateInnerArgs(args: undefined | string | boolean | string[]): Record<string, string> {
+  const innerArgs: Record<string, string> = {};
+  if (typeof args === 'boolean') {
+    throw new Error(`--arg must be a string or array of strings; got ${args}`);
+  } else if (typeof args === 'undefined') {
+    // Nothing
+  } else if (typeof args === 'string') {
+    const [k, v] = validateOneArg(args);
+    innerArgs[k] = v;
+  } else {
+    for (const s of args) {
+      const [k, v] = validateOneArg(s);
+      innerArgs[k] = v;
+    }
+  }
+  return innerArgs;
+}
+
 export default defineCommand({
   meta: {
     name: 'run',
@@ -28,23 +54,23 @@ export default defineCommand({
       required: true,
     },
     input: {
-      // This is logically a string or array of strings, but we have to manually
-      // validate this in run().
+      // Logically a string or array of strings, but we have to validate it.
       description: 'Input file (or files)',
     },
     outputDir: {
       type: 'string',
       description: 'Directory to put output files in',
+      required: true,
     },
-    argv: {
-      type: 'string',
+    arg: {
+      // Logically a string or array of strings, but we have to validate it.
       description: 'Arguments to pass to the script',
     }
   },
   async run({ args }) {
     const inputPaths = validateInputs(args.input);
+    const innerArgs = validateInnerArgs(args.arg);
     const runner = new NodeFiolinRunner(args.name, args.outputDir);
-    const { argv } = args;
-    await runner.runWithLocalFs(inputPaths, { argv });
+    await runner.runWithLocalFs(inputPaths, { args: innerArgs });
   },
 });

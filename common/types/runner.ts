@@ -4,7 +4,7 @@ import { FiolinScript } from './fiolin-script';
 // Used for encapsulating running a script.
 export interface FiolinRunRequest {
   inputs: File[];
-  argv: string;
+  args?: Record<string, string>;
   // TODO: Add a debug section
 }
 

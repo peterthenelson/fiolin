@@ -56,7 +56,7 @@ const runner = new PyodideRunner({ indexUrl: pkgPath('node_modules/pyodide') });
     runtime: {},
     code: { python },
   };
-  const response = await runner.run(script, { inputs: [], argv: '' });
+  const response = await runner.run(script, { inputs: [] });
   if (response.error) {
     console.error(response.error.message);
     process.exit(1);

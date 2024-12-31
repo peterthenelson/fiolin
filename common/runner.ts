@@ -50,7 +50,7 @@ export class PyodideRunner implements FiolinRunner {
   public loaded: Promise<void>;
 
   constructor(options?: PyodideRunnerOptions) {
-    this._shared = { inputs: [], outputs: [], argv: '' };
+    this._shared = { inputs: [], outputs: [], args: {} };
     const innerConsole: ConsoleLike = options?.console || console;
     this._log = [];
     this._console = {
@@ -140,7 +140,7 @@ export class PyodideRunner implements FiolinRunner {
     this._shared.outputs = [];
     this._shared.errorMsg = undefined;
     this._shared.errorLine = undefined;
-    this._shared.argv = '';
+    this._shared.args = {};
   }
 
   private async load() {
@@ -230,7 +230,7 @@ export class PyodideRunner implements FiolinRunner {
     }
     this._log = [];
     this.resetShared();
-    this._shared.argv = request.argv;
+    Object.assign(this._shared.args!, request.args || {});
     try {
       await this.installPkgs(script);
       await this._pyodide.loadPackagesFromImports(script.code.python);

@@ -17,7 +17,7 @@ describe('extract-winmail', () => {
     // As such, it is Copyright (c) 2021 Gateway Apps, LLC and available under
     // the MIT license (the same license as Fiolin's source code).
     const inputs = [pkgPath('fiols/testdata/winmail.dat')];
-    const outputs = await runner.runWithLocalFs(inputs, { argv: '' });
+    const outputs = await runner.runWithLocalFs(inputs, {});
     outputs.sort();
     expect(outputs).toEqual(['ZAPPA_~2.JPG', 'bookmark.htm']);
     const actual = readdirSync(output.path);

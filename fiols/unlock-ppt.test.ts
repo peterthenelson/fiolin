@@ -14,7 +14,7 @@ describe('unlock-pptx', () => {
   it('unlocks ppts', async () => {
     const runner = new NodeFiolinRunner('unlock-ppt', output.path);
     const outputs = await runner.runWithLocalFs(
-      [pkgPath('fiols/testdata/locked.pptx')], { argv: '' });
+      [pkgPath('fiols/testdata/locked.pptx')], {});
     expect(outputs).toEqual(['locked-unlocked.pptx']);
     const expectedBuf = await readFromZip(
       pkgPath('fiols/testdata/unlocked.pptx'), 'ppt/presentation.xml');
@@ -29,9 +29,9 @@ describe('unlock-pptx', () => {
     const runner = new NodeFiolinRunner('unlock-ppt', output.path);
     // Run it twice; the second time should succeed as well.
     await runner.runWithLocalFs(
-      [pkgPath('fiols/testdata/locked.pptx')], { argv: '' });
+      [pkgPath('fiols/testdata/locked.pptx')], {});
     const outputs = await runner.runWithLocalFs(
-      [pkgPath('fiols/testdata/locked.pptx')], { argv: '' });
+      [pkgPath('fiols/testdata/locked.pptx')], {});
     expect(outputs).toEqual(['locked-unlocked.pptx']);
     const expectedBuf = await readFromZip(
       pkgPath('fiols/testdata/unlocked.pptx'), 'ppt/presentation.xml');

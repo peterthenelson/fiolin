@@ -1,4 +1,5 @@
 // Half-assed validation/parsing library for javascript objects.
+export type Parser<V> = (p: ObjPath, v: unknown) => V;
 export function parseAs<T>(type: Parser<T>, v: unknown): T {
   return type(new ObjPath([]), v);
 }
@@ -28,8 +29,6 @@ export class ObjPath {
     return new ObjPath(this.parts.concat(part));
   }
 }
-
-export type Parser<V> = (p: ObjPath, v: unknown) => V;
 
 export function pObj(p: ObjPath, v: unknown): object {
   if (v === null) throw p.err(`be an object but it was null`);
@@ -97,16 +96,28 @@ export function pOnlyKeys(p: ObjPath, o: object, keys: string[]) {
   }
 }
 
-export function pProp<K extends string, V>(p: ObjPath, o: object, key: K, val: (p: ObjPath, v: unknown) => V): Record<K, V> {
+export function pProp<K extends string, V>(p: ObjPath, o: object, key: K, val: Parser<V>): Record<K, V> {
   if (key in o) {
     return { [key]: val(p._(key), o[key as (keyof typeof o)]) } as Record<K, V>;
   }
   throw p.err(`have property ${key}, but no such property exists`);
 }
 
-export function pPropU<K extends string, V>(p: ObjPath, o: object, key: K, val: (p: ObjPath, v: unknown) => V): Record<K, V | undefined> {
+export function pPropU<K extends string, V>(p: ObjPath, o: object, key: K, val: Parser<V>): Record<K, V | undefined> {
   if (key in o && typeof o[(key as keyof object)] !== 'undefined') {
     return { [key]: val(p._(key), o[key as (keyof typeof o)]) } as Record<K, V>;
   }
   return { [key]: undefined } as Record<K, undefined>;
+}
+
+export function pRec<V>(val: Parser<V>): Parser<Record<string, V>> {
+  return (p: ObjPath, v: unknown) => {
+    if (v === null) throw p.err(`be an object but it was null`);
+    if (typeof v !== 'object') throw p.err(`be an object; got ${v}`);
+    const rec: Record<string, V> = {};
+    for (const [k, rawV] of Object.entries(v)) {
+      rec[k] = val(p._(k), rawV);
+    }
+    return rec;
+  };
 }

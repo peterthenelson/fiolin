@@ -368,7 +368,7 @@ export class FiolinComponent {
       this.worker.postMessage({
         type: 'RUN',
         script,
-        request: { inputs: files, argv: '' }
+        request: { inputs: files }
       });
     }
   }

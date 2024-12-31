@@ -25,11 +25,11 @@ describe('strip-exif', () => {
     const inputs = [
       pkgPath('fiols/testdata/exif.jpg'),
     ];
-    const outputs = await runner.runWithLocalFs(inputs, { argv: '' });
+    const outputs = await runner.runWithLocalFs(inputs, {});
     expect(outputs).toEqual(['exif-no-exif.jpg']);
     expect(stdout).toMatch(/Removing the following Exif data:.*Praveen\. P/s);
     stdout = '';
-    const _ = await runner.runWithLocalFs([path.join(output.path, outputs[0])], { argv: '' })
+    const _ = await runner.runWithLocalFs([path.join(output.path, outputs[0])], {})
     expect(stdout).toMatch(/No Exif data found!/);
   });
 });

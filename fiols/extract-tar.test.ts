@@ -13,7 +13,7 @@ describe('extract-tar', () => {
   async function extractTar(testFile: string): Promise<string[]> {
     const runner = new NodeFiolinRunner('extract-tar', output.path);
     const inputs = [pkgPath(`fiols/testdata/${testFile}`)];
-    const outputs = await runner.runWithLocalFs(inputs, { argv: '' });
+    const outputs = await runner.runWithLocalFs(inputs, {});
     outputs.sort();
     const actual = readdirSync(output.path);
     actual.sort();
