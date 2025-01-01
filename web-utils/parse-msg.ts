@@ -22,7 +22,7 @@ export function pWorkerMessage(p: ObjPath, v: unknown): WorkerMessage {
   } else if (type === 'ERROR') {
     return pErrorMessage(p, v);
   } else {
-    throw new Error(`Expected WorkerMessage to have a known type; got ${type}`);
+    throw p.err(`to be a WorkerMessage with a known type; got type "${type}"`);
   }
 }
   

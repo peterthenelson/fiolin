@@ -143,7 +143,8 @@ than one file, and `'ANY'` means any number of files.
 TODO: Update once there are more interesting options
 
 If you're curious about configuration options you don't see covered in the docs,
-take a look at the [types](/doc/fiolin-script) to learn more.
+take a look at the types for [scripts](/doc/fiolin-script) and
+[forms](/doc/form) to learn more.
 
 [examples]: https://github.com/peterthenelson/fiolin/blob/main/fiols/
 [fiolin-tmpl]: https://github.com/peterthenelson/fiolin-template

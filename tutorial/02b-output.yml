@@ -1,5 +1,5 @@
 meta:
-  title: 2b. The /output directory.
+  title: 2b. Files -- The /output directory.
   author: Peter Nelson
   description: >
     /output: Files you write here are downloaded when the script ends.

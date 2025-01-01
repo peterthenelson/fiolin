@@ -1,5 +1,5 @@
 meta:
-  title: 2a. The /input directory
+  title: 2a. Files -- The /input directory
   author: Peter Nelson
   description: >
     /input: Files selected by the user are mounted here.

@@ -1,5 +1,5 @@
 meta:
-  title: 3a. Multiple inputs (or none!)
+  title: 3a. Basic UI -- Multiple inputs (or none!)
   author: Peter Nelson
   description: >
     The scripts we've written so far all take a single input file, but we can

@@ -1,5 +1,5 @@
 meta:
-  title: 4a. Built-in python libraries and packages
+  title: 4a. Libraries -- Built-in python libs and pkgs
   author: Peter Nelson
   description: >
     Pyodide includes the python system libraries, along with pre-built versions

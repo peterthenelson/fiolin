@@ -1,4 +1,6 @@
 A not-necessarily-exhaustive list of TODOs:
+- Docs
+  - Update docs for wasm and forms
 - Dev server and release:
   - Get unjs/nitro#2814 merged/released and then revert my local changes.
   - Set up tests involving the web server(s) and playwright to check that the
@@ -10,7 +12,11 @@ A not-necessarily-exhaustive list of TODOs:
     package so that people can import fiolin from their fiolin-template cloned
     projects and do local development. Update the repo template as needed.
 - Core functionality
-  - Some kind of flag parsing functionality
+  - Forms
+    - Add the remaining input types
+    - Get autofocus to work?
+  - Canvas
+  - Multi-stage callback based scripts
   - Get some emscripten binaries working in the same file-system as pyodide.
     (imagemagick done; maybe a document or ffmpeg one next)
       - Fix unsafe-eval issue with imagemagick
@@ -19,7 +25,8 @@ A not-necessarily-exhaustive list of TODOs:
 - Scripts
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)
-    - Demonstrating advanced UI
+    - Demonstrating canvas (when it works)
+    - Demonstrating callbacks (when they work)
   - More file-conversion scripts for real tasks
     - SVG recolor
     - Extracting text and tables from PDFs
@@ -48,6 +55,5 @@ A not-necessarily-exhaustive list of TODOs:
   - Controls:
     - Filtering in output terminal by log level
     - Improve the "simple" file UI to better work for multiple files
-    - Advanced UI options other than the "simple" version.
   - Deployment:
     - Deploy script in the template package.json

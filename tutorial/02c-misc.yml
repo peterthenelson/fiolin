@@ -1,5 +1,5 @@
 meta:
-  title: 2c. The rest of the filesystem.
+  title: 2c. Files -- The rest of the filesystem.
   author: Peter Nelson
   description: >
     /tmp: Write whatever you want here; the files will disappear when the run is over.

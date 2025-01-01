@@ -1,5 +1,6 @@
 import { pArr, ObjPath, pFileEnum, pObj, pOnlyKeys, pProp, pPropU, pStr } from './parse';
 import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface, FiolinPyPackage, FiolinWasmModule } from './types';
+import { pForm } from './parse-form';
 
 export function pFiolinScript(p: ObjPath, v: unknown): FiolinScript {
   const o: object = pObj(p, v);
@@ -25,11 +26,12 @@ function pMeta(p: ObjPath, v: unknown): FiolinScriptMeta {
 
 function pInterface(p: ObjPath, v: unknown): FiolinScriptInterface {
   const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['inputFiles', 'inputAccept', 'outputFiles']);
+  pOnlyKeys(p, o, ['inputFiles', 'inputAccept', 'outputFiles', 'form']);
   return {
     ...pProp(p, o, 'inputFiles', pFileEnum),
     ...pPropU(p, o, 'inputAccept', pStr),
     ...pProp(p, o, 'outputFiles', pFileEnum),
+    ...pPropU(p, o, 'form', pForm),
   };
 }
 

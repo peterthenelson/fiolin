@@ -8,6 +8,7 @@ import { parseAs, ParseError } from '../common/parse';
 import { TypedWorker } from './typed-worker';
 import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
 import YAML, { YAMLParseError } from 'yaml';
+import { renderForm } from './form-renderer';
 const monaco = import('./monaco');
 
 function maybeSelectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T {
@@ -119,6 +120,7 @@ export class FiolinComponent {
   private readonly deployButton: HTMLDivElement;
   private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
+  private scriptForm: HTMLFormElement;
   private readonly fileChooser: HTMLInputElement;
   private readonly inputFileText: HTMLSpanElement;
   private readonly outputFileText: HTMLSpanElement;
@@ -140,6 +142,7 @@ export class FiolinComponent {
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
     this.tutorialSelect = getByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
+    this.scriptForm = getByRelIdAs(container, 'script-form', HTMLFormElement);
     this.scriptTabs = getByRelIdAs(container, 'script-editor-tabs', HTMLDivElement);
     this.scriptEditor = getByRelIdAs(container, 'script-editor', HTMLDivElement);
     this.fileChooser = getByRelIdAs(container, 'input-files-chooser', HTMLInputElement);
@@ -170,23 +173,40 @@ export class FiolinComponent {
   private async updateUiForScript(script: FiolinScript) {
     this.scriptTitle.textContent = script.meta.title;
     this.scriptDesc.textContent = script.meta.description;
+    const ui = script.interface;
+    this.container.classList.remove('file-chooser-hidden');
     this.container.classList.remove('input-files-none')
     this.container.classList.remove('input-files-single');
     this.container.classList.remove('input-files-multi');
     this.container.classList.remove('input-files-any');
-    this.container.classList.add(`input-files-${script.interface.inputFiles.toLowerCase()}`);
+    this.container.classList.add(`input-files-${ui.inputFiles.toLowerCase()}`);
     this.container.classList.remove('output-files-none')
     this.container.classList.remove('output-files-single');
     this.container.classList.remove('output-files-multi');
     this.container.classList.remove('output-files-any');
-    this.container.classList.add(`output-files-${script.interface.outputFiles.toLowerCase()}`);
-    if (script.interface.inputFiles === 'NONE' ||
-        script.interface.inputFiles === 'SINGLE') {
+    this.container.classList.add(`output-files-${ui.outputFiles.toLowerCase()}`);
+    if (ui.inputFiles === 'NONE' || ui.inputFiles === 'SINGLE') {
       this.fileChooser.multiple = false;
     } else {
       this.fileChooser.multiple = true;
     }
-    this.fileChooser.accept = script.interface.inputAccept || '';
+    this.fileChooser.accept = ui.inputAccept || '';
+    if (ui.form) {
+      const newForm = renderForm(ui.form);
+      this.scriptForm.replaceWith(newForm);
+      this.scriptForm = newForm;
+      if (ui.form.hideFileChooser) {
+        this.container.classList.add('file-chooser-hidden');
+      }
+      this.scriptForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const script = await this.script;
+        if (script.interface.inputFiles === 'ANY' ||
+            script.interface.inputFiles === 'NONE') {
+          this.runScript([], new FormData(this.scriptForm, e.submitter));
+        }
+      }
+    }
   }
 
   private async loadScript(opts: FiolinComponentOptions) {
@@ -342,7 +362,10 @@ export class FiolinComponent {
     }
   }
 
-  private async runScript(files: File[]) {
+  private async runScript(files: File[], formData?: FormData) {
+    if (!this.scriptForm.reportValidity()) {
+      return;
+    }
     this.fileChooser.disabled = true;
     this.fileChooser.value = '';
     const script = await this.script;
@@ -365,10 +388,17 @@ export class FiolinComponent {
       this.inputFileText.title = fstring;
       this.inputFileText.textContent = fstring;
       this.container.classList.add('running');
+      const args: Record<string, string> = {};
+      if (!formData) {
+        formData = new FormData(this.scriptForm);
+      }
+      for (const [k, v] of formData.entries()) {
+        args[k] = v.toString();
+      }
       this.worker.postMessage({
         type: 'RUN',
         script,
-        request: { inputs: files }
+        request: { inputs: files, args }
       });
     }
   }

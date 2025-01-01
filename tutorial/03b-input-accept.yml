@@ -1,5 +1,5 @@
 meta:
-  title: 3b. Limiting to particular file extensions
+  title: 3b. Basic UI -- Limiting to particular file extensions
   author: Peter Nelson
   description: >
     The inputAccept attribute can be used to configure the file chooser to only

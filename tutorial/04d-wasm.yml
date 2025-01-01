@@ -1,5 +1,5 @@
 meta:
-  title: 4d. Wasm modules
+  title: 4d. Libraries -- Wasm modules
   author: Peter Nelson
   description: >
     You can configure fiolin to install some pre-selected WASM modules. This

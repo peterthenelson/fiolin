@@ -175,6 +175,7 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
         </div>
       </div>
       <div class="script-controls">
+        <form class="script-form" data-rel-id="script-form"></form>
         <label class="files-label">
           <div class="files-panel button flex-row-wrap">
             <span class="files-panel-text input-files-text" data-rel-id="input-files-text"></span>

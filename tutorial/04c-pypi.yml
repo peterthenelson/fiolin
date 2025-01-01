@@ -1,5 +1,5 @@
 meta:
-  title: 4c. PyPI pure-Python packages
+  title: 4c. Libraries -- PyPI pure-Python packages
   author: Peter Nelson
   description: >
     You can configure fiolin to install packages from PyPI. They must, however,

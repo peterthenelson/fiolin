@@ -353,6 +353,10 @@ form button {
   opacity: 0;
 }
 
+.file-chooser-hidden .files-panel {
+  display: none;
+}
+
 .running .files-panel {
   --buttonColor: var(--greenish);
   animation: controls-pulse 2.5s infinite;

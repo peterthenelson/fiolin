@@ -4,10 +4,9 @@ import { FiolinScript } from '../common/types';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dedent } from '../common/indent';
 
-const runner = new PyodideRunner({ indexUrl: pkgPath('node_modules/pyodide') });
-
-{
-  console.log('Generating fiolin-module.md');
+async function genPyDoc() {
+  const runner = new PyodideRunner({ indexUrl: pkgPath('node_modules/pyodide') });
+  console.log('Generating docs/fiolin-module.md');
   const python = dedent(`
   import inspect
   import fiolin
@@ -67,11 +66,11 @@ const runner = new PyodideRunner({ indexUrl: pkgPath('node_modules/pyodide') });
   }
 }
 
-{
-  console.log('Generating fiolin-script.md');
+function genTsDoc(tsPath: string, mdPath: string) {
+  console.log(`Generating ${mdPath}`);
   // TODO: Use @microsoft/tsdoc or something to do the parsing instead
-  const ts = readFileSync(pkgPath('common/types/fiolin-script.ts'), { encoding: 'utf-8' });
-  type State = 'WAIT_I_COMMENT' | 'I_COMMENT' | 'WAIT_F_COMMENT' | 'F_COMMENT';
+  const ts = readFileSync(pkgPath(tsPath), { encoding: 'utf-8' });
+  type State = 'WAIT_IT_COMMENT' | 'IT_COMMENT' | 'WAIT_F_COMMENT' | 'F_COMMENT' | 'WAIT_T_END';
   interface Field {
     name: string;
     comment: string;
@@ -81,32 +80,39 @@ const runner = new PyodideRunner({ indexUrl: pkgPath('node_modules/pyodide') });
     name: string;
     comment: string;
     fields: Field[];
+    typeVerbatim?: string;
   }
-  let state: State = 'WAIT_I_COMMENT';
+  let state: State = 'WAIT_IT_COMMENT';
   let comment = '';
   const interfaces: Interface[] = [];
   for (const line of ts.split('\n')) {
     const commentMatch = line.match(/^\s*\/\/ ?(.*)/);
-    const interfaceMatch = line.match(/^(?:export )interface (.*) {/);
+    const importMatch = line.match(/^import.*/);
+    const interfaceTypeMatch = line.match(/^(?:export )(interface|type) (.*) (?:.*)/);
     const fieldMatch = line.match(/^\s*([a-zA-Z][^:]*): (.*);$/);
     const isWhitespace = line.match(/^\s*$/) !== null;
-    if (state === 'WAIT_I_COMMENT') {
+    if (state === 'WAIT_IT_COMMENT') {
       if (commentMatch) {
-        state = 'I_COMMENT';
+        state = 'IT_COMMENT';
         comment = commentMatch.at(1);
+      } else if (importMatch) {
+        // Skip
       } else if (!isWhitespace) {
-        console.error(`Expected interface comment or blank line; got: ${line}`);
+        console.error(`Expected interface/type comment or blank line; got: ${line}`);
         process.exit(1);
       }
-    } else if (state === 'I_COMMENT') {
+    } else if (state === 'IT_COMMENT') {
       if (commentMatch) {
         comment += '\n' + commentMatch.at(1);
-      } else if (interfaceMatch) {
+      } else if (interfaceTypeMatch && interfaceTypeMatch.at(1) === 'interface') {
         state = 'WAIT_F_COMMENT';
-        interfaces.push({ name: interfaceMatch.at(1), comment, fields: [] });
+        interfaces.push({ name: interfaceTypeMatch.at(2), comment, fields: [] });
         comment = '';
+      } else if (interfaceTypeMatch && interfaceTypeMatch.at(1) === 'type') {
+        state = 'WAIT_T_END';
+        interfaces.push({ name: interfaceTypeMatch.at(2), comment, fields: [], typeVerbatim: '' })
       } else {
-        console.error(`Expected interface comment or decl; got: ${line}`);
+        console.error(`Expected interface/type comment or decl; got: ${line}`);
         process.exit(1);
       }
     } else if (state === 'WAIT_F_COMMENT') {
@@ -114,7 +120,7 @@ const runner = new PyodideRunner({ indexUrl: pkgPath('node_modules/pyodide') });
         state = 'F_COMMENT';
         comment = commentMatch.at(1);
       } else if (line === '}') {
-        state = 'WAIT_I_COMMENT';
+        state = 'WAIT_IT_COMMENT';
       } else if (!isWhitespace) {
         console.error(`Expected field comment, blank line, or }; got: ${line}`);
         process.exit(1);
@@ -129,10 +135,16 @@ const runner = new PyodideRunner({ indexUrl: pkgPath('node_modules/pyodide') });
       } else if (line === '}') {
         console.warn(`Dangling field comment: ${comment}`);
         comment = '';
-        state = 'WAIT_I_COMMENT';
+        state = 'WAIT_IT_COMMENT';
       } else {
         console.error(`Expected field comment or decl; got: ${line}`);
         process.exit(1);
+      }
+    } else if (state === 'WAIT_T_END') {
+      if (line === ')' || line === ');') {
+        state = 'WAIT_IT_COMMENT';
+      } else {
+        interfaces.at(-1).typeVerbatim! += line + '\n';
       }
     } else {
       console.error(`Unexpected state: ${state}`);
@@ -148,5 +160,9 @@ const runner = new PyodideRunner({ indexUrl: pkgPath('node_modules/pyodide') });
       output += `> ${field.comment}\n\n`;
     }
   }
-  writeFileSync(pkgPath('docs/fiolin-script.md'), output);
+  writeFileSync(pkgPath(mdPath), output);
 }
+
+await genPyDoc();
+genTsDoc('common/types/fiolin-script.ts', 'docs/fiolin-script.md');
+genTsDoc('common/types/form.ts', 'docs/form.md');

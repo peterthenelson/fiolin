@@ -1,3 +1,5 @@
+import { FiolinForm } from './form';
+
 // The JSON format that defines a fiolin script. This is the object type meant
 // to be served on your github.io site.
 export interface FiolinScript {
@@ -39,7 +41,10 @@ export interface FiolinScriptInterface {
   inputAccept?: string;
   // Does the script produce 0, 1, >1, or any number of files as output?
   outputFiles: 'NONE' | 'SINGLE' | 'MULTI' | 'ANY';
-  // TODO: extend w/stuff about flags, console output, and/or canvas
+  // Form presented to the user (the submitted values show up as args in the
+  // FiolinRunRequest).
+  form?: FiolinForm;
+  // TODO: extend w/stuff about console output, and/or canvas
 }
 
 // How the fiolin runner is meant to setup the environment for the script.

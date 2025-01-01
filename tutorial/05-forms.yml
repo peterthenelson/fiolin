@@ -1,0 +1,58 @@
+meta:
+  title: 5. Advanced UI -- Forms
+  author: Peter Nelson
+  description: >
+    You can present configuration options to the user in the form of a... form.
+    Check out the documentation for details or just play around constructing
+    different forms and seeing how they result in different args values in your
+    script.
+interface:
+  inputFiles: NONE
+  outputFiles: NONE
+  form:
+    autofocusedName: secret-code
+    hideFileChooser: true
+    children:
+      - type: DIV
+        dir: COL
+        children:
+          - type: DIV
+            dir: ROW
+            children:
+              - type: LABEL
+                text: Secret Code
+                child:
+                  type: TEXT
+                  name: secret-code
+                  required: true
+                  placeholder: a-z0-9nospaces
+                  pattern: '[a-z0-9]+'
+                  size: 15
+              - type: LABEL
+                text: Cake Preference
+                child:
+                  type: SELECT
+                  name: cake
+                  required: true
+                  options:
+                    - text: ''
+                      value: ''
+                      selected: true
+                    - text: Yes please
+                      value: 'yes'
+                    - text: No thanks
+                      value: 'no'
+                    - text: The cake is a lie!
+                      value: user-must-be-eliminated
+          - type: DIV
+            dir: ROW
+            children:
+              - type: BUTTON
+                text: Cut the Red Wire
+                name: wire
+                value: red
+              - type: BUTTON
+                text: Cut the Black Wire
+                name: wire
+                value: black
+runtime: {}

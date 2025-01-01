@@ -4,7 +4,7 @@ is provided by pylib.ts and saved into the emscripten file system. See the
 documentation for more information.
 """
 def args():
-  return []
+  return {}
 def get_input_basename(suffix=''):
   return ''
 def get_input_path():
