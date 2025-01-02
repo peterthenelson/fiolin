@@ -141,7 +141,7 @@ function genTsDoc(tsPath: string, mdPath: string) {
         process.exit(1);
       }
     } else if (state === 'WAIT_T_END') {
-      if (line === ')' || line === ');') {
+      if (line === ')' || line === ');' || line === '') {
         state = 'WAIT_IT_COMMENT';
       } else {
         interfaces.at(-1).typeVerbatim! += line + '\n';

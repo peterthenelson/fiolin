@@ -27,6 +27,9 @@ export type FiolinFormComponent = (
   // input type="url"
 );
 
+// The type tags for components
+export type FiolinFormComponentType = FiolinFormComponent extends { type: infer T } ? T : never;
+
 // A div (to make a row or column of components).
 export interface FiolinFormDiv {
   // Type id

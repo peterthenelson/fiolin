@@ -22,11 +22,15 @@ export class ObjPath {
   }
 
   err(beAMsg: string): Error {
-    return new ParseError(this, `Expected ${this.parts.join('.')} to ${beAMsg}`);
+    return new ParseError(this, `Expected ${this.parts.join('')} to ${beAMsg}`);
   }
 
   _(part: string): ObjPath {
     return new ObjPath(this.parts.concat(part));
+  }
+
+  dot(part: string): ObjPath {
+    return new ObjPath(this.parts.concat('.' + part))
   }
 }
 
@@ -34,6 +38,27 @@ export function pObj(p: ObjPath, v: unknown): object {
   if (v === null) throw p.err(`be an object but it was null`);
   if (typeof v === 'object') return v;
   throw p.err(`be an object; got ${v}`)
+}
+
+// Note: must specify T manually
+export function pObjWithProps<T>(props: { [K in keyof Required<T>]: Parser<T[K]> }): Parser<T> {
+  return (p: ObjPath, v: unknown) => {
+    const o: object = pObj(p, v);
+    pOnlyKeys(p, o, Object.keys(props));
+    let parsed: Partial<T> = {};
+    for (const [k, val] of Object.entries(props)) {
+      try {
+        parsed[k as keyof T] = (val as Parser<T[keyof T]>)(p.dot(k), o[k as (keyof typeof o)])
+      } catch (e) {
+        if (k in o) {
+          throw e;
+        } else {
+          throw p.err(`have property ${k}, but no such property exists`);
+        }
+      }
+    }
+    return parsed as T;
+  }
 }
 
 export function pInst<V>(cls: new (...args: any[])=> V): Parser<V> {
@@ -52,6 +77,17 @@ export function pStrLit<T extends string>(s: T): Parser<T> {
   return (p: ObjPath, v: unknown) => {
     if (typeof v === 'string' && v === s) return s;
     throw p.err(`be literal value "${s}"; got ${v}`);
+  }
+}
+
+// Note: Confusingly, you will need to manually specify the type as an array
+// and also specify all the values. Example:
+// type fooOrBar = 'foo' | 'bar'
+// pStrUnion<fooOrBar[]>(['foo', 'bar'])
+export function pStrUnion<T extends readonly string[]>(values: T): Parser<T[number]> {
+  return (p: ObjPath, v: unknown) => {
+    if (typeof v === 'string' && values.includes(v)) return v;
+    throw p.err(`be one of ${values.join(' | ')}; got ${v}`);
   }
 }
 
@@ -78,9 +114,11 @@ export function pArr<V>(elem: Parser<V>): Parser<V[]> {
   };
 }
 
-export function pFileEnum(p: ObjPath, v: unknown): 'NONE' | 'SINGLE' | 'MULTI' | 'ANY' {
-  if (v === 'NONE' || v === 'SINGLE' || v === 'MULTI' || v === 'ANY') return v;
-  throw p.err(`be 'NONE' | 'SINGLE' | 'MULTI' | 'ANY'; got ${v}`);
+export function pOpt<V>(val: Parser<V>): Parser<V | undefined> {
+  return (p: ObjPath, v: unknown) => {
+    if (typeof v === 'undefined') return v;
+    return val(p, v);
+  };
 }
 
 export function pOnlyKeys(p: ObjPath, o: object, keys: string[]) {
@@ -96,28 +134,46 @@ export function pOnlyKeys(p: ObjPath, o: object, keys: string[]) {
   }
 }
 
-export function pProp<K extends string, V>(p: ObjPath, o: object, key: K, val: Parser<V>): Record<K, V> {
-  if (key in o) {
-    return { [key]: val(p._(key), o[key as (keyof typeof o)]) } as Record<K, V>;
-  }
-  throw p.err(`have property ${key}, but no such property exists`);
+// Note: must specify T manually
+export function pTaggedUnion<T extends { type: string }>(cases: { [K in T['type']]: Parser<Extract<T, { type: K }>> }): Parser<T> {
+  return (p: ObjPath, v: unknown) => {
+    const o: object = pObj(p, v);
+    const tag: string = pStr(p.dot('type'), o['type' as keyof Object]);
+    for (const [k, val] of Object.entries(cases)) {
+      if (k === tag) {
+        return (val as Parser<T>)(p._(`(type=${k})`), o)
+      }
+    }
+    throw p.err(`be one of ${Object.keys(cases).join(' | ')}; got ${tag}`);
+  };
 }
 
-export function pPropU<K extends string, V>(p: ObjPath, o: object, key: K, val: Parser<V>): Record<K, V | undefined> {
-  if (key in o && typeof o[(key as keyof object)] !== 'undefined') {
-    return { [key]: val(p._(key), o[key as (keyof typeof o)]) } as Record<K, V>;
-  }
-  return { [key]: undefined } as Record<K, undefined>;
-}
-
+// Note: drops any non-string keys
 export function pRec<V>(val: Parser<V>): Parser<Record<string, V>> {
   return (p: ObjPath, v: unknown) => {
     if (v === null) throw p.err(`be an object but it was null`);
     if (typeof v !== 'object') throw p.err(`be an object; got ${v}`);
+    if (Array.isArray(v)) throw p.err(`be an object; got array ${v}`);
     const rec: Record<string, V> = {};
     for (const [k, rawV] of Object.entries(v)) {
-      rec[k] = val(p._(k), rawV);
+      rec[k] = val(p.dot(k), rawV);
     }
     return rec;
   };
+}
+
+// Note: must specify T manually
+export function pTuple<T extends any[]>(elems: { [K in keyof T]: Parser<T[K]> }): Parser<T> {
+  return (p: ObjPath, v: unknown) => {
+    if (!Array.isArray(v)) {
+      throw p.err(`be an array; got ${v}`);
+    } else if (v.length !== elems.length) {
+      throw p.err(`be of length ${elems.length}; got ${v.length}`);
+    }
+    const vals: any[] = [];
+    for (let i = 0; i < v.length; i++) {
+      vals.push(elems[i](p._(`[${i}]`), v[i]));
+    }
+    return (vals as T);
+  }
 }

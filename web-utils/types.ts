@@ -6,6 +6,8 @@ export type WorkerMessage = (
   PackagesInstalledMessage | RunMessage | SuccessMessage | ErrorMessage
 );
 
+export type WorkerMessageType = WorkerMessage extends { type: infer T } ? T : never;
+
 export interface LoadedMessage { type: 'LOADED' }
 
 export interface LogMessage {

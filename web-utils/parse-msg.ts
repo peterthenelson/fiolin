@@ -1,99 +1,70 @@
-import { pObj, ObjPath, pInst, pNum, pOnlyKeys, pProp, pPropU, pStr, pStrLit } from '../common/parse';
+import { ObjPath, pInst, pNum, pStr, pStrLit, pObjWithProps, pStrUnion, pOpt, pTaggedUnion } from '../common/parse';
 import { pFiolinScript } from '../common/parse-script';
 import { pFiolinRunRequest, pFiolinRunResponse } from '../common/parse-run';
-import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, LogMessage, SuccessMessage, WorkerMessage } from './types';
+import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, LogMessage, SuccessMessage, WorkerMessage, WorkerMessageType } from './types';
 import { FiolinLogLevel } from '../common/types';
 
 export function pWorkerMessage(p: ObjPath, v: unknown): WorkerMessage {
-  const o: object = pObj(p, v);
-  const type: string = pProp(p, o, 'type', pStr).type;
-  if (type === 'LOADED') {
-    return pLoadedMessage(p, v);
-  } else if (type === 'LOG') {
-    return pLogMessage(p, v);
-  } else if (type === 'INSTALL_PACKAGES') {
-    return pInstallPackagesMessage(p, v);
-  } else if (type === 'PACKAGES_INSTALLED') {
-    return pPackagesInstalledMessage(p, v);
-  } else if (type === 'RUN') {
-    return pRunMessage(p, v);
-  } else if (type === 'SUCCESS') {
-    return pSuccessMessage(p, v);
-  } else if (type === 'ERROR') {
-    return pErrorMessage(p, v);
-  } else {
-    throw p.err(`to be a WorkerMessage with a known type; got type "${type}"`);
-  }
+  return pTaggedUnion<WorkerMessage>({
+    'LOADED': pLoadedMessage,
+    'LOG': pLogMessage,
+    'INSTALL_PACKAGES': pInstallPackagesMessage,
+    'PACKAGES_INSTALLED': pPackagesInstalledMessage,
+    'RUN': pRunMessage,
+    'SUCCESS': pSuccessMessage,
+    'ERROR': pErrorMessage,
+  })(p, v);
 }
+
+export const pWorkerMessageType = pStrUnion<WorkerMessageType[]>([
+  'LOADED',
+  'LOG',
+  'INSTALL_PACKAGES',
+  'PACKAGES_INSTALLED',
+  'RUN',
+  'SUCCESS',
+  'ERROR',
+]);
   
-export function pLoadedMessage(p: ObjPath, v: unknown): LoadedMessage {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type']);
-  return {
-    ...pProp(p, o, 'type', pStrLit('LOADED')),
-  };
-}
+export const pLoadedMessage = pObjWithProps<LoadedMessage>({
+  type: pStrLit('LOADED')
+});
 
-function pLevel(p: ObjPath, v: unknown): FiolinLogLevel {
-  if (v === 'DEBUG' || v === 'INFO' || v === 'WARN' || v === 'ERROR') return v;
-  throw p.err(`be DEBUG/INFO/WARN/ERROR, got ${v}`);
-}
+const pLevel = pStrUnion<FiolinLogLevel[]>(['DEBUG', 'INFO', 'WARN', 'ERROR']);
 
-export function pLogMessage(p: ObjPath, v: unknown): LogMessage {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type', 'level', 'value']);
-  return {
-    ...pProp(p, o, 'type', pStrLit('LOG')),
-    ...pProp(p, o, 'level', pLevel),
-    ...pProp(p, o, 'value', pStr),
-  };
-}
+export const pLogMessage = pObjWithProps<LogMessage>({
+  type: pStrLit('LOG'),
+  level: pLevel,
+  value: pStr,
+});
 
-export function pInstallPackagesMessage(p: ObjPath, v: unknown): InstallPackagesMessage {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type', 'script']);
-  return {
-    ...pProp(p, o, 'type', pStrLit('INSTALL_PACKAGES')),
-    ...pProp(p, o, 'script', pFiolinScript),
-  };
-}
+export const pInstallPackagesMessage = pObjWithProps<InstallPackagesMessage>({
+  type: pStrLit('INSTALL_PACKAGES'),
+  script: pFiolinScript,
+});
 
-export function pPackagesInstalledMessage(p: ObjPath, v: unknown): PackagesInstalledMessage {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type']);
-  return {
-    ...pProp(p, o, 'type', pStrLit('PACKAGES_INSTALLED')),
-  };
-}
+export const pPackagesInstalledMessage = pObjWithProps<PackagesInstalledMessage>({
+  type: pStrLit('PACKAGES_INSTALLED'),
+});
 
-export function pRunMessage(p: ObjPath, v: unknown): RunMessage {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type', 'script', 'request']);
-  return {
-    ...pProp(p, o, 'type', pStrLit('RUN')),
-    ...pProp(p, o, 'script', pFiolinScript),
-    ...pProp(p, o, 'request', pFiolinRunRequest),
-  };
-}
+export const pRunMessage = pObjWithProps<RunMessage>({
+  type: pStrLit('RUN'),
+  script: pFiolinScript,
+  request: pFiolinRunRequest,
+});
 
-export function pSuccessMessage(p: ObjPath, v: unknown): SuccessMessage {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type', 'response']);
-  return {
-    ...pProp(p, o, 'type', pStrLit('SUCCESS')),
-    ...pProp(p, o, 'response', pFiolinRunResponse),
-  };
-}
+export const pSuccessMessage = pObjWithProps<SuccessMessage>({
+  type: pStrLit('SUCCESS'),
+  response: pFiolinRunResponse,
+});
 
-export function pErrorMessage(p: ObjPath, v: unknown): ErrorMessage {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type', 'error', 'name', 'lineno']);
-  const em = {
-    ...pProp(p, o, 'type', pStrLit('ERROR')),
-    ...pProp(p, o, 'error', pInst(Error)),
-    ...pProp(p, o, 'name', pStr),
-    ...pPropU(p, o, 'lineno', pNum),
-  };
+export function pErrorMessage(p: ObjPath, v: unknown) {
+  const em = pObjWithProps<ErrorMessage>({
+    type: pStrLit('ERROR'),
+    error: pInst(Error),
+    name: pStr,
+    lineno: pOpt(pNum),
+  })(p, v);
   if (em.name) {
     try {
       em.error.name = em.name;

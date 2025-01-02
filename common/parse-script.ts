@@ -1,69 +1,40 @@
-import { pArr, ObjPath, pFileEnum, pObj, pOnlyKeys, pProp, pPropU, pStr } from './parse';
+import { pArr, pStr, pStrUnion, pObjWithProps, pStrLit, pOpt } from './parse';
 import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface, FiolinPyPackage, FiolinWasmModule } from './types';
 import { pForm } from './parse-form';
 
-export function pFiolinScript(p: ObjPath, v: unknown): FiolinScript {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['meta', 'interface', 'runtime', 'code'])
-  return {
-    ...pProp(p, o, 'meta', pMeta),
-    ...pProp(p, o, 'interface', pInterface),
-    ...pProp(p, o, 'runtime', pRuntime),
-    ...pProp(p, o, 'code', pCode),
-  };
-}
+export const pFileEnum = pStrUnion<('NONE' | 'SINGLE' | 'MULTI' | 'ANY')[]>(['NONE', 'SINGLE', 'MULTI', 'ANY']);
 
-function pMeta(p: ObjPath, v: unknown): FiolinScriptMeta {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['title', 'description', 'author', 'extensions']);
-  return {
-    ...pProp(p, o, 'title', pStr),
-    ...pProp(p, o, 'description', pStr),
-    ...pPropU(p, o, 'author', pStr),
-    ...pPropU(p, o, 'extensions', pArr(pStr)),
-  };
-}
+const pMeta = pObjWithProps<FiolinScriptMeta>({
+  title: pStr,
+  description: pStr,
+  author: pOpt(pStr),
+  extensions: pOpt(pArr(pStr)),
+});
 
-function pInterface(p: ObjPath, v: unknown): FiolinScriptInterface {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['inputFiles', 'inputAccept', 'outputFiles', 'form']);
-  return {
-    ...pProp(p, o, 'inputFiles', pFileEnum),
-    ...pPropU(p, o, 'inputAccept', pStr),
-    ...pProp(p, o, 'outputFiles', pFileEnum),
-    ...pPropU(p, o, 'form', pForm),
-  };
-}
+const pInterface = pObjWithProps<FiolinScriptInterface>({
+  inputFiles: pFileEnum,
+  inputAccept: pOpt(pStr),
+  outputFiles: pFileEnum,
+  form: pOpt(pForm),
+});
 
-function pPyPkg(p: ObjPath, v: unknown): FiolinPyPackage {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['type', 'name']);
-  return {
-    ...pProp(p, o, 'type', (p, v): 'PYPI' => {
-      if (v === 'PYPI') return v;
-      throw p.err(`be PYPI; got ${v}`);
-    }),
-    ...pProp(p, o, 'name', pStr),
-  };
-}
+const pPyPkg = pObjWithProps<FiolinPyPackage>({
+  type: pStrLit('PYPI'),
+  name: pStr,
+});
 
-function pWasmMod(p: ObjPath, v: unknown): FiolinWasmModule {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['name']);
-  return { ...pProp(p, o, 'name', pStr) };
-}
+const pWasmMod = pObjWithProps<FiolinWasmModule>({ name: pStr });
 
-function pRuntime(p: ObjPath, v: unknown): FiolinScriptRuntime {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['pythonPkgs', 'wasmModules']);
-  return {
-    ...pPropU(p, o, 'pythonPkgs', pArr(pPyPkg)),
-    ...pPropU(p, o, 'wasmModules', pArr(pWasmMod)),
-  };
-}
+const pRuntime = pObjWithProps<FiolinScriptRuntime>({
+  pythonPkgs: pOpt(pArr(pPyPkg)),
+  wasmModules: pOpt(pArr(pWasmMod)),
+});
 
-function pCode(p: ObjPath, v: unknown): FiolinScriptCode {
-  const o: object = pObj(p, v);
-  pOnlyKeys(p, o, ['python']);
-  return { ...pProp(p, o, 'python', pStr) };
-}
+const pCode = pObjWithProps<FiolinScriptCode>({ python: pStr });
+
+export const pFiolinScript = pObjWithProps<FiolinScript>({
+  meta: pMeta,
+  interface: pInterface,
+  runtime: pRuntime,
+  code: pCode,
+});

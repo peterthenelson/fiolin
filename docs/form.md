@@ -22,6 +22,10 @@ be runnable)
 
 > Union type of all the form components
 
+## FiolinFormComponentType = FiolinFormComponent extends { type: infer T } ? T :
+
+> The type tags for components
+
 ## FiolinFormDiv
 
 > A div (to make a row or column of components).
