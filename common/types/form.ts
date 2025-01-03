@@ -4,6 +4,9 @@ export interface FiolinForm {
   children: FiolinFormComponent[];
   // The autofocused component (identified by name) if any
   autofocusedName?: string;
+  // The autofocused component (identified by value) if any; only used to
+  // distinguish between multiple components with the same name.
+  autofocusedValue?: string;
   // Hide the file chooser (and instead trigger off of a button). This option
   // only makes sense when inputFiles is NONE (otherwise your script will not
   // be runnable)
@@ -13,13 +16,11 @@ export interface FiolinForm {
 // Union type of all the form components
 export type FiolinFormComponent = (
   // The collection of component types
-  FiolinFormDiv | FiolinFormLabel | FiolinFormText | FiolinFormSelect | FiolinFormButton
+  FiolinFormDiv | FiolinFormLabel | FiolinFormCheckbox | FiolinFormColor |
+  FiolinFormDate | FiolinFormDatetimeLocal | FiolinFormNumber | FiolinFormText |
+  FiolinFormSelect | FiolinFormButton
   // TODO:
-  // input type="checkbox"
-  // input type="color"
-  // input type="date"
-  // input type="datetime-local"
-  // input type="number"
+  // input type="email"
   // input type="radio"
   // input type="range"
   // input type="tel"
@@ -50,12 +51,92 @@ export interface FiolinFormLabel {
   child: FiolinFormComponent;
 }
 
+// An input type="checkbox" element
+export interface FiolinFormCheckbox {
+  // Type id
+  type: 'CHECKBOX';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) value to associate with this checkbox
+  value?: string;
+  // Whether to begin with this box checked
+  checked?: boolean;
+}
+
+// An input type="color" element
+export interface FiolinFormColor {
+  // Type id
+  type: 'COLOR';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) initial value
+  value?: string;
+}
+
+// An input type="date" element
+export interface FiolinFormDate {
+  // Type id
+  type: 'DATE';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) default value to fill it with (YYYY-MM-DD)
+  value?: string;
+  // Is a (non-empty) value required?
+  required?: boolean;
+  // Minimum allowed value (YYYY-MM-DD)
+  min?: string;
+  // Maximum allowed value (YYYY-MM-DD)
+  max?: string;
+  // Step-size for selector (in number of days)
+  step?: number;
+}
+
+// An input type="datetime-local" element
+export interface FiolinFormDatetimeLocal {
+  // Type id
+  type: 'DATETIME_LOCAL';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) default value to fill it with (YYYY-MM-DDTHH:mm)
+  value?: string;
+  // Is a (non-empty) value required?
+  required?: boolean;
+  // Minimum allowed value (YYYY-MM-DDTHH:mm)
+  min?: string;
+  // Maximum allowed value (YYYY-MM-DDTHH:mm)
+  max?: string;
+  // Step-size for selector (in number of seconds)
+  step?: number;
+}
+
+// An input type="number" element
+export interface FiolinFormNumber {
+  // Type id
+  type: 'NUMBER';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) default value to fill it with
+  value?: number;
+  // Is a (non-empty) value required?
+  required?: boolean;
+  // Placeholder to show if it's empty
+  placeholder?: string;
+  // Minimum allowed value
+  min?: number;
+  // Maximum allowed value
+  max?: number;
+  // Step-size for selector
+  step?: number;
+}
+
 // An input type="text" element
 export interface FiolinFormText {
   // Type id
   type: 'TEXT';
   // The name of the arg to associate with this value
   name: string;
+  // The (optional) default value to fill it with
+  value?: string;
   // The regex to validate against
   pattern?: string;
   // Is a (non-empty) value required?

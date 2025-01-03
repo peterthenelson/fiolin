@@ -12,6 +12,11 @@
 
 > The autofocused component (identified by name) if any
 
+**autofocusedValue?**: _string_
+
+> The autofocused component (identified by value) if any; only used to
+distinguish between multiple components with the same name.
+
 **hideFileChooser?**: _boolean_
 
 > Hide the file chooser (and instead trigger off of a button). This option
@@ -58,6 +63,142 @@ be runnable)
 
 > The wrapped child component
 
+## FiolinFormCheckbox
+
+> An input type="checkbox" element
+
+**type**: _'CHECKBOX'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _string_
+
+> The (optional) value to associate with this checkbox
+
+**checked?**: _boolean_
+
+> Whether to begin with this box checked
+
+## FiolinFormColor
+
+> An input type="color" element
+
+**type**: _'COLOR'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _string_
+
+> The (optional) initial value
+
+## FiolinFormDate
+
+> An input type="date" element
+
+**type**: _'DATE'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _string_
+
+> The (optional) default value to fill it with (YYYY-MM-DD)
+
+**required?**: _boolean_
+
+> Is a (non-empty) value required?
+
+**min?**: _string_
+
+> Minimum allowed value (YYYY-MM-DD)
+
+**max?**: _string_
+
+> Maximum allowed value (YYYY-MM-DD)
+
+**step?**: _number_
+
+> Step-size for selector (in number of days)
+
+## FiolinFormDatetimeLocal
+
+> An input type="datetime-local" element
+
+**type**: _'DATETIME_LOCAL'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _string_
+
+> The (optional) default value to fill it with (YYYY-MM-DDTHH:mm)
+
+**required?**: _boolean_
+
+> Is a (non-empty) value required?
+
+**min?**: _string_
+
+> Minimum allowed value (YYYY-MM-DDTHH:mm)
+
+**max?**: _string_
+
+> Maximum allowed value (YYYY-MM-DDTHH:mm)
+
+**step?**: _number_
+
+> Step-size for selector (in number of seconds)
+
+## FiolinFormNumber
+
+> An input type="number" element
+
+**type**: _'NUMBER'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _number_
+
+> The (optional) default value to fill it with
+
+**required?**: _boolean_
+
+> Is a (non-empty) value required?
+
+**placeholder?**: _string_
+
+> Placeholder to show if it's empty
+
+**min?**: _number_
+
+> Minimum allowed value
+
+**max?**: _number_
+
+> Maximum allowed value
+
+**step?**: _number_
+
+> Step-size for selector
+
 ## FiolinFormText
 
 > An input type="text" element
@@ -69,6 +210,10 @@ be runnable)
 **name**: _string_
 
 > The name of the arg to associate with this value
+
+**value?**: _string_
+
+> The (optional) default value to fill it with
 
 **pattern?**: _string_
 
