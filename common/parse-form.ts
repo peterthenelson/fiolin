@@ -1,5 +1,5 @@
 import { ObjPath, pArr, pBool, pNum, pObj, pObjWithProps, pOpt, pStr, pStrLit, pStrUnion, pTaggedUnion } from './parse';
-import { FiolinForm, FiolinFormButton, FiolinFormDiv, FiolinFormComponent, FiolinFormText, FiolinFormLabel, FiolinFormSelect, FiolinFormSelectOption, FiolinFormCheckbox, FiolinFormColor, FiolinFormDate, FiolinFormDatetimeLocal, FiolinFormNumber  } from './types/form';
+import { FiolinForm, FiolinFormButton, FiolinFormDiv, FiolinFormComponent, FiolinFormText, FiolinFormLabel, FiolinFormSelect, FiolinFormSelectOption, FiolinFormCheckbox, FiolinFormColor, FiolinFormDate, FiolinFormDatetimeLocal, FiolinFormNumber, FiolinFormEmail, FiolinFormRadio, FiolinFormRange, FiolinFormTel, FiolinFormUrl, FiolinFormTime  } from './types/form';
 
 export const pForm = pObjWithProps<FiolinForm>({
   children: pArr(pComponent),
@@ -16,8 +16,14 @@ function pComponent(p: ObjPath, v: unknown): FiolinFormComponent {
     'COLOR': pColor,
     'DATE': pDate,
     'DATETIME_LOCAL': pDatetimeLocal,
+    'EMAIL': pEmail,
     'NUMBER': pNumber,
+    'RADIO': pRadio,
+    'RANGE': pRange,
+    'TEL': pTel,
+    'TIME': pTime,
     'TEXT': pText,
+    'URL': pUrl,
     'SELECT': pSelect,
     'BUTTON': pButton,
   })(p, v);
@@ -70,6 +76,17 @@ const pDatetimeLocal = pObjWithProps<FiolinFormDatetimeLocal>({
   step: pOpt(pNum),
 });
 
+const pEmail = pObjWithProps<FiolinFormEmail>({
+  type: pStrLit('EMAIL'),
+  name: pStr,
+  value: pOpt(pStr),
+  multiple: pOpt(pBool),
+  pattern: pOpt(pStr),
+  required: pOpt(pBool),
+  placeholder: pOpt(pStr),
+  size: pOpt(pNum),
+});
+
 const pNumber = pObjWithProps<FiolinFormNumber>({
   type: pStrLit('NUMBER'),
   name: pStr,
@@ -81,8 +98,55 @@ const pNumber = pObjWithProps<FiolinFormNumber>({
   step: pOpt(pNum),
 });
 
+const pRadio = pObjWithProps<FiolinFormRadio>({
+  type: pStrLit('RADIO'),
+  name: pStr,
+  value: pStr,
+  checked: pOpt(pBool),
+  required: pOpt(pBool),
+});
+
+const pRange = pObjWithProps<FiolinFormRange>({
+  type: pStrLit('RANGE'),
+  name: pStr,
+  value: pOpt(pNum),
+  min: pNum,
+  max: pNum,
+  step: pOpt(pNum),
+});
+
+const pTel = pObjWithProps<FiolinFormTel>({
+  type: pStrLit('TEL'),
+  name: pStr,
+  value: pOpt(pStr),
+  pattern: pOpt(pStr),
+  required: pOpt(pBool),
+  placeholder: pOpt(pStr),
+  size: pOpt(pNum),
+});
+
 const pText = pObjWithProps<FiolinFormText>({
   type: pStrLit('TEXT'),
+  name: pStr,
+  value: pOpt(pStr),
+  pattern: pOpt(pStr),
+  required: pOpt(pBool),
+  placeholder: pOpt(pStr),
+  size: pOpt(pNum),
+});
+
+const pTime = pObjWithProps<FiolinFormTime>({
+  type: pStrLit('TIME'),
+  name: pStr,
+  value: pOpt(pStr),
+  required: pOpt(pBool),
+  min: pOpt(pStr),
+  max: pOpt(pStr),
+  step: pOpt(pNum),
+});
+
+const pUrl = pObjWithProps<FiolinFormUrl>({
+  type: pStrLit('URL'),
   name: pStr,
   value: pOpt(pStr),
   pattern: pOpt(pStr),

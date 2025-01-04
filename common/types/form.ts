@@ -17,15 +17,10 @@ export interface FiolinForm {
 export type FiolinFormComponent = (
   // The collection of component types
   FiolinFormDiv | FiolinFormLabel | FiolinFormCheckbox | FiolinFormColor |
-  FiolinFormDate | FiolinFormDatetimeLocal | FiolinFormNumber | FiolinFormText |
-  FiolinFormSelect | FiolinFormButton
-  // TODO:
-  // input type="email"
-  // input type="radio"
-  // input type="range"
-  // input type="tel"
-  // input type="time"
-  // input type="url"
+  FiolinFormDate | FiolinFormDatetimeLocal | FiolinFormEmail |
+  FiolinFormNumber | FiolinFormRadio | FiolinFormRange | FiolinFormTel |
+  FiolinFormText | FiolinFormTime | FiolinFormUrl | FiolinFormSelect |
+  FiolinFormButton
 );
 
 // The type tags for components
@@ -109,6 +104,26 @@ export interface FiolinFormDatetimeLocal {
   step?: number;
 }
 
+// An input type="email" element
+export interface FiolinFormEmail {
+  // Type id
+  type: 'EMAIL';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) default value to fill it with
+  value?: string;
+  // Allow multiple emails (comma separated)
+  multiple?: boolean;
+  // The regex to validate against
+  pattern?: string;
+  // Is a (non-empty) value required?
+  required?: boolean;
+  // Placeholder to show if it's empty
+  placeholder?: string;
+  // The size in characters
+  size?: number;
+}
+
 // An input type="number" element
 export interface FiolinFormNumber {
   // Type id
@@ -129,10 +144,95 @@ export interface FiolinFormNumber {
   step?: number;
 }
 
+// An input type="radio" element
+export interface FiolinFormRadio {
+  // Type id
+  type: 'RADIO';
+  // The name of the arg to associate with this value; radio buttons with the
+  // same name are a mutually exclusive set of options.
+  name: string;
+  // The value to associate with this radio button
+  value: string;
+  // Whether to begin with this option selected
+  checked?: boolean;
+  // Is a selection of one of the radio buttons sharing this name required?
+  required?: boolean;
+}
+
+// An input type="range" element
+export interface FiolinFormRange {
+  // Type id
+  type: 'RANGE';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) default value to fill it with
+  value?: number;
+  // Minimum allowed value
+  min: number;
+  // Maximum allowed value
+  max: number;
+  // Step-size for selector
+  step?: number;
+}
+
+// An input type="tel" element
+export interface FiolinFormTel {
+  // Type id
+  type: 'TEL';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) default value to fill it with
+  value?: string;
+  // The regex to validate against
+  pattern?: string;
+  // Is a (non-empty) value required?
+  required?: boolean;
+  // Placeholder to show if it's empty
+  placeholder?: string;
+  // The size in characters
+  size?: number;
+}
+
 // An input type="text" element
 export interface FiolinFormText {
   // Type id
   type: 'TEXT';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) default value to fill it with
+  value?: string;
+  // The regex to validate against
+  pattern?: string;
+  // Is a (non-empty) value required?
+  required?: boolean;
+  // Placeholder to show if it's empty
+  placeholder?: string;
+  // The size in characters
+  size?: number;
+}
+
+// An input type="time" element
+export interface FiolinFormTime {
+  // Type id
+  type: 'TIME';
+  // The name of the arg to associate with this value
+  name: string;
+  // The (optional) default value to fill it with (HH:mm or HH:mm:ss)
+  value?: string;
+  // Is a (non-empty) value required?
+  required?: boolean;
+  // Minimum allowed value (HH:mm or HH:mm:ss)
+  min?: string;
+  // Maximum allowed value (HH:mm or HH:mm:ss)
+  max?: string;
+  // Step-size for selector (in number of seconds)
+  step?: number;
+}
+
+// An input type="url" element
+export interface FiolinFormUrl {
+  // Type id
+  type: 'URL';
   // The name of the arg to associate with this value
   name: string;
   // The (optional) default value to fill it with

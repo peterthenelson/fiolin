@@ -163,6 +163,42 @@ be runnable)
 
 > Step-size for selector (in number of seconds)
 
+## FiolinFormEmail
+
+> An input type="email" element
+
+**type**: _'EMAIL'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _string_
+
+> The (optional) default value to fill it with
+
+**multiple?**: _boolean_
+
+> Allow multiple emails (comma separated)
+
+**pattern?**: _string_
+
+> The regex to validate against
+
+**required?**: _boolean_
+
+> Is a (non-empty) value required?
+
+**placeholder?**: _string_
+
+> Placeholder to show if it's empty
+
+**size?**: _number_
+
+> The size in characters
+
 ## FiolinFormNumber
 
 > An input type="number" element
@@ -199,11 +235,160 @@ be runnable)
 
 > Step-size for selector
 
+## FiolinFormRadio
+
+> An input type="radio" element
+
+**type**: _'RADIO'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value; radio buttons with the
+same name are a mutually exclusive set of options.
+
+**value**: _string_
+
+> The value to associate with this radio button
+
+**checked?**: _boolean_
+
+> Whether to begin with this option selected
+
+**required?**: _boolean_
+
+> Is a selection of one of the radio buttons sharing this name required?
+
+## FiolinFormRange
+
+> An input type="range" element
+
+**type**: _'RANGE'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _number_
+
+> The (optional) default value to fill it with
+
+**min**: _number_
+
+> Minimum allowed value
+
+**max**: _number_
+
+> Maximum allowed value
+
+**step?**: _number_
+
+> Step-size for selector
+
+## FiolinFormTel
+
+> An input type="tel" element
+
+**type**: _'TEL'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _string_
+
+> The (optional) default value to fill it with
+
+**pattern?**: _string_
+
+> The regex to validate against
+
+**required?**: _boolean_
+
+> Is a (non-empty) value required?
+
+**placeholder?**: _string_
+
+> Placeholder to show if it's empty
+
+**size?**: _number_
+
+> The size in characters
+
 ## FiolinFormText
 
 > An input type="text" element
 
 **type**: _'TEXT'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _string_
+
+> The (optional) default value to fill it with
+
+**pattern?**: _string_
+
+> The regex to validate against
+
+**required?**: _boolean_
+
+> Is a (non-empty) value required?
+
+**placeholder?**: _string_
+
+> Placeholder to show if it's empty
+
+**size?**: _number_
+
+> The size in characters
+
+## FiolinFormTime
+
+> An input type="time" element
+
+**type**: _'TIME'_
+
+> Type id
+
+**name**: _string_
+
+> The name of the arg to associate with this value
+
+**value?**: _string_
+
+> The (optional) default value to fill it with (HH:mm or HH:mm:ss)
+
+**required?**: _boolean_
+
+> Is a (non-empty) value required?
+
+**min?**: _string_
+
+> Minimum allowed value (HH:mm or HH:mm:ss)
+
+**max?**: _string_
+
+> Maximum allowed value (HH:mm or HH:mm:ss)
+
+**step?**: _number_
+
+> Step-size for selector (in number of seconds)
+
+## FiolinFormUrl
+
+> An input type="url" element
+
+**type**: _'URL'_
 
 > Type id
 

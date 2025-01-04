@@ -58,7 +58,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       input.type = 'checkbox';
       maybeAutofocus(component, input, ctx);
       input.name = component.name;
-      if (component.value) input.value = component.value.toString();
+      if (component.value) input.value = component.value;
       if (component.checked) input.checked = true;
       return input;
     },
@@ -94,6 +94,19 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.step) input.step = component.step.toString();
       return input;
     },
+    'EMAIL': (component) => {
+      const input = document.createElement('input');
+      input.type = 'text';
+      maybeAutofocus(component, input, ctx);
+      input.name = component.name;
+      if (component.value) input.value = component.value;
+      if (component.multiple) input.multiple = component.multiple;
+      if (component.pattern) input.pattern = component.pattern;
+      if (component.required) input.required = true;
+      if (component.placeholder) input.placeholder = component.placeholder;
+      if (component.size) input.size = component.size;
+      return input;
+    },
     'NUMBER': (component) => {
       const input = document.createElement('input');
       input.type = 'number';
@@ -107,9 +120,66 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.step) input.step = component.step.toString();
       return input;
     },
+    'RADIO': (component) => {
+      const input = document.createElement('input');
+      input.type = 'radio';
+      maybeAutofocus(component, input, ctx);
+      input.name = component.name;
+      input.value = component.value;
+      if (component.checked) input.checked = true;
+      if (component.required) input.required = true;
+      return input;
+    },
+    'RANGE': (component) => {
+      const input = document.createElement('input');
+      input.type = 'range';
+      maybeAutofocus(component, input, ctx);
+      input.name = component.name;
+      if (component.value) input.value = component.value.toString();
+      input.min = component.min.toString();
+      input.max = component.max.toString();
+      if (component.step) input.step = component.step.toString();
+      return input;
+    },
+    'TEL': (component) => {
+      const input = document.createElement('input');
+      input.type = 'tel';
+      maybeAutofocus(component, input, ctx);
+      input.name = component.name;
+      if (component.value) input.value = component.value;
+      if (component.pattern) input.pattern = component.pattern;
+      if (component.required) input.required = true;
+      if (component.placeholder) input.placeholder = component.placeholder;
+      if (component.size) input.size = component.size;
+      return input;
+    },
     'TEXT': (component) => {
       const input = document.createElement('input');
       input.type = 'text';
+      maybeAutofocus(component, input, ctx);
+      input.name = component.name;
+      if (component.value) input.value = component.value;
+      if (component.pattern) input.pattern = component.pattern;
+      if (component.required) input.required = true;
+      if (component.placeholder) input.placeholder = component.placeholder;
+      if (component.size) input.size = component.size;
+      return input;
+    },
+    'TIME': (component) => {
+      const input = document.createElement('input');
+      input.type = 'time';
+      maybeAutofocus(component, input, ctx);
+      input.name = component.name;
+      if (component.value) input.value = component.value;
+      if (component.required) input.required = true;
+      if (component.min) input.min = component.min;
+      if (component.max) input.max = component.max;
+      if (component.step) input.step = component.step.toString();
+      return input;
+    },
+    'URL': (component) => {
+      const input = document.createElement('input');
+      input.type = 'url';
       maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value;
