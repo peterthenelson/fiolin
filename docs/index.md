@@ -9,19 +9,25 @@ friends. Run them entirely in your browser.
 
 Think about Fiolin as a JSFiddle-like platform for writing and sharing simple
 scripts, with a focus on transforming files provided by the user of the script.
-Check out the [interactive tutorial](/playground) to get started writing fiolin
+Check out the [interactive tutorial][playground] to get started writing fiolin
 scripts in your browser, or copy the [template repository][fiolin-tmpl] and
 use the node-based offline toolchain.
 
 ## Table of Contents
 
 * [Python API](#python-api)
-* [Third-Party Packages](#third-party-packages)
+* [Importing Libraries](#importing-libs)
+  * [Built-in Libraries and Packages](#builtin-libs)
+  * [Third-Party Packages](#third-party-packages)
+  * [WASM Modules](#wasm)
+* [UI Configuration](#ui-configuration)
+  * [Basic UI](#basic-ui)
+  * [Forms](#forms)
 * [Sharing Fiolin Scripts](#sharing-fiolin-scripts)
-* [Linking To 3p Scripts](#linking-3p-scripts)
-* [Advanced UI Configuration](#advance-ui-configuration)
-* [Design Document](/doc/design)
-* [Example First-Party Fiolin Scripts][examples]
+  * [Linking To 3p Scripts](#linking-3p-scripts)
+* [Further Reading](#more)
+  * [Design Document](./design.md)
+  * [Example First-Party Fiolin Scripts][examples]
 
 ## Python API <a name="python-api"></a>
 
@@ -56,9 +62,17 @@ fiolin.cp(f'/input/{name}', f'/tmp/baz-{name}')
 # /output/*, so it's usually not necessary to use these functions.
 ```
 
-For more information on the `fiolin` module, read [the pydoc](/doc/fiolin-module).
+For more information on the `fiolin` module, read [the pydoc](./fiolin-module.md)
+or follow the [interactive tutorial][playground].
 
-## Third-Party Packages <a name="third-party-packages"></a>
+## Importing Libraries <a name="importing-libs"></a>
+
+### Built-in Libraries and Packages <a name="builtin-libs"></a>
+
+You can of course import any of the standard python modules. Additionally,
+pyodide ships with a number of [popular third-party libraries built right in.][pyodide-builtin]
+
+### Third-Party Packages <a name="third-party-packages"></a>
 
 Fiolin supports installing packages from PyPI, so long as they are written in
 pure python. If you are unsure about whether the package you're interested in
@@ -77,7 +91,78 @@ runtime:
       name: mypkg
 ```
 
-TODO: Adding WASM stuff
+### WASM Modules <a name="wasm"></a>
+
+You can configure fiolin to install some pre-selected WASM modules. This
+currently is limited to imagemagick, although there are some issues around
+js/py interop that may need to be ironed out. See
+https://github.com/dlemstra/magick-wasm for details on how the js api works.
+
+Note that the python file-system is mounted under `/py` in the imagemagick
+file-system.
+
+In order to use imagemagick (or any future additional wasm modules), you must
+explicitly list it in the runtime section of your Fiolin script yaml:
+
+```yml
+# ...
+runtime:
+  wasmModules:
+    - name: imagemagick
+```
+
+## UI Configuration <a name="ui-configuration"></a>
+
+You may have noticed that different Fiolin scripts have different interfaces.
+Some have just one "Choose An Input File" control that automatically triggers
+the script to run and download the (single) output file. Others have file
+choosers with different behavior or custom inputs.
+
+The `interface` section of the `FiolinScript` type is used to configure this
+behavior.
+
+### Basic UI <a name="basic-ui"></a>
+
+The basic options are for how many input and output files you expect.  `'NONE'`
+means no files, `'SINGLE'` means exactly one file, `'MULTI'` means more than one
+file, and `'ANY'` means any number of files.
+
+Additionally, `inputAccept` will configure the file chooser to only suggest
+files of a particular type. (See [MDN][mdn-input-accept] for details.)
+
+### Forms <a name="forms"></a>
+
+Fiolin scripts can be configured to present basic HTML forms to the user, and
+the submitted values will be made available to the running script.
+
+An example (see [here](./form.md) for more details):
+
+```yml
+# ...
+interface:
+  # ...
+  form:
+    children:
+      - type: RADIO
+        name: currency
+        value: dollars
+      - type: RADIO
+        name: currency
+        value: rubles
+      - type: RANGE
+        name: price
+        min: 0
+        max: 100
+```
+
+```py
+import fiolin
+args = fiolin.args()
+print(f'You guessed the price was {args['price']} {args['currency']}')
+```
+
+If you're curious about configuration options you don't see covered in the docs,
+take a look at the types for [scripts](./fiolin-script.md).
 
 ## Sharing Fiolin Scripts <a name="sharing-fiolin-scripts"></a>
 
@@ -128,23 +213,13 @@ Fiolin repository.
   </div>
 </form>
 
-## Advanced UI Configuration <a name="advance-ui-configuration"></a>
+## Further Reading <a name="more"></a>
 
-You may have noticed that different Fiolin scripts have different interfaces.
-Some have just one "Choose An Input File" control that automatically triggers
-the script to run and download the (single) output file. Others have more
-complex file-chooser components, manual run buttons, etc.
-
-The `interface` section of the `FiolinScript` type is used to configure this
-behavior. The basic options are for how many input and output files you expect.
-`'NONE'` means no files, `'SINGLE'` means exactly one file, `'MULTI'` means more
-than one file, and `'ANY'` means any number of files.
-
-TODO: Update once there are more interesting options
-
-If you're curious about configuration options you don't see covered in the docs,
-take a look at the types for [scripts](/doc/fiolin-script) and
-[forms](/doc/form) to learn more.
+* [Design Document](./design.md)
+* [Example First-Party Fiolin Scripts][examples]
 
 [examples]: https://github.com/peterthenelson/fiolin/blob/main/fiols/
 [fiolin-tmpl]: https://github.com/peterthenelson/fiolin-template
+[mdn-input-accept]: https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept#unique_file_type_specifiers
+[playground]: https://fiolin.org/playground
+[pyodide-builtin]: https://pyodide.org/en/stable/usage/packages-in-pyodide.html

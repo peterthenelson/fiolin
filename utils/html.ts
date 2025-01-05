@@ -2,7 +2,7 @@ import { indent, redent } from '../common/indent';
 import { pkgPath } from './pkg-path';
 import { marked } from 'marked';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { link, readFileSync } from 'node:fs';
 import { FiolinScript } from '../common/types';
 
 // Covert x.js or /x.js to /x.js?v=123, supposing that the contents of the file
@@ -204,7 +204,16 @@ export function mdDoc(path: string) {
   // Note: the dev server is just used for pre-rendering; we do not actually
   // have to care about path traversal vulnerabilities.
   const md: string = readFileSync(pkgPath(`docs/${path}.md`), { encoding: 'utf-8' });
-  const parsed: string = marked.parse(md, { async: false });
+  // Rewrite local doc crosslinks
+  const linkRewriter = new marked.Renderer();
+  linkRewriter.link = ({href, title, text}): string => {
+    const regex = /\.\/(.*)\.md/;
+    if (regex.test(href)) {
+      href = href.replace(regex, '/doc/$1');
+    }
+    return `<a href="${href}" title="${title || ''}">${text}</a>`;
+  };
+  const parsed: string = marked.parse(md, { async: false, renderer: linkRewriter });
   return `
     <!DOCTYPE html>
     <html>

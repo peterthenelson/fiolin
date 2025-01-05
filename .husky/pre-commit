@@ -1,1 +1,3 @@
+npm run build:doc
+git add docs/*
 npm test -- --no-watch

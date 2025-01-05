@@ -1,6 +1,6 @@
 A not-necessarily-exhaustive list of TODOs:
 - Docs
-  - Update docs for wasm and forms
+  - Update docs for template repo
 - Dev server and release:
   - Get unjs/nitro#2814 merged/released and then revert my local changes.
   - Set up tests involving the web server(s) and playwright to check that the
@@ -13,7 +13,6 @@ A not-necessarily-exhaustive list of TODOs:
     projects and do local development. Update the repo template as needed.
 - Core functionality
   - Forms
-    - Add the remaining input types
     - Get autofocus to work?
   - Canvas
   - Multi-stage callback based scripts
@@ -22,6 +21,7 @@ A not-necessarily-exhaustive list of TODOs:
       - Fix unsafe-eval issue with imagemagick
       - Figure out how to pass in bytes to imagemagick read
   - Some kind of (interactive?) canvas functionality
+  - Debug command that can trigger some kind of interactive repl
 - Scripts
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)

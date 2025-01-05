@@ -6,6 +6,4 @@ node_modules
 **/.output
 **/.env
 **/.wrangler
-docs/fiolin-module.md
-docs/fiolin-script.md
 server/public/bundle
