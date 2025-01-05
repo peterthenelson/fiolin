@@ -17,14 +17,17 @@ def args():
     return {}
   return dict(js.args.object_entries())
 
-def get_input_basename(suffix=''):
+def get_input_basename(suffix='', ext=None):
   """Gets the (assumed to be single) input file basename.
   
-  Optionally adds a suffix, which is helpful for making output file names.
+  Optionally adds a suffix or swaps the extension, which is helpful for making
+  output file names.
   """
   if len(js.inputs):
-    stem, ext = os.path.splitext(js.inputs[0])
-    return stem + suffix + ext
+    stem, extension = os.path.splitext(js.inputs[0])
+    if ext is not None:
+      extension = ext
+    return stem + suffix + extension
   else:
     raise ValueError(
       f'Expected a single input file but got {js.inputs}; get_input_basename() ' +

@@ -22,11 +22,12 @@ fiolin.**extract_exc**(e=None)
 
 > Extract line number from (last) exception and format stack trace.
 
-fiolin.**get_input_basename**(suffix='')
+fiolin.**get_input_basename**(suffix='', ext=None)
 
 > Gets the (assumed to be single) input file basename.
 > 
-> Optionally adds a suffix, which is helpful for making output file names.
+> Optionally adds a suffix or swaps the extension, which is helpful for making
+> output file names.
 
 fiolin.**get_input_basenames**()
 

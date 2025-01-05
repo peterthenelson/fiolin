@@ -5,7 +5,7 @@ documentation for more information.
 """
 def args():
   return {}
-def get_input_basename(suffix=''):
+def get_input_basename(suffix='', ext=''):
   return ''
 def get_input_path():
   return ''
