@@ -1,0 +1,15 @@
+meta:
+  title: Image to Favicon
+  author: Peter Nelson
+  description: >
+    Create a multi-resolution icon file from a square image. The script will
+    create an icon file with 256x256, 128x128, 64x64, 32x32, and 16x16
+    scaled versions of the original image. (Browsers choose the appropriate
+    size version automatically.)
+interface:
+  inputAccept: image/*
+  inputFiles: SINGLE
+  outputFiles: SINGLE
+runtime:
+  wasmModules:
+    - name: imagemagick
