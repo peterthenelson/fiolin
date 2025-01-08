@@ -9,6 +9,7 @@ import { TypedWorker } from './typed-worker';
 import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
 import YAML, { YAMLParseError } from 'yaml';
 import { renderForm } from './form-renderer';
+import { FiolinFormButtonAction } from '../common/types/form';
 const monaco = import('./monaco');
 
 function maybeSelectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T {
@@ -122,6 +123,7 @@ export class FiolinComponent {
   private readonly scriptDesc: HTMLPreElement;
   private scriptForm: HTMLFormElement;
   private readonly fileChooser: HTMLInputElement;
+  private runTrigger?: [HTMLButtonElement, FiolinFormButtonAction];
   private readonly inputFileText: HTMLSpanElement;
   private readonly outputFileText: HTMLSpanElement;
   private readonly scriptTabs: HTMLDivElement;
@@ -191,20 +193,26 @@ export class FiolinComponent {
       this.fileChooser.multiple = true;
     }
     this.fileChooser.accept = ui.inputAccept || '';
+    this.runTrigger = undefined;
     if (ui.form) {
-      const newForm = renderForm(ui.form);
+      const newForm = renderForm(ui.form, (button, action) => {
+        this.runTrigger = [button, action];
+        this.fileChooser.click();
+      });
       this.scriptForm.replaceWith(newForm);
       this.scriptForm = newForm;
       if (ui.form.hideFileChooser) {
         this.container.classList.add('file-chooser-hidden');
       }
-      this.scriptForm.onsubmit = async (e) => {
+      this.scriptForm.onsubmit = (e) => {
         e.preventDefault();
-        const script = await this.script;
-        if (script.interface.inputFiles === 'ANY' ||
-            script.interface.inputFiles === 'NONE') {
-          this.runScript([], new FormData(this.scriptForm, e.submitter));
+        const files: File[] = [];
+        if (this.fileChooser.files !== null) {
+          for (const f of this.fileChooser.files) {
+            files.push(f);
+          }
         }
+        this.runScript(files, new FormData(this.scriptForm, e.submitter));
       }
     }
   }
@@ -256,20 +264,29 @@ export class FiolinComponent {
     }
     this.fileChooser.onclick = async (event) => {
       const script = await this.script;
-      if (script.interface.inputFiles === 'NONE') {
+      // If the chooser is hidden, then the click must have been from a form
+      // button (which will handle running the script if needed). Otherwise
+      // skip file choosing and directly run it if inputFiles is 'NONE'.
+      if (!script.interface.form?.hideFileChooser && script.interface.inputFiles === 'NONE') {
         event.preventDefault();
         this.runScript([]);
       }
     };
     this.fileChooser.onchange = () => {
-      const files: File[] = [];
-      if (this.fileChooser.files !== null) {
-        for (const f of this.fileChooser.files) {
-          files.push(f);
+      if (!this.runTrigger) {
+        const files: File[] = [];
+        if (this.fileChooser.files !== null) {
+          for (const f of this.fileChooser.files) {
+            files.push(f);
+          }
         }
+        this.runScript(files);
+      } else if (this.runTrigger[1] === 'FILE') {
+        // Skip submission
+      } else {
+        this.scriptForm.requestSubmit(this.runTrigger[0]);
       }
-      this.runScript(files);
-    };
+    }
     this.fileChooser.disabled = false;
     this.modeButton.onclick = () => {
       this.container.classList.toggle('dev-mode');
@@ -367,7 +384,16 @@ export class FiolinComponent {
       return;
     }
     this.fileChooser.disabled = true;
-    this.fileChooser.value = '';
+    // File input components' behavior is a bit tricky. onchange will not fire
+    // if the same file is chosen as before. In order to remedy this, it is
+    // desirable to clear the file chooser's value on runs. However, this is
+    // only the case when the file chooser itself or a form button is being used
+    // to both select a file *and* trigger the run. Otherwise, we'd like to
+    // retain the files (e.g., if there are separate "Choose File" and "Run"
+    // buttons).
+    if (!this.runTrigger || this.runTrigger[1] === 'FILE_AND_SUBMIT') {
+      this.fileChooser.value = '';
+    }
     const script = await this.script;
     await this.readyToRun.promise;
     this.container.classList.remove('error');

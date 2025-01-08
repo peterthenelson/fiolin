@@ -53,6 +53,11 @@ A not-necessarily-exhaustive list of TODOs:
     - Why is monaco occasionally triggering a request for clipboard permissions?
     - Add some transition animations for the buttons to invite interaction.
   - Controls:
+    - Maybe redo the button/file stuff. I know I just wrote it, but it probably
+      makes more sense to:
+      - Have a FILE component that optionally includes triggering
+      - Redo the "simple ui" to either be implemented in terms of the form
+        builder components or at least share more of the logic with it
     - Filtering in output terminal by log level
     - Improve the "simple" file UI to better work for multiple files
   - Deployment:

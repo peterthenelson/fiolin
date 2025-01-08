@@ -456,6 +456,10 @@ same name are a mutually exclusive set of options.
 
 > Is this selected by default?
 
+## FiolinFormButtonAction = 'SUBMIT' | 'FILE' |
+
+> The button action types
+
 ## FiolinFormButton
 
 > An button element
@@ -476,4 +480,11 @@ same name are a mutually exclusive set of options.
 
 > The value to be submitted when it's clicked (optional, but logically should
 be present whenever name is present and vice versa).
+
+**action?**: _FiolinFormButtonAction_
+
+> Buttons, by default, submit the form and then run the script. If you'd like
+to replace the file chooser UI with a custom button, you can configure a
+button to trigger file choice instead of or in addition to running the
+script.
 

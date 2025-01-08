@@ -1,11 +1,15 @@
-import { FiolinForm, FiolinFormComponent } from '../common/types/form';
+import { typeSwitch } from '../common/type-switch';
+import { FiolinForm, FiolinFormButtonAction, FiolinFormComponent } from '../common/types/form';
 
-
-export function renderForm(form: FiolinForm): HTMLFormElement {
+// Note: the fileChooserCb should trigger the file chooser and then, if
+// submitWith is specified, then it will submit the form with that as the
+// submitter.
+export function renderForm(form: FiolinForm, fileChooserCb: (button: HTMLButtonElement, action: FiolinFormButtonAction) => void): HTMLFormElement {
   const f = document.createElement('form');
   const ctx: RenderContext = {
     autofocusedName: form.autofocusedName,
-    autofocusedValue: form.autofocusedValue
+    autofocusedValue: form.autofocusedValue,
+    fileChooserCb,
   };
   for (const c of form.children) {
     f.append(renderComponent(c, ctx));
@@ -16,15 +20,7 @@ export function renderForm(form: FiolinForm): HTMLFormElement {
 interface RenderContext {
   autofocusedName?: string;
   autofocusedValue?: string;
-}
-
-function taggedUnionSwitch<T extends { type: string }, V>(input: T, cases: { [K in T['type']]: (input: Extract<T, { type: K }>) => V }): V {
-  for (const [k, val] of Object.entries(cases)) {
-    if (k === input.type) {
-      return (val as (input: unknown) => V)(input);
-    }
-  }
-  throw new Error(`Expected input.type be one of ${Object.keys(cases).join(' | ')}; got ${input.type}`);
+  fileChooserCb: (button: HTMLButtonElement, action: FiolinFormButtonAction) => void;
 }
 
 function maybeAutofocus(component: FiolinFormComponent, element: HTMLElement, ctx: RenderContext) {
@@ -38,7 +34,7 @@ function maybeAutofocus(component: FiolinFormComponent, element: HTMLElement, ct
 }
 
 function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HTMLElement {
-  return taggedUnionSwitch(component, {
+  return typeSwitch(component, {
     'DIV': (component) => {
       const div = document.createElement('div');
       div.classList.add(`flex-${component.dir.toLowerCase()}-wrap`);
@@ -210,6 +206,22 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       button.append(component.text);
       if (component.name) button.name = component.name;
       if (component.value) button.value = component.value;
+      if (component.action) {
+        const a = component.action;
+        button.onclick = (ev) => {
+          typeSwitch({ type: a }, {
+            'SUBMIT': () => { /* default is fine */ },
+            'FILE': () => {
+              ev.preventDefault();
+              ctx.fileChooserCb(button, a);
+            },
+            'FILE_AND_SUBMIT': () =>{
+              ev.preventDefault();
+              ctx.fileChooserCb(button, a);
+            }
+          });
+        }
+      }
       return button;
     }
   });

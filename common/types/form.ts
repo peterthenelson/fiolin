@@ -271,6 +271,9 @@ export interface FiolinFormSelectOption {
   selected?: boolean;
 }
 
+// The button action types
+export type FiolinFormButtonAction = 'SUBMIT' | 'FILE' | 'FILE_AND_SUBMIT';
+
 // An button element
 export interface FiolinFormButton {
   // Type id
@@ -282,4 +285,9 @@ export interface FiolinFormButton {
   // The value to be submitted when it's clicked (optional, but logically should
   // be present whenever name is present and vice versa).
   value?: string;
+  // Buttons, by default, submit the form and then run the script. If you'd like
+  // to replace the file chooser UI with a custom button, you can configure a
+  // button to trigger file choice instead of or in addition to running the
+  // script.
+  action?: FiolinFormButtonAction;
 }
