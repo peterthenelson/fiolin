@@ -230,6 +230,8 @@ form label:focus-within  {
   color: var(--whitish);
   border: 1px solid var(--lightGrey);
   border-radius: 5px;
+  padding: .5em;
+  margin: .5em 1em 0.1em 1em;
 }
 
 :is(form, .script-header) :is(input, select):focus {
@@ -353,7 +355,7 @@ form button {
   opacity: 0;
 }
 
-.file-chooser-hidden .files-panel {
+.file-chooser-hidden .files-label {
   display: none;
 }
 
