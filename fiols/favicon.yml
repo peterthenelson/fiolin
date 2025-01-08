@@ -6,6 +6,8 @@ meta:
     create an icon file with 256x256, 128x128, 64x64, 32x32, and 16x16
     scaled versions of the original image. (Browsers choose the appropriate
     size version automatically.)
+  extensions:
+    - ico
 interface:
   inputAccept: image/*
   inputFiles: SINGLE
