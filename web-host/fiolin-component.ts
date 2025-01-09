@@ -291,10 +291,11 @@ export class FiolinComponent {
     this.modeButton.onclick = () => {
       this.container.classList.toggle('dev-mode');
     };
-    // TODO: on hash change (when navigating), do this too.
+    window.addEventListener('hashchange', () => {
+      this.script = this.loadScript({});
+    });
     this.tutorialSelect.onchange = async () => {
       window.location.hash = this.tutorialSelect.value;
-      this.script = this.loadScript({});
     };
     this.tutorialSelect.disabled = false;
     const dialog = getByRelIdAs(this.container, 'deploy-dialog', HTMLDialogElement);
