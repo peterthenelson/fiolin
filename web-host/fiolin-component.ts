@@ -10,32 +10,8 @@ import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
 import YAML, { YAMLParseError } from 'yaml';
 import { renderForm } from './form-renderer';
 import { FiolinFormButtonAction } from '../common/types/form';
+import { getByRelIdAs, selectAs } from '../web-utils/select-as';
 const monaco = import('./monaco');
-
-function maybeSelectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T {
-  const elem = root.querySelector(sel);
-  if (elem instanceof cls) {
-    return (elem as T);
-  } else {
-    throw new Error(`${sel} is not an instance of ${cls}`);
-  }
-}
-
-function selectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T {
-  const elem = maybeSelectAs(root, sel, cls);
-  if (elem === null) {
-    throw new Error(`No matches for selector '${sel}'`);
-  }
-  return elem;
-}
-
-function maybeGetByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
-  return maybeSelectAs(root, `[data-rel-id="${relativeId}"]`, cls);
-}
-
-function getByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
-  return selectAs(root, `[data-rel-id="${relativeId}"]`, cls);
-}
 
 function getFormValue(fd: FormData, key: string): string {
   const value = fd.get(key);
