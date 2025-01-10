@@ -97,7 +97,7 @@ export class FiolinComponent {
   private readonly deployButton: HTMLDivElement;
   private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
-  private scriptForm: HTMLFormElement;
+  private customForm: HTMLFormElement;
   private readonly fileChooser: HTMLInputElement;
   private runTrigger?: [HTMLButtonElement, FiolinFormButtonAction];
   private readonly inputFileText: HTMLSpanElement;
@@ -120,7 +120,7 @@ export class FiolinComponent {
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
     this.tutorialSelect = getByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
-    this.scriptForm = getByRelIdAs(container, 'script-form', HTMLFormElement);
+    this.customForm = getByRelIdAs(container, 'script-form', HTMLFormElement);
     this.scriptTabs = getByRelIdAs(container, 'script-editor-tabs', HTMLDivElement);
     this.scriptEditor = getByRelIdAs(container, 'script-editor', HTMLDivElement);
     this.fileChooser = getByRelIdAs(container, 'input-files-chooser', HTMLInputElement);
@@ -175,12 +175,12 @@ export class FiolinComponent {
         this.runTrigger = [button, action];
         this.fileChooser.click();
       });
-      this.scriptForm.replaceWith(newForm);
-      this.scriptForm = newForm;
+      this.customForm.replaceWith(newForm);
+      this.customForm = newForm;
       if (ui.form.hideFileChooser) {
         this.container.classList.add('file-chooser-hidden');
       }
-      this.scriptForm.onsubmit = (e) => {
+      this.customForm.onsubmit = (e) => {
         e.preventDefault();
         const files: File[] = [];
         if (this.fileChooser.files !== null) {
@@ -188,7 +188,7 @@ export class FiolinComponent {
             files.push(f);
           }
         }
-        this.runScript(files, new FormData(this.scriptForm, e.submitter));
+        this.runScript(files, new FormData(this.customForm, e.submitter));
       }
     }
   }
@@ -260,7 +260,7 @@ export class FiolinComponent {
       } else if (this.runTrigger[1] === 'FILE') {
         // Skip submission
       } else {
-        this.scriptForm.requestSubmit(this.runTrigger[0]);
+        this.customForm.requestSubmit(this.runTrigger[0]);
       }
     }
     this.fileChooser.disabled = false;
@@ -357,7 +357,7 @@ export class FiolinComponent {
   }
 
   private async runScript(files: File[], formData?: FormData) {
-    if (!this.scriptForm.reportValidity()) {
+    if (!this.customForm.reportValidity()) {
       return;
     }
     this.fileChooser.disabled = true;
@@ -393,7 +393,7 @@ export class FiolinComponent {
       this.container.classList.add('running');
       const args: Record<string, string> = {};
       if (!formData) {
-        formData = new FormData(this.scriptForm);
+        formData = new FormData(this.customForm);
       }
       for (const [k, v] of formData.entries()) {
         args[k] = v.toString();
