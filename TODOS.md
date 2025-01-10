@@ -32,7 +32,6 @@ A not-necessarily-exhaustive list of TODOs:
     - Extracting text and tables from PDFs
     - ImageMagick:
       - Resize / adjust quality of / trim image
-      - Make ICOs
       - Make thumbnails
       - Montage, append
       - Combine into GIF / explode out from GIF
@@ -40,7 +39,7 @@ A not-necessarily-exhaustive list of TODOs:
       - To grayscale, invert, change colorspace, tint, blur
       - Mirror or rotate
       - Image to PDF
-      - Convert formats
+      - Converter for DSLR raw formats
     - Extract or convert 7z, cab, jar, rar, zip
     - Convert audio aac, aiff, flac, m4a, mp3, ogg, wav, wma
     - Convert docs djvu, docx, odt, pdf, rtf

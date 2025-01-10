@@ -1,0 +1,59 @@
+meta:
+  title: Convert Between Image Formats
+  author: Peter Nelson
+  description: >
+    Convert images to .bmp, .jpg, .png, .tiff, or .webp format. Supports
+    additional input formats beyond these.
+  extensions:
+    - bmp
+    - jpg
+    - jpeg
+    - png
+    - tif
+    - tiff
+    - webp
+interface:
+  inputAccept: image/*
+  inputFiles: SINGLE
+  outputFiles: SINGLE
+  form:
+    autofocusedName: format
+    hideFileChooser: true
+    children:
+      - type: DIV
+        dir: ROW
+        children:
+          - type: LABEL
+            text: Input Image
+            child:
+              type: BUTTON
+              text: Choose File
+              action: FILE
+          - type: LABEL
+            text: Output Image Format
+            child:
+              type: SELECT
+              name: format
+              required: true
+              options:
+                - text: ''
+                  value: ''
+                  selected: true
+                - text: Bitmap
+                  value: .bmp
+                - text: JPEG
+                  value: .jpg
+                - text: PNG
+                  value: .png
+                - text: TIFF
+                  value: .tiff
+                - text: WebP
+                  value: .webp
+          - type: LABEL
+            text: Convert Image
+            child:
+              type: BUTTON
+              text: Run
+runtime:
+  wasmModules:
+    - name: imagemagick
