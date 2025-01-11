@@ -1,7 +1,17 @@
 """Somebody set up us the bomb."""
 import fiolin
 import sys
-import base64
+
+def caesar(s):
+  """Thus always to ciphers!"""
+  a = ord('a')
+  enc = ''
+  for c in s:
+    if c.isalpha():
+      enc += chr(a + (ord(c) - a + 3) % 26)
+    else:
+      enc += c
+  return enc
 
 # TODO: Try out filling the form in in different ways in order to defuse the
 # bomb. No editing the python! (But what about the yaml...?)
@@ -13,10 +23,10 @@ elif args['secret-code'] != 'CAPS':
 elif args['cake'] in ['yes', 'no']:
   print('Sorry, the cake is a lie')
 else:
-  encoded = base64.b64encode(args['cake'].encode('utf-8')).decode('utf-8')
-  if encoded != 'Z2xhZG9zLXNodXRkb3du':
+  if caesar(args['cake']) != 'vkxwgrzq-jodgrv':
     print("I'm afraid you're about to become the immediate past president of "
-            "the Being Alive club!", file=sys.stderr)
+          "the Being Alive club!", file=sys.stderr)
   else:
     print('You defused the bomb!')
-    print('This was a triumph...')
+    print('This was a triumph.')
+    print('I\'m making a note here: "Huge success"...')
