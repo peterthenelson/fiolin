@@ -3,6 +3,10 @@ import { FiolinScript } from '../common/types';
 // Abstraction over different types of forms (for choosing files and invoking
 // FiolinScripts).
 export abstract class FormComponent {
+  // Check for validity (of form choices) and update the UI to report any
+  // issues.
+  abstract reportValidity(): boolean;
+
   // Update the UI given the newly loaded FiolinScript.
   abstract onLoad(script: FiolinScript): void;
 

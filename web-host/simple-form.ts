@@ -28,6 +28,8 @@ export class SimpleForm extends FormComponent {
     // Disable it until the script is set.
     this.fileChooser.onclick = (e) => { e.preventDefault() };
   }
+
+  reportValidity(): boolean { return true; }
   
   onLoad(script: FiolinScript) {
     this.ui = script.interface;
