@@ -9,7 +9,7 @@ import { TypedWorker } from './typed-worker';
 import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
 import YAML, { YAMLParseError } from 'yaml';
 import { renderForm } from './form-renderer';
-import { FiolinFormButtonAction } from '../common/types/form';
+import { SimpleForm } from './simple-form';
 import { getByRelIdAs, selectAs } from '../web-utils/select-as';
 const monaco = import('./monaco');
 
@@ -98,10 +98,7 @@ export class FiolinComponent {
   private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
   private customForm: HTMLFormElement;
-  private readonly fileChooser: HTMLInputElement;
-  private runTrigger?: [HTMLButtonElement, FiolinFormButtonAction];
-  private readonly inputFileText: HTMLSpanElement;
-  private readonly outputFileText: HTMLSpanElement;
+  private simpleForm: SimpleForm;
   private readonly scriptTabs: HTMLDivElement;
   private readonly scriptEditor: HTMLDivElement;
   private readonly outputTerm: HTMLPreElement;
@@ -123,9 +120,10 @@ export class FiolinComponent {
     this.customForm = getByRelIdAs(container, 'script-form', HTMLFormElement);
     this.scriptTabs = getByRelIdAs(container, 'script-editor-tabs', HTMLDivElement);
     this.scriptEditor = getByRelIdAs(container, 'script-editor', HTMLDivElement);
-    this.fileChooser = getByRelIdAs(container, 'input-files-chooser', HTMLInputElement);
-    this.inputFileText = getByRelIdAs(container, 'input-files-text', HTMLSpanElement);
-    this.outputFileText = getByRelIdAs(container, 'output-files-text', HTMLSpanElement);
+    this.simpleForm = new SimpleForm(container, {
+      runScript: (files, formData) => this.runScript(files, formData),
+      requestSubmit: (submitter) => this.customForm.requestSubmit(submitter),
+    });
     this.outputTerm = getByRelIdAs(container, 'output-term', HTMLPreElement);
     this.log = [];
     this.worker = new TypedWorker(opts?.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
@@ -163,17 +161,11 @@ export class FiolinComponent {
     this.container.classList.remove('output-files-multi');
     this.container.classList.remove('output-files-any');
     this.container.classList.add(`output-files-${ui.outputFiles.toLowerCase()}`);
-    if (ui.inputFiles === 'NONE' || ui.inputFiles === 'SINGLE') {
-      this.fileChooser.multiple = false;
-    } else {
-      this.fileChooser.multiple = true;
-    }
-    this.fileChooser.accept = ui.inputAccept || '';
-    this.runTrigger = undefined;
+    this.simpleForm.onLoad(script);
     if (ui.form) {
       const newForm = renderForm(ui.form, (button, action) => {
-        this.runTrigger = [button, action];
-        this.fileChooser.click();
+        // TODO: obviate this dep
+        this.simpleForm.clickFileChooser(button, action);
       });
       this.customForm.replaceWith(newForm);
       this.customForm = newForm;
@@ -182,12 +174,7 @@ export class FiolinComponent {
       }
       this.customForm.onsubmit = (e) => {
         e.preventDefault();
-        const files: File[] = [];
-        if (this.fileChooser.files !== null) {
-          for (const f of this.fileChooser.files) {
-            files.push(f);
-          }
-        }
+        const files = this.simpleForm.getFiles();
         this.runScript(files, new FormData(this.customForm, e.submitter));
       }
     }
@@ -232,38 +219,6 @@ export class FiolinComponent {
   }
 
   private async setupHandlers() {
-    this.fileChooser.oncancel = async () => {
-      const script = await this.script;
-      if (script.interface.inputFiles === 'ANY') {
-        this.runScript([]);
-      }
-    }
-    this.fileChooser.onclick = async (event) => {
-      const script = await this.script;
-      // If the chooser is hidden, then the click must have been from a form
-      // button (which will handle running the script if needed). Otherwise
-      // skip file choosing and directly run it if inputFiles is 'NONE'.
-      if (!script.interface.form?.hideFileChooser && script.interface.inputFiles === 'NONE') {
-        event.preventDefault();
-        this.runScript([]);
-      }
-    };
-    this.fileChooser.onchange = () => {
-      if (!this.runTrigger) {
-        const files: File[] = [];
-        if (this.fileChooser.files !== null) {
-          for (const f of this.fileChooser.files) {
-            files.push(f);
-          }
-        }
-        this.runScript(files);
-      } else if (this.runTrigger[1] === 'FILE') {
-        // Skip submission
-      } else {
-        this.customForm.requestSubmit(this.runTrigger[0]);
-      }
-    }
-    this.fileChooser.disabled = false;
     this.modeButton.onclick = () => {
       this.container.classList.toggle('dev-mode');
     };
@@ -360,36 +315,19 @@ export class FiolinComponent {
     if (!this.customForm.reportValidity()) {
       return;
     }
-    this.fileChooser.disabled = true;
-    // File input components' behavior is a bit tricky. onchange will not fire
-    // if the same file is chosen as before. In order to remedy this, it is
-    // desirable to clear the file chooser's value on runs. However, this is
-    // only the case when the file chooser itself or a form button is being used
-    // to both select a file *and* trigger the run. Otherwise, we'd like to
-    // retain the files (e.g., if there are separate "Choose File" and "Run"
-    // buttons).
-    if (!this.runTrigger || this.runTrigger[1] === 'FILE_AND_SUBMIT') {
-      this.fileChooser.value = '';
-    }
+    this.simpleForm.onRun(files, formData);
     const script = await this.script;
     await this.readyToRun.promise;
     this.container.classList.remove('error');
     this.outputTerm.textContent = '';
     this.log.length = 0;
     (await this.editor).clearErrors();
-    this.outputFileText.title = '';
-    this.outputFileText.textContent = '';
     if ((files === null || files.length === 0) &&
         (script.interface.inputFiles !== 'NONE' &&
          script.interface.inputFiles !== 'ANY')) {
-      this.inputFileText.title = 'Choose File';
-      this.inputFileText.textContent = 'Choose File';
       this.container.classList.add('error');
-      this.fileChooser.disabled = false;
+      this.simpleForm.onError();
     } else {
-      const fstring = files.map((f) => f.name).join(', ');
-      this.inputFileText.title = fstring;
-      this.inputFileText.textContent = fstring;
       this.container.classList.add('running');
       const args: Record<string, string> = {};
       if (!formData) {
@@ -417,11 +355,9 @@ export class FiolinComponent {
       this.outputTerm.textContent += msg.level[0] + ': ' + msg.value + '\n';
       this.outputTerm.scroll({ top: this.outputTerm.scrollHeight, behavior: 'smooth' });
     } else if (msg.type === 'SUCCESS') {
-      this.fileChooser.disabled = false;
+      this.simpleForm.onSuccess(msg.response.outputs);
       this.container.classList.remove('running');
       if (msg.response.outputs.length > 0) {
-        this.outputFileText.textContent = msg.response.outputs.map((f) => f.name).join();
-        this.outputFileText.title = msg.response.outputs.map((f) => f.name).join();
         for (const f of msg.response.outputs) {
           downloadFile(f);
         }
@@ -430,7 +366,7 @@ export class FiolinComponent {
             '='.repeat(30) + '\nScript did not produce an output file.\n');
       }
     } else if (msg.type === 'ERROR') {
-      this.fileChooser.disabled = false;
+      this.simpleForm.onError();
       this.container.classList.add('error');
       this.container.classList.remove('running');
       if (typeof msg.lineno !== 'undefined') {
