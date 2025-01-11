@@ -15,6 +15,19 @@ export function selectAs<T extends HTMLElement>(root: HTMLElement, sel: string, 
   return elem;
 }
 
+export function selectAllAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T[] {
+  const matches = root.querySelectorAll(sel);
+  const elems: T[] = [];
+  for (const e of matches) {
+    if (e instanceof cls) {
+      elems.push(e);
+    } else {
+      throw new Error(`${sel} matched elements that were not instances of ${cls}`);
+    }
+  }
+  return elems;
+}
+
 export function maybeGetByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
   return maybeSelectAs(root, `[data-rel-id="${relativeId}"]`, cls);
 }
