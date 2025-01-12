@@ -52,6 +52,7 @@ A not-necessarily-exhaustive list of TODOs:
     - Why is monaco occasionally triggering a request for clipboard permissions?
     - Add some transition animations for the buttons to invite interaction.
   - Controls:
+    - Run button (on custom form) firing pre-load bug
     - Maybe redo the button/file stuff. I know I just wrote it, but it probably
       makes more sense to:
       - Have a FILE component that optionally includes triggering

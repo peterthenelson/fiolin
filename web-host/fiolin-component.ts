@@ -8,7 +8,7 @@ import { parseAs, ParseError } from '../common/parse';
 import { TypedWorker } from './typed-worker';
 import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
 import YAML, { YAMLParseError } from 'yaml';
-import { renderForm } from './form-renderer';
+import { CustomForm } from './custom-form';
 import { SimpleForm } from './simple-form';
 import { getByRelIdAs, selectAs } from '../web-utils/select-as';
 const monaco = import('./monaco');
@@ -97,7 +97,7 @@ export class FiolinComponent {
   private readonly deployButton: HTMLDivElement;
   private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
-  private customForm: HTMLFormElement;
+  private customForm: CustomForm;
   private simpleForm: SimpleForm;
   private readonly scriptTabs: HTMLDivElement;
   private readonly scriptEditor: HTMLDivElement;
@@ -117,7 +117,11 @@ export class FiolinComponent {
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
     this.tutorialSelect = getByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
-    this.customForm = getByRelIdAs(container, 'script-form', HTMLFormElement);
+    this.customForm = new CustomForm(container, {
+      runScript: (files, formData) => this.runScript(files, formData),
+      clickFileChooser: (button, action) => this.simpleForm.clickFileChooser(button, action),
+      getFiles: () => this.simpleForm.getFiles(),
+    });
     this.scriptTabs = getByRelIdAs(container, 'script-editor-tabs', HTMLDivElement);
     this.scriptEditor = getByRelIdAs(container, 'script-editor', HTMLDivElement);
     this.simpleForm = new SimpleForm(container, {
@@ -162,22 +166,7 @@ export class FiolinComponent {
     this.container.classList.remove('output-files-any');
     this.container.classList.add(`output-files-${ui.outputFiles.toLowerCase()}`);
     this.simpleForm.onLoad(script);
-    if (ui.form) {
-      const newForm = renderForm(ui.form, (button, action) => {
-        // TODO: obviate this dep
-        this.simpleForm.clickFileChooser(button, action);
-      });
-      this.customForm.replaceWith(newForm);
-      this.customForm = newForm;
-      if (ui.form.hideFileChooser) {
-        this.container.classList.add('file-chooser-hidden');
-      }
-      this.customForm.onsubmit = (e) => {
-        e.preventDefault();
-        const files = this.simpleForm.getFiles();
-        this.runScript(files, new FormData(this.customForm, e.submitter));
-      }
-    }
+    this.customForm.onLoad(script);
   }
 
   private async loadScript(opts: FiolinComponentOptions) {
@@ -312,10 +301,11 @@ export class FiolinComponent {
   }
 
   private async runScript(files: File[], formData?: FormData) {
-    if (!this.customForm.reportValidity()) {
+    if (!this.simpleForm.reportValidity() || !this.customForm.reportValidity()) {
       return;
     }
     this.simpleForm.onRun(files, formData);
+    this.customForm.onRun(files, formData);
     const script = await this.script;
     await this.readyToRun.promise;
     this.container.classList.remove('error');
@@ -327,11 +317,13 @@ export class FiolinComponent {
          script.interface.inputFiles !== 'ANY')) {
       this.container.classList.add('error');
       this.simpleForm.onError();
+      this.customForm.onError();
     } else {
       this.container.classList.add('running');
       const args: Record<string, string> = {};
+      // TODO: Remove this once decoupled
       if (!formData) {
-        formData = new FormData(this.customForm);
+        formData = this.customForm.getFormData();
       }
       for (const [k, v] of formData.entries()) {
         args[k] = v.toString();
@@ -356,6 +348,7 @@ export class FiolinComponent {
       this.outputTerm.scroll({ top: this.outputTerm.scrollHeight, behavior: 'smooth' });
     } else if (msg.type === 'SUCCESS') {
       this.simpleForm.onSuccess(msg.response.outputs);
+      this.customForm.onSuccess(msg.response.outputs);
       this.container.classList.remove('running');
       if (msg.response.outputs.length > 0) {
         for (const f of msg.response.outputs) {
@@ -367,6 +360,7 @@ export class FiolinComponent {
       }
     } else if (msg.type === 'ERROR') {
       this.simpleForm.onError();
+      this.customForm.onError();
       this.container.classList.add('error');
       this.container.classList.remove('running');
       if (typeof msg.lineno !== 'undefined') {
