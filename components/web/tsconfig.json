@@ -5,17 +5,14 @@
     "outDir": "./dist",
     "skipLibCheck": true,
   },
-  "extends": "../tsconfig.fiolin-base.json",
+  "extends": "../../tsconfig.fiolin-base.json",
   "include": ["**/*.ts"],
   "references": [
     {
-      "path": "../common"
+      "path": "../../common"
     },
     {
-      "path": "../components/web"
-    },
-    {
-      "path": "../web-utils"
+      "path": "../../web-utils"
     }
   ]
 }

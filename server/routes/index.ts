@@ -1,5 +1,6 @@
 import { loadAll } from '../../utils/config';
-import { fiolinSharedHeaders, versionedLink } from '../../utils/html';
+import { fiolinSharedHeaders } from '../html';
+import { versionedLink } from '../../utils/versioned-link';
 import { indent, dedent } from '../../common/indent';
 
 function mkLis(pathNamePairs: [string, string][], prefix: string): string {

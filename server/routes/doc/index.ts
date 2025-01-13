@@ -1,4 +1,4 @@
-import { mdDoc } from '../../../utils/html';
+import { mdDoc } from '../../html';
 
 export default defineEventHandler((event) => {
   return mdDoc('index');

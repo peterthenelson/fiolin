@@ -1,5 +1,6 @@
 import { dedent } from '../../../common/indent';
-import { fiolinContainer, fiolinSharedHeaders, versionedLink } from '../../../utils/html';
+import { fiolinContainer, fiolinSharedHeaders } from '../../html';
+import { versionedLink } from '../../../utils/versioned-link';
 
 export default defineEventHandler(() => {
   return dedent(`
