@@ -1,5 +1,4 @@
 import { WorkerMessage } from '../web-utils/types';
-import { DeployOptions, deployScript } from './deploy-gen';
 import { Deferred } from '../common/deferred';
 import { getErrMsg, toErr } from '../common/errors';
 import { pFiolinScript } from '../common/parse-script';
@@ -8,16 +7,13 @@ import { parseAs, ParseError } from '../common/parse';
 import { TypedWorker } from './typed-worker';
 import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
 import YAML, { YAMLParseError } from 'yaml';
+import { DeployDialog } from '../components/web/deploy-dialog';
 import { CustomForm } from './custom-form';
 import { SimpleForm } from './simple-form';
 import { getByRelIdAs, selectAs } from '../web-utils/select-as';
+import { setSelected } from '../web-utils/set-selected';
+import { StorageLike } from '../web-utils/types';
 const monaco = import('./monaco');
-
-function getFormValue(fd: FormData, key: string): string {
-  const value = fd.get(key);
-  if (value !== null) return value.toString();
-  throw new Error(`Expected form data to have name ${key} but got ${Array.from(fd.keys())}`);
-}
 
 function downloadFile(f: File) {
   const elem = document.createElement('a');
@@ -26,58 +22,6 @@ function downloadFile(f: File) {
   document.body.appendChild(elem);
   elem.click();        
   document.body.removeChild(elem);
-}
-
-interface StorageLike {
-  clear: () => void;
-  getItem: (keyName: string) => string | null;
-  removeItem: (keyName: string) => void;
-  setItem: (keyName: string, keyValue: string) => void;
-}
-
-function setSelected(elem: HTMLSelectElement, value: string) {
-  for (let option of elem.options) {
-    if (option.value === value) {
-      option.selected = true;
-    } else {
-      option.selected = false;
-    }
-  }
-}
-
-function populateFormFromStorage(storage: StorageLike, deployForm: HTMLFormElement) {
-  selectAs(deployForm, '[name="gh-user-name"]', HTMLInputElement).value = (
-    storage.getItem('deploy/gh-user-name') || '');
-  selectAs(deployForm, '[name="gh-repo-name"]', HTMLInputElement).value = (
-    storage.getItem('deploy/gh-repo-name') || '');
-  selectAs(deployForm, '[name="gh-default-branch"]', HTMLInputElement).value = (
-    storage.getItem('deploy/gh-default-branch') || 'main');
-  selectAs(deployForm, '[name="gh-pages-branch"]', HTMLInputElement).value = (
-    storage.getItem('deploy/gh-pages-branch') || 'gh-pages');
-  const lang = storage.getItem('deploy/lang');
-  const langSel = selectAs(deployForm, '[name="lang"]', HTMLSelectElement);
-  if (lang === 'SH' || lang === 'PS1') {
-    setSelected(langSel, lang);
-  } else if (navigator.platform.startsWith('Win')) {
-    setSelected(langSel, 'PS1');
-  }
-}
-
-function saveFormToStorage(storage: StorageLike, deployForm: HTMLFormElement) {
-  storage.setItem(
-    'deploy/gh-user-name',
-    selectAs(deployForm, '[name="gh-user-name"]', HTMLInputElement).value);
-  storage.setItem(
-    'deploy/gh-repo-name',
-    selectAs(deployForm, '[name="gh-repo-name"]', HTMLInputElement).value);
-  storage.setItem(
-    'deploy/gh-default-branch',
-    selectAs(deployForm, '[name="gh-default-branch"]', HTMLInputElement).value);
-  storage.setItem(
-    'deploy/gh-pages-branch',
-    selectAs(deployForm, '[name="gh-pages-branch"]', HTMLInputElement).value);
-  const lang = selectAs(deployForm, 'select[name="lang"]', HTMLSelectElement);
-  storage.setItem('deploy/lang', lang.value);
 }
 
 export interface FiolinComponentOptions {
@@ -95,6 +39,7 @@ export class FiolinComponent {
   private readonly scriptTitle: HTMLDivElement;
   private readonly modeButton: HTMLDivElement;
   private readonly deployButton: HTMLDivElement;
+  private readonly deployDialog: DeployDialog;
   private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
   private customForm: CustomForm;
@@ -115,6 +60,7 @@ export class FiolinComponent {
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
+    this.deployDialog = new DeployDialog(container, { storage: this.storage, downloadFile })
     this.tutorialSelect = getByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
     this.customForm = new CustomForm(container, {
@@ -218,35 +164,9 @@ export class FiolinComponent {
       window.location.hash = this.tutorialSelect.value;
     };
     this.tutorialSelect.disabled = false;
-    const dialog = getByRelIdAs(this.container, 'deploy-dialog', HTMLDialogElement);
-    const deployForm = getByRelIdAs(dialog, 'deploy-form', HTMLFormElement);
-    deployForm.onsubmit = async (event) => {
-      if (event.submitter instanceof HTMLButtonElement &&
-          event.submitter.value === 'cancel') {
-        return;
-      }
-      saveFormToStorage(this.storage, deployForm);
-      const fd = new FormData(deployForm);
-      const lang = fd.get('lang')?.toString() === 'SH' ? 'SH' : 'PS1';
-      const opts: DeployOptions = {
-        gh: {
-          userName: getFormValue(fd, 'gh-user-name'),
-          repoName: getFormValue(fd, 'gh-repo-name'),
-          defaultBranch: getFormValue(fd, 'gh-default-branch'),
-          pagesBranch: getFormValue(fd, 'gh-pages-branch'),
-        },
-        scriptId: getFormValue(fd, 'script-id'),
-        lang
-      };
-      downloadFile(deployScript(await this.script, opts));
-    };
     this.deployButton.onclick = async () => {
       const script = await this.script;
-      const slug = script.meta.title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-');
-      selectAs(deployForm, '[name="script-id"]', HTMLInputElement).value = (
-        slug.match(/^\d+/) ? '' : slug);
-      populateFormFromStorage(this.storage, deployForm);
-      dialog.showModal();
+      this.deployDialog.showModal(script);
     };
     this.scriptTabs.onclick = async (event) => {
       const editor = await this.editor;

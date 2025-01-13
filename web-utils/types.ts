@@ -46,3 +46,11 @@ export function mkErrorMessage(e: unknown, lineno?: number): ErrorMessage {
   em.name = em.error.name;
   return em;
 }
+
+// Localstorage-like interface
+export interface StorageLike {
+  clear: () => void;
+  getItem: (keyName: string) => string | null;
+  removeItem: (keyName: string) => void;
+  setItem: (keyName: string, keyValue: string) => void;
+}
