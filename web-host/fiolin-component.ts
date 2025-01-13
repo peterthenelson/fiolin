@@ -3,17 +3,16 @@ import { Deferred } from '../common/deferred';
 import { getErrMsg, toErr } from '../common/errors';
 import { pFiolinScript } from '../common/parse-script';
 import { FiolinLogLevel, FiolinScript } from '../common/types';
-import { parseAs, ParseError } from '../common/parse';
+import { parseAs } from '../common/parse';
 import { TypedWorker } from './typed-worker';
-import type { FiolinScriptEditor, FiolinScriptEditorModel } from './monaco';
-import YAML, { YAMLParseError } from 'yaml';
+import type { FiolinScriptEditorModel } from '../web-utils/monaco';
 import { DeployDialog } from '../components/web/deploy-dialog';
+import { Editor } from '../components/web/editor';
 import { CustomForm } from './custom-form';
 import { SimpleForm } from './simple-form';
-import { getByRelIdAs, selectAs } from '../web-utils/select-as';
+import { getByRelIdAs } from '../web-utils/select-as';
 import { setSelected } from '../web-utils/set-selected';
 import { StorageLike } from '../web-utils/types';
-const monaco = import('./monaco');
 
 function downloadFile(f: File) {
   const elem = document.createElement('a');
@@ -42,14 +41,12 @@ export class FiolinComponent {
   private readonly deployDialog: DeployDialog;
   private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
-  private customForm: CustomForm;
-  private simpleForm: SimpleForm;
-  private readonly scriptTabs: HTMLDivElement;
-  private readonly scriptEditor: HTMLDivElement;
+  private readonly customForm: CustomForm;
+  private readonly simpleForm: SimpleForm;
+  private readonly editor: Editor;
   private readonly outputTerm: HTMLPreElement;
   private readonly log: [FiolinLogLevel, string][];
   private readonly worker: TypedWorker;
-  private readonly editor: Promise<FiolinScriptEditor>;
   public script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
 
@@ -68,8 +65,10 @@ export class FiolinComponent {
       clickFileChooser: (button, action) => this.simpleForm.clickFileChooser(button, action),
       getFiles: () => this.simpleForm.getFiles(),
     });
-    this.scriptTabs = getByRelIdAs(container, 'script-editor-tabs', HTMLDivElement);
-    this.scriptEditor = getByRelIdAs(container, 'script-editor', HTMLDivElement);
+    this.editor = new Editor(container, {
+      update: (s, m) => this.scriptUpdated(s, m),
+      updateError: (e) => this.scriptUpdateError(e),
+    })
     this.simpleForm = new SimpleForm(container, {
       runScript: (files, formData) => this.runScript(files, formData),
       requestSubmit: (submitter) => this.customForm.requestSubmit(submitter),
@@ -84,16 +83,9 @@ export class FiolinComponent {
     this.worker.onmessage = (msg) => {
       this.handleMessage(msg);
     }
-    this.editor = this.setupScriptEditor();
     this.script = this.loadScript(opts || {});
     this.setupHandlers();
     this.readyToRun = new Deferred();
-  }
-
-  private async setupScriptEditor(): Promise<FiolinScriptEditor> {
-    return new (await monaco).FiolinScriptEditor(this.scriptEditor, async (m, v) => {
-      await this.handleScriptUpdate(m, v);
-    });
   }
 
   private async updateUiForScript(script: FiolinScript) {
@@ -141,7 +133,7 @@ export class FiolinComponent {
       }
       this.worker.postMessage({ type: 'INSTALL_PACKAGES', script });
       this.updateUiForScript(script);
-      (await this.editor).setScript(script);
+      await this.editor.setScript(script);
       return script;
     } catch (e) {
       console.log('Failed to fetch script!');
@@ -168,55 +160,21 @@ export class FiolinComponent {
       const script = await this.script;
       this.deployDialog.showModal(script);
     };
-    this.scriptTabs.onclick = async (event) => {
-      const editor = await this.editor;
-      if (event.target instanceof HTMLElement && event.target.dataset['model']) {
-        const model = event.target.dataset['model'];
-        if (model !== 'script.py' && model !== 'script.yml') {
-          throw new Error(`Expected data-model to be script.py or script.yml; got ${model}`);
-        }
-        for (const child of this.scriptTabs.children) {
-          child.classList.remove('active');
-        }
-        event.target.classList.add('active');
-        editor.switchTab(model);
-      }
-    };
   }
-  
-  private async handleScriptUpdate(model: FiolinScriptEditorModel, value: string) {
-    const script = await this.script;
-    const editor = await this.editor;
-    if (model === 'script.py') {
-      script.code.python = value;
+
+  private async scriptUpdated(script: FiolinScript, model: FiolinScriptEditorModel) {
+    const currentScript = await this.script;
+    Object.assign(currentScript, script);
+    if (model === 'script.yml') {
+      await this.updateUiForScript(script);
+    }
+  }
+
+  private async scriptUpdateError(e: unknown) {
+    if (e instanceof Error) {
+      this.scriptDesc.textContent = e.message;
     } else {
-      try {
-        const template = YAML.parse(value);
-        const newScript = { code: { python: script.code.python }, ...template };
-        Object.assign(script, parseAs(pFiolinScript, newScript));
-        this.updateUiForScript(script);
-        editor.clearErrors();
-      } catch (e) {
-        if (e instanceof YAMLParseError && e.linePos) {
-          editor.setError('script.yml', e.linePos[0].line, e.message);
-          this.scriptDesc.textContent = e.message;
-        } else if (e instanceof ParseError) {
-          const lines = value.split(/\n/);
-          const field = e.objPath.parts.at(-1);
-          const fieldRe = new RegExp(`^\\s*${field}:`);
-          for (let i = 0; field && i < lines.length; i++) {
-            if (lines[i].match(fieldRe)) {
-              editor.setError('script.yml', i + 1, e.message);
-            }
-          }
-          this.scriptDesc.textContent = e.message;
-        } else if (e instanceof Error) {
-          console.error(e);
-          this.scriptDesc.textContent = e.message;
-        } else {
-          console.error(e);
-        }
-      }
+      this.scriptDesc.textContent = '[Unknown Error]';
     }
   }
 
@@ -231,7 +189,7 @@ export class FiolinComponent {
     this.container.classList.remove('error');
     this.outputTerm.textContent = '';
     this.log.length = 0;
-    (await this.editor).clearErrors();
+    await this.editor.clearErrors();
     if ((files === null || files.length === 0) &&
         (script.interface.inputFiles !== 'NONE' &&
          script.interface.inputFiles !== 'ANY')) {
@@ -285,7 +243,7 @@ export class FiolinComponent {
       this.container.classList.remove('running');
       if (typeof msg.lineno !== 'undefined') {
         console.warn(msg.error.message);
-        (await this.editor).setError('script.py', msg.lineno, msg.error.message);
+        await this.editor.setError('script.py', msg.lineno, msg.error.message);
       } else {
         console.warn(msg.error);
       }

@@ -5,7 +5,8 @@ import { readFileSync } from 'node:fs';
 import { FiolinScript } from '../common/types';
 import { versionedLink } from '../utils/versioned-link';
 import { loadSvg } from '../utils/load-svg';
-import { deployDialog } from '../components/server/deploy-dialog';
+import { renderDeployDialog } from '../components/server/deploy-dialog';
+import { renderEditor } from '../components/server/editor';
 
 export function fiolinSharedHeaders(): string {
   return redent(`
@@ -59,18 +60,12 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
             ${loadSvg('deploy')}
           </div>
         </div>
-        ${deployDialog(8)}
+        ${renderDeployDialog(8)}
       </div>
       <div class="script">
         <pre class="script-desc" data-rel-id="script-desc">${options.desc || 'Loading...'}</pre>
         <div class="mobile-warning">Developer Mode has limited support on mobile</div>
-        <div class="script-editor-frame">
-          <div class="script-editor-tabs" data-rel-id="script-editor-tabs">
-            <div class="script-editor-tab active" data-model="script.py">Python</div>
-            <div class="script-editor-tab" data-model="script.yml">Yaml</div>
-          </div>
-          <div class="script-editor" data-rel-id="script-editor"></div>
-        </div>
+        ${renderEditor(8)}
       </div>
       <div class="script-controls">
         <form class="script-form" data-rel-id="script-form"></form>

@@ -1,6 +1,6 @@
 import { FiolinScript } from '../common/types';
 import { FiolinComponent } from './fiolin-component';
-const monaco = import('./monaco');
+const monaco = import('../web-utils/monaco');
 
 export interface FromUrlOpts {
   url: string;

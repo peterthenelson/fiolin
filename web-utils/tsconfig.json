@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "rootDir": ".",
     "outDir": "./dist",
+    "skipLibCheck": true,
   },
   "extends": "../tsconfig.fiolin-base.json",
   "include": ["**/*"],

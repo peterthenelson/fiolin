@@ -1,6 +1,6 @@
 import { redent } from '../../common/indent';
 
-export function deployDialog(indent?: number): string {
+export function renderDeployDialog(numSpaces?: number): string {
   return redent(`
     <dialog data-rel-id="deploy-dialog">
       <form method="dialog" class="flex-col-wrap" data-rel-id="deploy-form">
@@ -76,5 +76,5 @@ export function deployDialog(indent?: number): string {
         </div>
       </form>
     </dialog>
-  `, ' '.repeat(indent || 0));
+  `, ' '.repeat(numSpaces || 0));
 }
