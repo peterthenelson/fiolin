@@ -8,6 +8,7 @@ import { TypedWorker } from './typed-worker';
 import type { FiolinScriptEditorModel } from '../web-utils/monaco';
 import { DeployDialog } from '../components/web/deploy-dialog';
 import { Editor } from '../components/web/editor';
+import { Terminal } from '../components/web/terminal';
 import { CustomForm } from './custom-form';
 import { SimpleForm } from './simple-form';
 import { getByRelIdAs } from '../web-utils/select-as';
@@ -44,8 +45,7 @@ export class FiolinComponent {
   private readonly customForm: CustomForm;
   private readonly simpleForm: SimpleForm;
   private readonly editor: Editor;
-  private readonly outputTerm: HTMLPreElement;
-  private readonly log: [FiolinLogLevel, string][];
+  private readonly terminal: Terminal;
   private readonly worker: TypedWorker;
   public script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
@@ -73,12 +73,11 @@ export class FiolinComponent {
       runScript: (files, formData) => this.runScript(files, formData),
       requestSubmit: (submitter) => this.customForm.requestSubmit(submitter),
     });
-    this.outputTerm = getByRelIdAs(container, 'output-term', HTMLPreElement);
-    this.log = [];
+    this.terminal = new Terminal(container);
     this.worker = new TypedWorker(opts?.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
     this.worker.onerror = (e) => {
       console.error(getErrMsg(e));
-      this.outputTerm.textContent = getErrMsg(e);
+      this.terminal.fatal(getErrMsg(e));
     };
     this.worker.onmessage = (msg) => {
       this.handleMessage(msg);
@@ -91,18 +90,6 @@ export class FiolinComponent {
   private async updateUiForScript(script: FiolinScript) {
     this.scriptTitle.textContent = script.meta.title;
     this.scriptDesc.textContent = script.meta.description;
-    const ui = script.interface;
-    this.container.classList.remove('file-chooser-hidden');
-    this.container.classList.remove('input-files-none')
-    this.container.classList.remove('input-files-single');
-    this.container.classList.remove('input-files-multi');
-    this.container.classList.remove('input-files-any');
-    this.container.classList.add(`input-files-${ui.inputFiles.toLowerCase()}`);
-    this.container.classList.remove('output-files-none')
-    this.container.classList.remove('output-files-single');
-    this.container.classList.remove('output-files-multi');
-    this.container.classList.remove('output-files-any');
-    this.container.classList.add(`output-files-${ui.outputFiles.toLowerCase()}`);
     this.simpleForm.onLoad(script);
     this.customForm.onLoad(script);
   }
@@ -187,8 +174,7 @@ export class FiolinComponent {
     const script = await this.script;
     await this.readyToRun.promise;
     this.container.classList.remove('error');
-    this.outputTerm.textContent = '';
-    this.log.length = 0;
+    this.terminal.clear();
     await this.editor.clearErrors();
     if ((files === null || files.length === 0) &&
         (script.interface.inputFiles !== 'NONE' &&
@@ -216,14 +202,12 @@ export class FiolinComponent {
 
   private async handleMessage(msg: WorkerMessage): Promise<void> {
     if (msg.type === 'LOADED') {
-      this.outputTerm.textContent = 'Pyodide Loaded\n';
+      console.log('Pyodide Loaded');
     } else if (msg.type === 'PACKAGES_INSTALLED') {
       await this.script;
       this.readyToRun.resolve();
     } else if (msg.type === 'LOG') {
-      this.log.push([msg.level, msg.value]);
-      this.outputTerm.textContent += msg.level[0] + ': ' + msg.value + '\n';
-      this.outputTerm.scroll({ top: this.outputTerm.scrollHeight, behavior: 'smooth' });
+      this.terminal.log(msg.level, msg.value);
     } else if (msg.type === 'SUCCESS') {
       this.simpleForm.onSuccess(msg.response.outputs);
       this.customForm.onSuccess(msg.response.outputs);
@@ -232,9 +216,6 @@ export class FiolinComponent {
         for (const f of msg.response.outputs) {
           downloadFile(f);
         }
-      } else {
-        this.outputTerm.textContent += (
-            '='.repeat(30) + '\nScript did not produce an output file.\n');
       }
     } else if (msg.type === 'ERROR') {
       this.simpleForm.onError();
@@ -247,7 +228,7 @@ export class FiolinComponent {
       } else {
         console.warn(msg.error);
       }
-      this.outputTerm.textContent = msg.error.toString();
+      this.terminal.fatal(msg.error.toString());
       // Counterintuitive, but we want to unblock running, as it will just
       // attempt to reinstall on run.
       if (msg.error.name === 'InstallPkgsError') {
@@ -255,7 +236,7 @@ export class FiolinComponent {
       }
     } else {
       this.container.classList.add('error');
-      this.outputTerm.textContent = `Unexpected event data: ${msg}`;
+      this.terminal.fatal(`Unexpected event data: ${msg}`);
       console.error(`Unexpected event data: ${msg}`);
     }
   }

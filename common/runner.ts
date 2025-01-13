@@ -124,6 +124,9 @@ export class PyodideRunner implements FiolinRunner {
       throw new Error(`Script expected to produce multiple files; got ${nOutputs}`);
     }
     this._console.debug('Extracting outputs from /output');
+    if (nOutputs === 0) {
+      this._console.debug('Script did not produce an output file.');
+    }
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present before resetFs!`)
     }
@@ -150,6 +153,7 @@ export class PyodideRunner implements FiolinRunner {
     });
     this._pyodide.setStdout({ batched: (s) => { this._console.info(s) } });
     this._pyodide.setStderr({ batched: (s) => { this._console.error(s) } });
+    this._console.debug('Pyodide Loaded');
   }
 
   async installPkgs(script: FiolinScript) {

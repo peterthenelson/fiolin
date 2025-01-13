@@ -7,6 +7,7 @@ import { versionedLink } from '../utils/versioned-link';
 import { loadSvg } from '../utils/load-svg';
 import { renderDeployDialog } from '../components/server/deploy-dialog';
 import { renderEditor } from '../components/server/editor';
+import { renderTerminal } from '../components/server/terminal';
 
 export function fiolinSharedHeaders(): string {
   return redent(`
@@ -82,7 +83,7 @@ export function fiolinContainer(options?: FiolinContainerOptions): string {
         <!-- TODO -->
       </div>
       <div class="script-output">
-        <pre class="output-term" data-rel-id="output-term">Loading...</pre>
+        ${renderTerminal(8)}
       </div>
       <div class="flow-row-wrap footer">
         <a href="/">Return Home</a>
