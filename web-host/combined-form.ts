@@ -20,8 +20,8 @@ export class CombinedForm extends FormComponent {
     this.forms.forEach((f) => f.onLoad(script));
   }
 
-  onRun(inputs: File[], formData?: FormData): void {
-    this.forms.forEach((f) => f.onRun(inputs, formData));
+  onRun(inputs: File[], args?: Record<string, string>): void {
+    this.forms.forEach((f) => f.onRun(inputs, args));
   }
 
   onSuccess(outputs: File[]): void {

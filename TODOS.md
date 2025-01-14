@@ -53,12 +53,9 @@ A not-necessarily-exhaustive list of TODOs:
     - Add some transition animations for the buttons to invite interaction.
   - Controls:
     - Run button (on custom form) firing pre-load bug
-    - Maybe redo the button/file stuff. I know I just wrote it, but it probably
-      makes more sense to:
-      - Have a FILE component that optionally includes triggering
-      - Redo the "simple ui" to either be implemented in terms of the form
-        builder components or at least share more of the logic with it
+    - Make custom form lock up during run (and glow)
+    - Add a "download files" component for the custom form
+    - Make FILE component have a logo and text and panel and whatnot
     - Filtering in output terminal by log level
-    - Improve the "simple" file UI to better work for multiple files
   - Deployment:
     - Deploy script in the template package.json

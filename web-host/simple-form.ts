@@ -1,32 +1,30 @@
 import { typeSwitch } from '../common/type-switch';
 import { FiolinScript, FiolinScriptInterface } from '../common/types';
-import { FiolinFormButtonAction } from '../common/types/form';
 import { getByRelIdAs } from '../web-utils/select-as';
-import { FormComponent } from './form-component';
-
-export interface SimpleFormCallbacks {
-  runScript(files: File[], formData?: FormData): Promise<void>;
-  // TODO: Remove this once the custom form uses its own file chooser
-  requestSubmit(submitter: HTMLElement): void;
-}
+import { FormCallbacks, FormComponent } from './form-component';
 
 // Default UI has a file chooser that doubles as a run button.
 export class SimpleForm extends FormComponent {
+  private readonly container: HTMLElement;
   private readonly fileChooser: HTMLInputElement;
-  private runTrigger?: [HTMLButtonElement, FiolinFormButtonAction];
   private readonly inputFileText: HTMLSpanElement;
   private readonly outputFileText: HTMLSpanElement;
   private ui?: FiolinScriptInterface;
-  private readonly cbs: SimpleFormCallbacks;
+  private readonly cbs: FormCallbacks;
 
-  constructor(container: HTMLElement, callbacks: SimpleFormCallbacks) {
+  constructor(container: HTMLElement, callbacks: FormCallbacks) {
     super();
+    this.container = container;
     this.fileChooser = getByRelIdAs(container, 'input-files-chooser', HTMLInputElement);
     this.inputFileText = getByRelIdAs(container, 'input-files-text', HTMLSpanElement);
     this.outputFileText = getByRelIdAs(container, 'output-files-text', HTMLSpanElement);
     this.cbs = callbacks;
     // Disable it until the script is set.
     this.fileChooser.onclick = (e) => { e.preventDefault() };
+  }
+
+  private isEnabled(): boolean {
+    return !(this.ui && this.ui.form);
   }
 
   reportValidity(): boolean { return true; }
@@ -40,17 +38,13 @@ export class SimpleForm extends FormComponent {
     }
     this.setInputFileText([]);
     this.fileChooser.accept = this.ui.inputAccept || '';
-    this.runTrigger = undefined;
     this.fileChooser.oncancel = () => {
       if (this.ui && this.ui.inputFiles === 'ANY') {
         this.cbs.runScript([]);
       }
     }
     this.fileChooser.onclick = (event) => {
-      // If the chooser is hidden, then the click must have been from a form
-      // button (which will handle running the script if needed). Otherwise
-      // skip file choosing and directly run it if inputFiles is 'NONE'.
-      if (this.ui && !this.ui.form?.hideFileChooser && this.ui.inputFiles === 'NONE') {
+      if (this.ui && this.ui.inputFiles === 'NONE') {
         event.preventDefault();
         this.cbs.runScript([]);
       }
@@ -58,29 +52,19 @@ export class SimpleForm extends FormComponent {
     this.fileChooser.onchange = () => {
       const files = this.getFiles();
       this.setInputFileText(files);
-      if (!this.runTrigger) {
-        this.cbs.runScript(files);
-      } else if (this.runTrigger[1] === 'FILE') {
-        // Skip submission
-      } else {
-        this.cbs.requestSubmit(this.runTrigger[0]);
-      }
+      this.cbs.runScript(files);
     }
     this.fileChooser.disabled = false;
+    if (this.ui.form) {
+      this.container.classList.add('file-chooser-hidden');
+    } else {
+      this.container.classList.remove('file-chooser-hidden');
+    }
   }
 
-  onRun(inputs: File[], formData?: FormData) {
+  onRun(inputs: File[], args?: Record<string, string>) {
     this.fileChooser.disabled = true;
-    // File input components' behavior is a bit tricky. onchange will not fire
-    // if the same file is chosen as before. In order to remedy this, it is
-    // desirable to clear the file chooser's value on runs. However, this is
-    // only the case when the file chooser itself or a form button is being used
-    // to both select a file *and* trigger the run. Otherwise, we'd like to
-    // retain the files (e.g., if there are separate "Choose File" and "Run"
-    // buttons).
-    if (!this.runTrigger || this.runTrigger[1] === 'FILE_AND_SUBMIT') {
-      this.fileChooser.value = '';
-    }
+    this.fileChooser.value = '';
     this.outputFileText.title = '';
     this.outputFileText.textContent = '';
   }
@@ -89,14 +73,18 @@ export class SimpleForm extends FormComponent {
     this.fileChooser.disabled = false;
     this.outputFileText.textContent = outputs.map((f) => f.name).join();
     this.outputFileText.title = outputs.map((f) => f.name).join();
+    if (this.isEnabled()) {
+      for (const f of outputs) {
+        this.cbs.downloadFile(f);
+      }
+    }
   }
 
   onError() {
     this.fileChooser.disabled = false;
   }
 
-  // TODO: Make this private once the custom form uses its own file chooser
-  getFiles(): File[] {
+  private getFiles(): File[] {
     const files: File[] = [];
     if (this.fileChooser.files !== null) {
       for (const f of this.fileChooser.files) {
@@ -121,11 +109,5 @@ export class SimpleForm extends FormComponent {
       this.inputFileText.title = fstring;
       this.inputFileText.textContent = fstring;
     }
-  }
-
-  // TODO: Remove this once the custom form uses its own file chooser
-  clickFileChooser(button: HTMLButtonElement, action: FiolinFormButtonAction) {
-    this.runTrigger = [button, action];
-    this.fileChooser.click();
   }
 }

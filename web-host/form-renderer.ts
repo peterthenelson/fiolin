@@ -1,26 +1,30 @@
 import { typeSwitch } from '../common/type-switch';
-import { FiolinForm, FiolinFormButtonAction, FiolinFormComponent } from '../common/types/form';
+import { FiolinScriptInterface } from '../common/types';
+import { FiolinFormComponent } from '../common/types/form';
 
 // Note: the fileChooserCb should trigger the file chooser and then, if
 // submitWith is specified, then it will submit the form with that as the
 // submitter.
-export function renderForm(form: FiolinForm, fileChooserCb: (button: HTMLButtonElement, action: FiolinFormButtonAction) => void): HTMLFormElement {
-  const f = document.createElement('form');
+export function renderForm(ui: FiolinScriptInterface): HTMLFormElement {
+  const form = document.createElement('form');
+  if (!ui.form) return form;
   const ctx: RenderContext = {
-    autofocusedName: form.autofocusedName,
-    autofocusedValue: form.autofocusedValue,
-    fileChooserCb,
+    form,
+    ui,
+    autofocusedName: ui.form.autofocusedName,
+    autofocusedValue: ui.form.autofocusedValue,
   };
-  for (const c of form.children) {
-    f.append(renderComponent(c, ctx));
+  for (const c of ui.form.children) {
+    form.append(renderComponent(c, ctx));
   }
-  return f;
+  return form;
 }
 
 interface RenderContext {
+  form: HTMLFormElement;
+  ui: FiolinScriptInterface;
   autofocusedName?: string;
   autofocusedValue?: string;
-  fileChooserCb: (button: HTMLButtonElement, action: FiolinFormButtonAction) => void;
 }
 
 function maybeAutofocus(component: FiolinFormComponent, element: HTMLElement, ctx: RenderContext) {
@@ -101,6 +105,28 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.required) input.required = true;
       if (component.placeholder) input.placeholder = component.placeholder;
       if (component.size) input.size = component.size;
+      return input;
+    },
+    'FILE': (component) => {
+      // TODO: Don't just make an input. Make a little panel.
+      const input = document.createElement('input');
+      input.type = 'file';
+      maybeAutofocus(component, input, ctx);
+      if (component.name) input.name = component.name;
+      if (component.multiple) input.multiple = component.multiple;
+      const accept = component.accept || ctx.ui.inputAccept;
+      if (accept) input.accept = accept;
+      if (component.submit) {
+        input.oncancel = () => {
+          input.value = '';
+          ctx.form.requestSubmit();
+        }
+        input.onchange = () => {
+          // TODO: Update the text part
+          ctx.form.requestSubmit();
+          input.value = '';
+        }
+      }
       return input;
     },
     'NUMBER': (component) => {
@@ -206,22 +232,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       button.append(component.text);
       if (component.name) button.name = component.name;
       if (component.value) button.value = component.value;
-      if (component.action) {
-        const a = component.action;
-        button.onclick = (ev) => {
-          typeSwitch({ type: a }, {
-            'SUBMIT': () => { /* default is fine */ },
-            'FILE': () => {
-              ev.preventDefault();
-              ctx.fileChooserCb(button, a);
-            },
-            'FILE_AND_SUBMIT': () =>{
-              ev.preventDefault();
-              ctx.fileChooserCb(button, a);
-            }
-          });
-        }
-      }
       return button;
     }
   });

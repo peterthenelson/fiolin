@@ -7,17 +7,13 @@ export interface FiolinForm {
   // The autofocused component (identified by value) if any; only used to
   // distinguish between multiple components with the same name.
   autofocusedValue?: string;
-  // Hide the file chooser (and instead trigger off of a button). This option
-  // only makes sense when inputFiles is NONE (otherwise your script will not
-  // be runnable)
-  hideFileChooser?: boolean;
 }
 
 // Union type of all the form components
 export type FiolinFormComponent = (
   // The collection of component types
   FiolinFormDiv | FiolinFormLabel | FiolinFormCheckbox | FiolinFormColor |
-  FiolinFormDate | FiolinFormDatetimeLocal | FiolinFormEmail |
+  FiolinFormDate | FiolinFormDatetimeLocal | FiolinFormEmail | FiolinFormFile |
   FiolinFormNumber | FiolinFormRadio | FiolinFormRange | FiolinFormTel |
   FiolinFormText | FiolinFormTime | FiolinFormUrl | FiolinFormSelect |
   FiolinFormButton
@@ -122,6 +118,24 @@ export interface FiolinFormEmail {
   placeholder?: string;
   // The size in characters
   size?: number;
+}
+
+// An input type="file" element. Can optionally serve as a submit button too.
+// Files end up in inputs and file names show up in the args given to the
+// script (the paths are rewritten to be relative to pyodide filesystem).
+export interface FiolinFormFile {
+  // Type id
+  type: 'FILE';
+  // Optional name for this argument.
+  name?: string;
+  // Allow multiple files. Only makes sense if the script can accept >=1 files.
+  // (And using this component at all only makes sense if )
+  multiple?: boolean;
+  // By default, inherits accept from the script's inputAccept, but it can be
+  // optionally overridden on a per-file component basis.
+  accept?: string;
+  // Trigger form submission upon file choice.
+  submit?: boolean;
 }
 
 // An input type="number" element
@@ -271,10 +285,7 @@ export interface FiolinFormSelectOption {
   selected?: boolean;
 }
 
-// The button action types
-export type FiolinFormButtonAction = 'SUBMIT' | 'FILE' | 'FILE_AND_SUBMIT';
-
-// An button element
+// A (submit) button element
 export interface FiolinFormButton {
   // Type id
   type: 'BUTTON';
@@ -285,9 +296,4 @@ export interface FiolinFormButton {
   // The value to be submitted when it's clicked (optional, but logically should
   // be present whenever name is present and vice versa).
   value?: string;
-  // Buttons, by default, submit the form and then run the script. If you'd like
-  // to replace the file chooser UI with a custom button, you can configure a
-  // button to trigger file choice instead of or in addition to running the
-  // script.
-  action?: FiolinFormButtonAction;
 }

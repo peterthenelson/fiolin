@@ -17,12 +17,6 @@
 > The autofocused component (identified by value) if any; only used to
 distinguish between multiple components with the same name.
 
-**hideFileChooser?**: _boolean_
-
-> Hide the file chooser (and instead trigger off of a button). This option
-only makes sense when inputFiles is NONE (otherwise your script will not
-be runnable)
-
 ## FiolinFormComponent =
 
 > Union type of all the form components
@@ -198,6 +192,34 @@ be runnable)
 **size?**: _number_
 
 > The size in characters
+
+## FiolinFormFile
+
+> An input type="file" element. Can optionally serve as a submit button too.
+Files end up in inputs and file names show up in the args given to the
+script (the paths are rewritten to be relative to pyodide filesystem).
+
+**type**: _'FILE'_
+
+> Type id
+
+**name?**: _string_
+
+> Optional name for this argument.
+
+**multiple?**: _boolean_
+
+> Allow multiple files. Only makes sense if the script can accept >=1 files.
+(And using this component at all only makes sense if )
+
+**accept?**: _string_
+
+> By default, inherits accept from the script's inputAccept, but it can be
+optionally overridden on a per-file component basis.
+
+**submit?**: _boolean_
+
+> Trigger form submission upon file choice.
 
 ## FiolinFormNumber
 
@@ -456,13 +478,9 @@ same name are a mutually exclusive set of options.
 
 > Is this selected by default?
 
-## FiolinFormButtonAction = 'SUBMIT' | 'FILE' |
-
-> The button action types
-
 ## FiolinFormButton
 
-> An button element
+> A (submit) button element
 
 **type**: _'BUTTON'_
 
@@ -480,11 +498,4 @@ same name are a mutually exclusive set of options.
 
 > The value to be submitted when it's clicked (optional, but logically should
 be present whenever name is present and vice versa).
-
-**action?**: _FiolinFormButtonAction_
-
-> Buttons, by default, submit the form and then run the script. If you'd like
-to replace the file chooser UI with a custom button, you can configure a
-button to trigger file choice instead of or in addition to running the
-script.
 

@@ -9,9 +9,11 @@ import type { FiolinScriptEditorModel } from '../web-utils/monaco';
 import { DeployDialog } from '../components/web/deploy-dialog';
 import { Editor } from '../components/web/editor';
 import { Terminal } from '../components/web/terminal';
+import { CombinedForm } from './combined-form';
 import { CustomForm } from './custom-form';
 import { SimpleForm } from './simple-form';
 import { getByRelIdAs } from '../web-utils/select-as';
+import { FormCallbacks, FormComponent } from './form-component';
 import { setSelected } from '../web-utils/set-selected';
 import { StorageLike } from '../web-utils/types';
 
@@ -42,8 +44,7 @@ export class FiolinComponent {
   private readonly deployDialog: DeployDialog;
   private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
-  private readonly customForm: CustomForm;
-  private readonly simpleForm: SimpleForm;
+  private form: FormComponent;
   private readonly editor: Editor;
   private readonly terminal: Terminal;
   private readonly worker: TypedWorker;
@@ -60,19 +61,18 @@ export class FiolinComponent {
     this.deployDialog = new DeployDialog(container, { storage: this.storage, downloadFile })
     this.tutorialSelect = getByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
-    this.customForm = new CustomForm(container, {
-      runScript: (files, formData) => this.runScript(files, formData),
-      clickFileChooser: (button, action) => this.simpleForm.clickFileChooser(button, action),
-      getFiles: () => this.simpleForm.getFiles(),
-    });
+    const formCallbacks: FormCallbacks = {
+      runScript: (files, args) => this.runScript(files, args),
+      downloadFile: (file) => downloadFile(file),
+    };
+    this.form = new CombinedForm([
+      new CustomForm(container, formCallbacks),
+      new SimpleForm(container, formCallbacks),
+    ]);
     this.editor = new Editor(container, {
       update: (s, m) => this.scriptUpdated(s, m),
       updateError: (e) => this.scriptUpdateError(e),
     })
-    this.simpleForm = new SimpleForm(container, {
-      runScript: (files, formData) => this.runScript(files, formData),
-      requestSubmit: (submitter) => this.customForm.requestSubmit(submitter),
-    });
     this.terminal = new Terminal(container);
     this.worker = new TypedWorker(opts?.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
     this.worker.onerror = (e) => {
@@ -90,8 +90,7 @@ export class FiolinComponent {
   private async updateUiForScript(script: FiolinScript) {
     this.scriptTitle.textContent = script.meta.title;
     this.scriptDesc.textContent = script.meta.description;
-    this.simpleForm.onLoad(script);
-    this.customForm.onLoad(script);
+    this.form.onLoad(script);
   }
 
   private async loadScript(opts: FiolinComponentOptions) {
@@ -165,12 +164,11 @@ export class FiolinComponent {
     }
   }
 
-  private async runScript(files: File[], formData?: FormData) {
-    if (!this.simpleForm.reportValidity() || !this.customForm.reportValidity()) {
+  private async runScript(files: File[], args?: Record<string, string>) {
+    if (!this.form.reportValidity()) {
       return;
     }
-    this.simpleForm.onRun(files, formData);
-    this.customForm.onRun(files, formData);
+    this.form.onRun(files, args);
     const script = await this.script;
     await this.readyToRun.promise;
     this.container.classList.remove('error');
@@ -180,18 +178,9 @@ export class FiolinComponent {
         (script.interface.inputFiles !== 'NONE' &&
          script.interface.inputFiles !== 'ANY')) {
       this.container.classList.add('error');
-      this.simpleForm.onError();
-      this.customForm.onError();
+      this.form.onError();
     } else {
       this.container.classList.add('running');
-      const args: Record<string, string> = {};
-      // TODO: Remove this once decoupled
-      if (!formData) {
-        formData = this.customForm.getFormData();
-      }
-      for (const [k, v] of formData.entries()) {
-        args[k] = v.toString();
-      }
       this.worker.postMessage({
         type: 'RUN',
         script,
@@ -209,17 +198,10 @@ export class FiolinComponent {
     } else if (msg.type === 'LOG') {
       this.terminal.log(msg.level, msg.value);
     } else if (msg.type === 'SUCCESS') {
-      this.simpleForm.onSuccess(msg.response.outputs);
-      this.customForm.onSuccess(msg.response.outputs);
+      this.form.onSuccess(msg.response.outputs);
       this.container.classList.remove('running');
-      if (msg.response.outputs.length > 0) {
-        for (const f of msg.response.outputs) {
-          downloadFile(f);
-        }
-      }
     } else if (msg.type === 'ERROR') {
-      this.simpleForm.onError();
-      this.customForm.onError();
+      this.form.onError();
       this.container.classList.add('error');
       this.container.classList.remove('running');
       if (typeof msg.lineno !== 'undefined') {

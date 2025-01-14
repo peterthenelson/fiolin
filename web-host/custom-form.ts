@@ -1,29 +1,28 @@
 import { FiolinScript, FiolinScriptInterface } from '../common/types';
-import { FiolinFormButtonAction } from '../common/types/form';
-import { getByRelIdAs } from '../web-utils/select-as';
+import { getByRelIdAs, selectAllAs } from '../web-utils/select-as';
 import { FormComponent } from './form-component';
 import { renderForm } from './form-renderer';
 
 export interface CustomFormCallbacks {
-  runScript(files: File[], formData?: FormData): Promise<void>;
-  // TODO: Remove these once decoupled from SimpleForm
-  getFiles(): File[];
-  clickFileChooser(button: HTMLButtonElement, action: FiolinFormButtonAction): void;
+  runScript(files: File[], args?: Record<string, string>): Promise<void>;
+  downloadFile(file: File): void;
 }
 
 export class CustomForm extends FormComponent {
-  private readonly container: HTMLElement;
   private form: HTMLFormElement;
   private readonly cbs: CustomFormCallbacks;
   private ui?: FiolinScriptInterface;
 
   constructor(container: HTMLElement, callbacks: CustomFormCallbacks) {
     super();
-    this.container = container;
     this.form = getByRelIdAs(container, 'script-form', HTMLFormElement);
     this.cbs = callbacks;
     // Disable it until the script is set.
     this.form.onsubmit = (e) => e.preventDefault();
+  }
+
+  private isEnabled(): boolean {
+    return !!(this.ui && this.ui.form);
   }
 
   reportValidity(): boolean {
@@ -34,19 +33,28 @@ export class CustomForm extends FormComponent {
     this.ui = script.interface;
     let newForm: HTMLFormElement;
     if (this.ui.form) {
-      newForm = renderForm(this.ui.form, (button, action) => {
-        // TODO: remove onced decoupled from SimpleForm
-        this.cbs.clickFileChooser(button, action);
-      });
-      if (this.ui.form.hideFileChooser) {
-        this.container.classList.add('file-chooser-hidden');
-      } else {
-        this.container.classList.remove('file-chooser-hidden');
-      }
+      newForm = renderForm(this.ui);
       newForm.onsubmit = (e) => {
         e.preventDefault();
-        const files = this.cbs.getFiles();
-        this.cbs.runScript(files, new FormData(this.form, e.submitter));
+        const files: File[] = [];
+        for (const fileChooser of selectAllAs(this.form, 'input[type="file"]', HTMLInputElement)) {
+          if (fileChooser.files !== null) {
+            for (const f of fileChooser.files) {
+              files.push(f);
+            }
+          }
+        }
+        const formData = new FormData(this.form, e.submitter);
+        const args: Record<string, string> = {};
+        for (const [k, v] of formData.entries()) {
+          const vo = v.valueOf();
+          if (vo instanceof File) {
+            args[k] = vo.name !== '' ? `/input/${vo.name}` : '';
+          } else {
+            args[k] = v.toString();
+          }
+        }
+        this.cbs.runScript(files, args);
       }
     } else {
       newForm = document.createElement('form');
@@ -55,7 +63,7 @@ export class CustomForm extends FormComponent {
     this.form = newForm;
   }
 
-  onRun(inputs: File[], formData?: FormData): void {
+  onRun(inputs: File[], args?: Record<string, string>): void {
     // TODO: When they exist:
     // - disable submit buttons of any sort
     // - reset file/run component values
@@ -66,20 +74,15 @@ export class CustomForm extends FormComponent {
     // TODO: When they exists:
     // - reenable submit buttons of any sort
     // - update the output file display component.
+    if (this.isEnabled()) {
+      for (const f of outputs) {
+        this.cbs.downloadFile(f);
+      }
+    }
   }
 
   onError(): void {
     // TODO: When they exist:
     // - reenable submit buttons of any sort
-  }
-
-  // TODO: Remove when this is decoupled from SimpleForm
-  requestSubmit(submitter: HTMLElement) {
-    this.form.requestSubmit(submitter);
-  }
-
-  // TODO: Remove when possible
-  getFormData(): FormData {
-    return new FormData(this.form);
   }
 }

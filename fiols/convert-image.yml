@@ -18,7 +18,6 @@ interface:
   outputFiles: SINGLE
   form:
     autofocusedName: format
-    hideFileChooser: true
     children:
       - type: DIV
         dir: ROW
@@ -26,9 +25,7 @@ interface:
           - type: LABEL
             text: Input Image
             child:
-              type: BUTTON
-              text: Choose File
-              action: FILE
+              type: FILE
           - type: LABEL
             text: Output Image Format
             child:

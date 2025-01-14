@@ -1,11 +1,10 @@
 import { ObjPath, pArr, pBool, pNum, pObjWithProps, pOpt, pStr, pStrLit, pStrUnion, pTaggedUnion } from './parse';
-import { FiolinForm, FiolinFormButton, FiolinFormDiv, FiolinFormComponent, FiolinFormText, FiolinFormLabel, FiolinFormSelect, FiolinFormSelectOption, FiolinFormCheckbox, FiolinFormColor, FiolinFormDate, FiolinFormDatetimeLocal, FiolinFormNumber, FiolinFormEmail, FiolinFormRadio, FiolinFormRange, FiolinFormTel, FiolinFormUrl, FiolinFormTime, FiolinFormButtonAction  } from './types/form';
+import { FiolinForm, FiolinFormButton, FiolinFormDiv, FiolinFormComponent, FiolinFormText, FiolinFormLabel, FiolinFormSelect, FiolinFormSelectOption, FiolinFormCheckbox, FiolinFormColor, FiolinFormDate, FiolinFormDatetimeLocal, FiolinFormNumber, FiolinFormEmail, FiolinFormRadio, FiolinFormRange, FiolinFormTel, FiolinFormUrl, FiolinFormTime, FiolinFormFile  } from './types/form';
 
 export const pForm = pObjWithProps<FiolinForm>({
   children: pArr(pComponent),
   autofocusedName: pOpt(pStr),
   autofocusedValue: pOpt(pStr),
-  hideFileChooser: pOpt(pBool),
 });
 
 function pComponent(p: ObjPath, v: unknown): FiolinFormComponent {
@@ -17,6 +16,7 @@ function pComponent(p: ObjPath, v: unknown): FiolinFormComponent {
     'DATE': pDate,
     'DATETIME_LOCAL': pDatetimeLocal,
     'EMAIL': pEmail,
+    'FILE': pFile,
     'NUMBER': pNumber,
     'RADIO': pRadio,
     'RANGE': pRange,
@@ -85,6 +85,14 @@ const pEmail = pObjWithProps<FiolinFormEmail>({
   required: pOpt(pBool),
   placeholder: pOpt(pStr),
   size: pOpt(pNum),
+});
+
+const pFile = pObjWithProps<FiolinFormFile>({
+  type: pStrLit('FILE'),
+  name: pOpt(pStr),
+  multiple: pOpt(pBool),
+  accept: pOpt(pStr),
+  submit: pOpt(pBool),
 });
 
 const pNumber = pObjWithProps<FiolinFormNumber>({
@@ -174,5 +182,4 @@ const pButton = pObjWithProps<FiolinFormButton>({
   text: pStr,
   name: pOpt(pStr),
   value: pOpt(pStr),
-  action: pOpt(pStrUnion<FiolinFormButtonAction[]>(['SUBMIT', 'FILE', 'FILE_AND_SUBMIT'])),
 });
