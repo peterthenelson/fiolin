@@ -1,9 +1,7 @@
 import { WorkerMessage } from '../../web-utils/types';
 import { Deferred } from '../../common/deferred';
 import { getErrMsg, toErr } from '../../common/errors';
-import { pFiolinScript } from '../../common/parse-script';
 import { FiolinScript } from '../../common/types';
-import { parseAs } from '../../common/parse';
 import { TypedWorker } from '../../web-utils/typed-worker';
 import type { FiolinScriptEditorModel } from '../../web-utils/monaco';
 import { DeployDialog } from '../../components/web/deploy-dialog';
@@ -14,7 +12,6 @@ import { CustomForm } from './custom-form';
 import { SimpleForm } from './simple-form';
 import { getByRelIdAs } from '../../web-utils/select-as';
 import { FormCallbacks, FormComponent } from './form-component';
-import { setSelected } from '../../web-utils/set-selected';
 import { StorageLike } from '../../web-utils/types';
 import { TutorialLoader } from './tutorial-loader';
 import { UrlLoader } from './url-loader';
@@ -46,7 +43,6 @@ export class Container {
   private readonly modeButton: HTMLDivElement;
   private readonly deployButton: HTMLDivElement;
   private readonly deployDialog: DeployDialog;
-  private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
   private readonly form: FormComponent;
   private readonly editor: Editor;
@@ -65,14 +61,18 @@ export class Container {
           this.scriptDesc.textContent = `Fetching script from\n${s}`;
         } : undefined,
       }),
-      new TutorialLoader(container, { tutorials: opts?.tutorials })
+      new TutorialLoader(container, {
+        tutorials: opts?.tutorials,
+        triggerReload: () => {
+          this.script = this.loadScript({});
+        },
+      })
     ])
     this.storage = opts?.storage || window.localStorage;
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
     this.deployDialog = new DeployDialog(container, { storage: this.storage, downloadFile })
-    this.tutorialSelect = getByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
     const formCallbacks: FormCallbacks = {
       runScript: (files, args) => this.runScript(files, args),
@@ -112,7 +112,7 @@ export class Container {
       if (this.loader.isEnabled()) {
         script = await this.loader.load();
       } else {
-        throw new Error(`Container requires either .url or non-empty .tutorial`);
+        throw new Error(`Container requires either .url or non-empty .tutorials`);
       }
       this.worker.postMessage({ type: 'INSTALL_PACKAGES', script });
       this.updateUiForScript(script);
@@ -132,13 +132,6 @@ export class Container {
     this.modeButton.onclick = () => {
       this.container.classList.toggle('dev-mode');
     };
-    window.addEventListener('hashchange', () => {
-      this.script = this.loadScript({});
-    });
-    this.tutorialSelect.onchange = async () => {
-      window.location.hash = this.tutorialSelect.value;
-    };
-    this.tutorialSelect.disabled = false;
     this.deployButton.onclick = async () => {
       const script = await this.script;
       this.deployDialog.showModal(script);
