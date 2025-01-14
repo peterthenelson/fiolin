@@ -37,13 +37,12 @@ export interface ContainerOptions {
 
 export class Container {
   private readonly container: HTMLElement;
-  private readonly loader: LoaderComponent;
-  private readonly storage: StorageLike;
   private readonly scriptTitle: HTMLDivElement;
   private readonly modeButton: HTMLDivElement;
   private readonly deployButton: HTMLDivElement;
-  private readonly deployDialog: DeployDialog;
   private readonly scriptDesc: HTMLPreElement;
+  private readonly loader: LoaderComponent;
+  private readonly deployDialog: DeployDialog;
   private readonly form: FormComponent;
   private readonly editor: Editor;
   private readonly terminal: Terminal;
@@ -52,28 +51,31 @@ export class Container {
   public readonly readyToRun: Deferred<void>;
 
   constructor(container: HTMLElement, opts?: ContainerOptions) {
+    opts = opts || {};
     this.container = container;
+    this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
+    this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
+    this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
+    this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
     this.loader = new CombinedLoader([
       new UrlLoader({
-        url: opts?.url,
-        setLoadingText: opts?.showLoading ? (s) => {
+        url: opts.url,
+        setLoadingText: opts.showLoading ? (s) => {
           this.scriptTitle.textContent = s;
           this.scriptDesc.textContent = `Fetching script from\n${s}`;
         } : undefined,
       }),
       new TutorialLoader(container, {
-        tutorials: opts?.tutorials,
+        tutorials: opts.tutorials,
         triggerReload: () => {
-          this.script = this.loadScript({});
+          this.script = this.loadScript();
         },
       })
     ])
-    this.storage = opts?.storage || window.localStorage;
-    this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
-    this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
-    this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
-    this.deployDialog = new DeployDialog(container, { storage: this.storage, downloadFile })
-    this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
+    this.deployDialog = new DeployDialog(container, {
+      storage: opts.storage || window.localStorage,
+      downloadFile,
+    });
     const formCallbacks: FormCallbacks = {
       runScript: (files, args) => this.runScript(files, args),
       downloadFile: (file) => downloadFile(file),
@@ -87,7 +89,7 @@ export class Container {
       updateError: (e) => this.scriptUpdateError(e),
     })
     this.terminal = new Terminal(container);
-    this.worker = new TypedWorker(opts?.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
+    this.worker = new TypedWorker(opts.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
     this.worker.onerror = (e) => {
       console.error(getErrMsg(e));
       this.terminal.fatal(getErrMsg(e));
@@ -95,7 +97,7 @@ export class Container {
     this.worker.onmessage = (msg) => {
       this.handleMessage(msg);
     }
-    this.script = this.loadScript(opts || {});
+    this.script = this.loadScript();
     this.setupHandlers();
     this.readyToRun = new Deferred();
   }
@@ -106,7 +108,7 @@ export class Container {
     this.form.onLoad(script);
   }
 
-  private async loadScript(opts: ContainerOptions): Promise<FiolinScript> {
+  private async loadScript(): Promise<FiolinScript> {
     try {
       let script: FiolinScript;
       if (this.loader.isEnabled()) {
@@ -119,11 +121,10 @@ export class Container {
       await this.editor.setScript(script);
       return script;
     } catch (e) {
-      console.log('Failed to fetch script!');
+      console.log('Failed to load script!');
       const err = toErr(e);
       console.error(err);
-      this.scriptDesc.textContent = (
-        `Failed to fetch script from\n${opts.url}\n${err.message}`);
+      this.scriptDesc.textContent = `Failed to load script:\n${err.message}`;
       throw e;
     }
   }
