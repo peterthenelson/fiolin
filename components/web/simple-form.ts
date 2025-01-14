@@ -1,6 +1,6 @@
-import { typeSwitch } from '../common/type-switch';
-import { FiolinScript, FiolinScriptInterface } from '../common/types';
-import { getByRelIdAs } from '../web-utils/select-as';
+import { typeSwitch } from '../../common/type-switch';
+import { FiolinScript, FiolinScriptInterface } from '../../common/types';
+import { getByRelIdAs } from '../../web-utils/select-as';
 import { FormCallbacks, FormComponent } from './form-component';
 
 // Default UI has a file chooser that doubles as a run button.

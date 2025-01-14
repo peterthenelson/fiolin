@@ -1,7 +1,8 @@
 import { loadScript } from '../../../../utils/config';
 import { dedent } from '../../../../common/indent';
-import { fiolinContainer, fiolinSharedHeaders } from '../../../html';
+import { fiolinSharedHeaders } from '../../../html';
 import { versionedLink } from '../../../../utils/versioned-link';
+import { renderContainer } from '../../../../components/server/container';
 
 export default defineEventHandler((event) => {
   const name = getRouterParam(event, 'id')
@@ -15,7 +16,7 @@ export default defineEventHandler((event) => {
         <script src="${versionedLink('/init-fiol.js')}&fiol=${name}" type="module" defer></script>
       </head>
       <body>
-        ${fiolinContainer({ title: script.meta.title, desc: script.meta.description })}
+        ${renderContainer({ title: script.meta.title, desc: script.meta.description, numSpaces: 4 })}
         <a href="/s/${name}/script.json" class="hidden">fiolin script source</a>
       </body>
     </html>

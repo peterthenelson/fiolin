@@ -1,21 +1,21 @@
-import { WorkerMessage } from '../web-utils/types';
-import { Deferred } from '../common/deferred';
-import { getErrMsg, toErr } from '../common/errors';
-import { pFiolinScript } from '../common/parse-script';
-import { FiolinLogLevel, FiolinScript } from '../common/types';
-import { parseAs } from '../common/parse';
-import { TypedWorker } from './typed-worker';
-import type { FiolinScriptEditorModel } from '../web-utils/monaco';
-import { DeployDialog } from '../components/web/deploy-dialog';
-import { Editor } from '../components/web/editor';
-import { Terminal } from '../components/web/terminal';
+import { WorkerMessage } from '../../web-utils/types';
+import { Deferred } from '../../common/deferred';
+import { getErrMsg, toErr } from '../../common/errors';
+import { pFiolinScript } from '../../common/parse-script';
+import { FiolinScript } from '../../common/types';
+import { parseAs } from '../../common/parse';
+import { TypedWorker } from '../../web-utils/typed-worker';
+import type { FiolinScriptEditorModel } from '../../web-utils/monaco';
+import { DeployDialog } from '../../components/web/deploy-dialog';
+import { Editor } from '../../components/web/editor';
+import { Terminal } from '../../components/web/terminal';
 import { CombinedForm } from './combined-form';
 import { CustomForm } from './custom-form';
 import { SimpleForm } from './simple-form';
-import { getByRelIdAs } from '../web-utils/select-as';
+import { getByRelIdAs } from '../../web-utils/select-as';
 import { FormCallbacks, FormComponent } from './form-component';
-import { setSelected } from '../web-utils/set-selected';
-import { StorageLike } from '../web-utils/types';
+import { setSelected } from '../../web-utils/set-selected';
+import { StorageLike } from '../../web-utils/types';
 
 function downloadFile(f: File) {
   const elem = document.createElement('a');
@@ -26,7 +26,7 @@ function downloadFile(f: File) {
   document.body.removeChild(elem);
 }
 
-export interface FiolinComponentOptions {
+export interface ContainerOptions {
   url?: string;
   workerEndpoint?: string;
   showLoading?: boolean;
@@ -34,7 +34,7 @@ export interface FiolinComponentOptions {
   storage?: StorageLike;
 }
 
-export class FiolinComponent {
+export class Container {
   private readonly container: HTMLElement;
   private readonly tutorial?: Record<string, FiolinScript>;
   private readonly storage: StorageLike;
@@ -51,7 +51,7 @@ export class FiolinComponent {
   public script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
 
-  constructor(container: HTMLElement, opts?: FiolinComponentOptions) {
+  constructor(container: HTMLElement, opts?: ContainerOptions) {
     this.container = container;
     this.tutorial = opts?.tutorial;
     this.storage = opts?.storage || window.localStorage;
@@ -93,7 +93,7 @@ export class FiolinComponent {
     this.form.onLoad(script);
   }
 
-  private async loadScript(opts: FiolinComponentOptions) {
+  private async loadScript(opts: ContainerOptions) {
     try {
       let script: FiolinScript | undefined;
       if (opts.url) {
@@ -115,7 +115,7 @@ export class FiolinComponent {
           window.location.hash = first;
         }
       } else {
-        throw new Error(`FiolinComponent requires either .url or non-empty .tutorial`);
+        throw new Error(`Container requires either .url or non-empty .tutorial`);
       }
       this.worker.postMessage({ type: 'INSTALL_PACKAGES', script });
       this.updateUiForScript(script);

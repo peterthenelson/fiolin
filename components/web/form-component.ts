@@ -1,4 +1,4 @@
-import { FiolinScript } from '../common/types';
+import { FiolinScript } from '../../common/types';
 
 export interface FormCallbacks {
   runScript(files: File[], args?: Record<string, string>): Promise<void>;

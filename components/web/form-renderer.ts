@@ -1,6 +1,6 @@
-import { typeSwitch } from '../common/type-switch';
-import { FiolinScriptInterface } from '../common/types';
-import { FiolinFormComponent } from '../common/types/form';
+import { typeSwitch } from '../../common/type-switch';
+import { FiolinScriptInterface } from '../../common/types';
+import { FiolinFormComponent } from '../../common/types/form';
 
 // Note: the fileChooserCb should trigger the file chooser and then, if
 // submitWith is specified, then it will submit the form with that as the

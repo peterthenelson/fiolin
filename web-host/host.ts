@@ -1,5 +1,5 @@
 import { FiolinScript } from '../common/types';
-import { FiolinComponent } from './fiolin-component';
+import { Container } from '../components/web/container';
 const monaco = import('../web-utils/monaco');
 
 export interface FromUrlOpts {
@@ -11,7 +11,7 @@ export interface FromTutorialOpts {
   tutorial: Record<string, FiolinScript>;
 }
 
-export async function initFiolin(opts: FromUrlOpts | FromTutorialOpts): Promise<FiolinComponent> {
+export async function initFiolin(opts: FromUrlOpts | FromTutorialOpts): Promise<Container> {
   let endpoints: Record<string, string> = {};
   try {
     const resp = await fetch(`/bundle/versions.json?v=${Math.random()}`);
@@ -24,7 +24,7 @@ export async function initFiolin(opts: FromUrlOpts | FromTutorialOpts): Promise<
   if (container === null) {
     die('#container not present; cannot initFiolin');
   }
-  return new FiolinComponent(container, { workerEndpoint: endpoints.worker, ...opts });
+  return new Container(container, { workerEndpoint: endpoints.worker, ...opts });
 }
 
 async function colorizeLang(lang: string): Promise<void> {

@@ -1,4 +1,4 @@
-import { FiolinScript } from '../common/types';
+import { FiolinScript } from '../../common/types';
 import { FormComponent } from './form-component';
 
 // Multiple forms together, with events delegated to all of them.

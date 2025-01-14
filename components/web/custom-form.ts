@@ -1,5 +1,5 @@
-import { FiolinScript, FiolinScriptInterface } from '../common/types';
-import { getByRelIdAs, selectAllAs } from '../web-utils/select-as';
+import { FiolinScript, FiolinScriptInterface } from '../../common/types';
+import { getByRelIdAs, selectAllAs } from '../../web-utils/select-as';
 import { FormComponent } from './form-component';
 import { renderForm } from './form-renderer';
 

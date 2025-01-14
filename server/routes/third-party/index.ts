@@ -1,6 +1,7 @@
 import { dedent } from '../../../common/indent';
-import { fiolinContainer, fiolinSharedHeaders } from '../../html';
+import { fiolinSharedHeaders } from '../../html';
 import { versionedLink } from '../../../utils/versioned-link';
+import { renderContainer } from '../../../components/server/container';
 
 export default defineEventHandler(() => {
   return dedent(`
@@ -12,8 +13,7 @@ export default defineEventHandler(() => {
         <script src="${versionedLink('/third-party.js')}" type="module" defer></script>
       </head>
       <body>
-        <!-- TODO: Third-party-specific components -->
-        ${fiolinContainer()}
+        ${renderContainer({ numSpaces: 4 })}
       </body>
     </html>
   `);
