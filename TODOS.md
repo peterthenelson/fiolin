@@ -1,6 +1,8 @@
 A not-necessarily-exhaustive list of TODOs:
-- Docs
+- Template repo
   - Update docs for template repo
+  - Deploy script in the template package.json
+  - Other scripts to run and test locally
 - Dev server and release:
   - Get unjs/nitro#2814 merged/released and then revert my local changes.
   - Set up tests involving the web server(s) and playwright to check that the
@@ -12,8 +14,6 @@ A not-necessarily-exhaustive list of TODOs:
     package so that people can import fiolin from their fiolin-template cloned
     projects and do local development. Update the repo template as needed.
 - Core functionality
-  - Forms
-    - Get autofocus to work?
   - Canvas
   - Multi-stage callback based scripts
   - Get some emscripten binaries working in the same file-system as pyodide.
@@ -47,15 +47,17 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert video?
 - Frontend
   - Landing page: autocomplete
-  - 3p page: modal warnings, dev avatar, localstorage of approvals
-  - Editor and playground:
+  - Add some transition animations for the buttons to invite interaction.
+  - Third party:
+    - Add a component
+    - Modal/overlaid warnings w/dev avatar
+    - Stored approvals
+  - Editor:
     - Why is monaco occasionally triggering a request for clipboard permissions?
-    - Add some transition animations for the buttons to invite interaction.
   - Controls:
     - Run button (on custom form) firing pre-load bug
     - Make custom form lock up during run (and glow)
     - Add a "download files" component for the custom form
     - Make FILE component have a logo and text and panel and whatnot
+  - Terminal:
     - Filtering in output terminal by log level
-  - Deployment:
-    - Deploy script in the template package.json
