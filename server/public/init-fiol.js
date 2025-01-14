@@ -13,9 +13,9 @@ import(endpoints.host || '/bundle/host.js').then((host) => {
   if (fiol) {
     host.initFiolin({ url: `/s/${fiol}/script.json` });
   } else if (tutorialVar) {
-    const tutorial = window[tutorialVar];
-    if (tutorial) {
-      host.initFiolin({ tutorial });
+    const tutorials = window[tutorialVar];
+    if (tutorials) {
+      host.initFiolin({ tutorials });
     } else {
       console.error(`window.${tutorialVar} doesn't exist`)
     }

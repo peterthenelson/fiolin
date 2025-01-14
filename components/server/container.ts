@@ -1,4 +1,4 @@
-import { indent, redent } from '../../common/indent';
+import { redent } from '../../common/indent';
 import { FiolinScript } from '../../common/types';
 import { loadSvg } from '../../utils/load-svg';
 import { renderDeployDialog } from '../../components/server/deploy-dialog';
@@ -6,11 +6,7 @@ import { renderEditor } from '../../components/server/editor';
 import { renderTerminal } from '../../components/server/terminal';
 import { renderCustomForm } from '../../components/server/custom-form';
 import { renderSimpleForm } from '../../components/server/simple-form';
-
-function mkOptions(hashNamePairs: [string, string][], prefix: string): string {
-  const opts = hashNamePairs.map(([p, n]) => `<option value="${p}">${n}</option>`);
-  return indent(opts.join('\n'), prefix);
-}
+import { renderTutorialLoader } from './tutorial-loader';
 
 export interface FiolinContainerOptions {
   // Title for the script (defaults to empty)
@@ -27,22 +23,16 @@ export interface FiolinContainerOptions {
   numSpaces?: number;
 }
 
-export function renderContainer(options?: FiolinContainerOptions): string {
-  options = options || {};
-  const idPrefix = options.idPrefix ? options.idPrefix + '-' : '';
-  const dmHidden = options.playground ? 'hidden' : '';
-  const depHidden = options.playground ? '' : 'hidden';
-  const hashNamePairs: [string, string][] = (
-    options.tutorial ?
-    Object.entries(options.tutorial).map(([h, s]) => [h, s.meta.title]) :
-    []);
+export function renderContainer(opts?: FiolinContainerOptions): string {
+  opts = opts || {};
+  const idPrefix = opts.idPrefix ? opts.idPrefix + '-' : '';
+  const dmHidden = opts.playground ? 'hidden' : '';
+  const depHidden = opts.playground ? '' : 'hidden';
   return redent(`
-    <div id="${idPrefix}container" class="container ${options.playground ? 'dev-mode' : ''}">
+    <div id="${idPrefix}container" class="container ${opts.playground ? 'dev-mode' : ''}">
       <div class="script-header flex-row-wrap">
-        <div class="script-title" data-rel-id="script-title">${options.title || ''}</div>
-        <select class="${options.tutorial ? '' : 'hidden'}" data-rel-id="tutorial-select" disabled>
-          ${mkOptions(hashNamePairs, '          ')}
-        </select>
+        <div class="script-title" data-rel-id="script-title">${opts.title || ''}</div>
+        ${renderTutorialLoader({ tutorials: opts.tutorial, numSpaces: (opts.numSpaces || 0) + 4 })}
         <div class="script-buttons">
           <div class="dev-mode-button circle-button button ${dmHidden}" data-rel-id="dev-mode-button" title="Developer Mode">
             ${loadSvg('dev')}
@@ -51,19 +41,19 @@ export function renderContainer(options?: FiolinContainerOptions): string {
             ${loadSvg('deploy')}
           </div>
         </div>
-        ${renderDeployDialog(8)}
+        ${renderDeployDialog((opts.numSpaces || 0) + 4)}
       </div>
       <div class="script">
-        <pre class="script-desc" data-rel-id="script-desc">${options.desc || 'Loading...'}</pre>
+        <pre class="script-desc" data-rel-id="script-desc">${opts.desc || 'Loading...'}</pre>
         <div class="mobile-warning">Developer Mode has limited support on mobile</div>
-        ${renderEditor(8)}
+        ${renderEditor((opts.numSpaces || 0) + 4)}
       </div>
       <div class="script-controls">
-        ${renderCustomForm(8)}
-        ${renderSimpleForm(8)}
+        ${renderCustomForm((opts.numSpaces || 0) + 4)}
+        ${renderSimpleForm((opts.numSpaces || 0) + 4)}
       </div>
       <div class="script-output">
-        ${renderTerminal(8)}
+        ${renderTerminal((opts.numSpaces || 0) + 4)}
       </div>
       <div class="flow-row-wrap footer">
         <a href="/">Return Home</a>
@@ -71,5 +61,5 @@ export function renderContainer(options?: FiolinContainerOptions): string {
         <a href="https://github.com/peterthenelson/fiolin/issues/new">Report Bug</a>
       </div>
     </div>
-  `, ' '.repeat(options.numSpaces || 0));
+  `, ' '.repeat(opts.numSpaces || 0));
 }

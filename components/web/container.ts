@@ -16,6 +16,10 @@ import { getByRelIdAs } from '../../web-utils/select-as';
 import { FormCallbacks, FormComponent } from './form-component';
 import { setSelected } from '../../web-utils/set-selected';
 import { StorageLike } from '../../web-utils/types';
+import { TutorialLoader } from './tutorial-loader';
+import { UrlLoader } from './url-loader';
+import { LoaderComponent } from './loader-component';
+import { CombinedLoader } from './combined-loader';
 
 function downloadFile(f: File) {
   const elem = document.createElement('a');
@@ -30,13 +34,13 @@ export interface ContainerOptions {
   url?: string;
   workerEndpoint?: string;
   showLoading?: boolean;
-  tutorial?: Record<string, FiolinScript>;
+  tutorials?: Record<string, FiolinScript>;
   storage?: StorageLike;
 }
 
 export class Container {
   private readonly container: HTMLElement;
-  private readonly tutorial?: Record<string, FiolinScript>;
+  private readonly loader: LoaderComponent;
   private readonly storage: StorageLike;
   private readonly scriptTitle: HTMLDivElement;
   private readonly modeButton: HTMLDivElement;
@@ -44,7 +48,7 @@ export class Container {
   private readonly deployDialog: DeployDialog;
   private readonly tutorialSelect: HTMLSelectElement;
   private readonly scriptDesc: HTMLPreElement;
-  private form: FormComponent;
+  private readonly form: FormComponent;
   private readonly editor: Editor;
   private readonly terminal: Terminal;
   private readonly worker: TypedWorker;
@@ -53,7 +57,16 @@ export class Container {
 
   constructor(container: HTMLElement, opts?: ContainerOptions) {
     this.container = container;
-    this.tutorial = opts?.tutorial;
+    this.loader = new CombinedLoader([
+      new UrlLoader({
+        url: opts?.url,
+        setLoadingText: opts?.showLoading ? (s) => {
+          this.scriptTitle.textContent = s;
+          this.scriptDesc.textContent = `Fetching script from\n${s}`;
+        } : undefined,
+      }),
+      new TutorialLoader(container, { tutorials: opts?.tutorials })
+    ])
     this.storage = opts?.storage || window.localStorage;
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
@@ -93,27 +106,11 @@ export class Container {
     this.form.onLoad(script);
   }
 
-  private async loadScript(opts: ContainerOptions) {
+  private async loadScript(opts: ContainerOptions): Promise<FiolinScript> {
     try {
-      let script: FiolinScript | undefined;
-      if (opts.url) {
-        if (opts.showLoading) {
-          this.scriptTitle.textContent = opts.url;
-          this.scriptDesc.textContent = `Fetching script from\n${opts.url}`;
-        }
-        const resp = await fetch(opts.url);
-        const parsed = await resp.json();
-        script = parseAs(pFiolinScript, parsed);
-      } else if (this.tutorial && Object.keys(this.tutorial).length > 0) {
-        const hash = window.location.hash.substring(1);
-        if (hash !== '' && hash in this.tutorial) {
-          script = this.tutorial[hash];
-          setSelected(this.tutorialSelect, hash);
-        } else {
-          const first = Object.keys(this.tutorial).sort()[0]
-          script = this.tutorial[first];
-          window.location.hash = first;
-        }
+      let script: FiolinScript;
+      if (this.loader.isEnabled()) {
+        script = await this.loader.load();
       } else {
         throw new Error(`Container requires either .url or non-empty .tutorial`);
       }

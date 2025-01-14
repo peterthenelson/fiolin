@@ -14,7 +14,7 @@ export default defineEventHandler(async () => {
         ${fiolinSharedHeaders()}
         <title>ƒɪᴏʟɪɴ playground</title>
         <script src="${versionedLink('/playground/load-tutorial', contents)}" type="module" defer></script>
-        <script src="${versionedLink('/init-fiol.js')}&tutorialVar=tutorial" type="module" defer></script>
+        <script src="${versionedLink('/init-fiol.js')}&tutorialVar=tutorials" type="module" defer></script>
       </head>
       <body>
         ${renderContainer({ playground: true, tutorial, numSpaces: 4 })}
