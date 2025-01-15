@@ -69,11 +69,11 @@ export class SimpleForm extends FormComponent {
     this.outputFileText.textContent = '';
   }
 
-  onSuccess(outputs: File[]) {
+  onSuccess(outputs: File[], partial?: boolean) {
     this.fileChooser.disabled = false;
     this.outputFileText.textContent = outputs.map((f) => f.name).join();
     this.outputFileText.title = outputs.map((f) => f.name).join();
-    if (this.isEnabled()) {
+    if (this.isEnabled() && !partial) {
       for (const f of outputs) {
         this.cbs.downloadFile(f);
       }

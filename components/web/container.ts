@@ -189,7 +189,7 @@ export class Container {
     } else if (msg.type === 'LOG') {
       this.terminal.log(msg.level, msg.value);
     } else if (msg.type === 'SUCCESS') {
-      this.form.onSuccess(msg.response.outputs);
+      this.form.onSuccess(msg.response.outputs, msg.response.partial);
       this.container.classList.remove('running');
     } else if (msg.type === 'ERROR') {
       this.form.onError();

@@ -19,7 +19,7 @@ export abstract class FormComponent {
   abstract onRun(inputs: File[], args?: Record<string, string>): void;
 
   // Update the UI after a successful run of the script.
-  abstract onSuccess(outputs: File[]): void;
+  abstract onSuccess(outputs: File[], partial?: boolean): void;
 
   // Update the UI after an error occurs (could occur at different parts of the
   // lifecycle of running a script).

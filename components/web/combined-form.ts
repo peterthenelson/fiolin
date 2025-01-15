@@ -24,8 +24,8 @@ export class CombinedForm extends FormComponent {
     this.forms.forEach((f) => f.onRun(inputs, args));
   }
 
-  onSuccess(outputs: File[]): void {
-    this.forms.forEach((f) => f.onSuccess(outputs));
+  onSuccess(outputs: File[], partial?: boolean): void {
+    this.forms.forEach((f) => f.onSuccess(outputs, partial));
   }
 
   onError(): void {

@@ -3,6 +3,10 @@ This is just a fake module to make pylance happy. In reality, the fiolin module
 is provided by pylib.ts and saved into the emscripten file system. See the
 documentation for more information.
 """
+def state():
+  return None
+def continue_with(new_state):
+  pass
 def args():
   return {}
 def get_input_basename(suffix='', ext=''):

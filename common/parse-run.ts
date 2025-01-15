@@ -1,4 +1,4 @@
-import { pArr, pInst, pNum, pRec, pStr, pObjWithProps, pOpt, pTuple, pStrUnion } from './parse';
+import { pArr, pInst, pNum, pRec, pStr, pObjWithProps, pOpt, pTuple, pStrUnion, pBool } from './parse';
 import { FiolinLogLevel, FiolinRunRequest, FiolinRunResponse } from './types';
 
 export const pFiolinRunRequest = pObjWithProps<FiolinRunRequest>({
@@ -16,4 +16,5 @@ export const pFiolinRunResponse = pObjWithProps<FiolinRunResponse>({
   log: pArr(pLogEntry),
   error: pOpt(pInst(Error)),
   lineno: pOpt(pNum),
+  partial: pOpt(pBool),
 });

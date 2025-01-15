@@ -11,6 +11,16 @@ import re
 import sys
 import traceback
 
+def state():
+  """Get saved state from the previous run."""
+  return globals().get('_state')
+
+def continue_with(new_state):
+  """Set the continue bit and save state for the next run."""
+  global state
+  state = new_state
+  js.partial = True
+
 def args():
   """Get the args dictionary."""
   if not js.args:

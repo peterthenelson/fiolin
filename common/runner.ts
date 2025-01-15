@@ -143,6 +143,7 @@ export class PyodideRunner implements FiolinRunner {
     this._shared.outputs = [];
     this._shared.errorMsg = undefined;
     this._shared.errorLine = undefined;
+    this._shared.partial = undefined;
     this._shared.args = {};
   }
 
@@ -245,7 +246,8 @@ export class PyodideRunner implements FiolinRunner {
       if (this._shared.errorMsg) {
         return {
           outputs: [], log: this._log,
-          error: new Error(this._shared.errorMsg), lineno: this._shared.errorLine
+          error: new Error(this._shared.errorMsg), lineno: this._shared.errorLine,
+          partial: this._shared.partial,
         };
       }
       const outputs = this.extractOutputs(script);

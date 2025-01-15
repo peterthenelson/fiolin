@@ -70,11 +70,11 @@ export class CustomForm extends FormComponent {
     // - reset the output file display component.
   }
 
-  onSuccess(outputs: File[]): void {
+  onSuccess(outputs: File[], partial?: boolean): void {
     // TODO: When they exists:
     // - reenable submit buttons of any sort
     // - update the output file display component.
-    if (this.isEnabled()) {
+    if (this.isEnabled() && !partial) {
       for (const f of outputs) {
         this.cbs.downloadFile(f);
       }

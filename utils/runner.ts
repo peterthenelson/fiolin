@@ -35,6 +35,9 @@ export class NodeFiolinRunner {
     if (response.error) {
       throw response.error;
     }
+    if (response.partial) {
+      throw new Error(`Script reached only partial completion; perhaps some required args were missing`);
+    }
     const outputBasenames: string[] = [];
     for (const f of response.outputs) {
       outputBasenames.push(f.name);

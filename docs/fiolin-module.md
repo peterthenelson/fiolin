@@ -10,6 +10,10 @@ fiolin.**args**()
 
 > Get the args dictionary.
 
+fiolin.**continue_with**(new_state)
+
+> Set the continue bit and save state for the next run.
+
 fiolin.**cp**(src, dest)
 
 > Copy a file from src to dest.
@@ -52,6 +56,10 @@ fiolin.**set_output_basenames**(outputs=None)
 fiolin.**smart_sort**(files)
 
 > Sorts file names in the intuitive order, accounting for sloppy numbering.
+
+fiolin.**state**()
+
+> Get saved state from the previous run.
 
 fiolin.**tree**(path, file=<_io.TextIOWrapper name='<stdout>' mode='w' encoding='utf-8'>, prefix=None)
 

@@ -15,6 +15,7 @@ export interface FiolinRunResponse {
   log: [FiolinLogLevel, string][];
   error?: Error;
   lineno?: number;
+  partial?: boolean;
 }
 
 export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
@@ -26,6 +27,10 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // Used to pass exceptions back to the host
   errorMsg?: string;
   errorLine?: number;
+
+  // Used to signal that the script is not done and further interactions should
+  // be allowed.
+  partial?: boolean;
 
   // Other properties may be temporarily needed during the loading phase.
   [key: string]: any;

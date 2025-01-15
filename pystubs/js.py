@@ -4,4 +4,5 @@ inputs = []
 outputs = []
 errorMsg = None
 errorLine = None
+partial = None
 args = {}
