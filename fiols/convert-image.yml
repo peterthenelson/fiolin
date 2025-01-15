@@ -17,7 +17,7 @@ interface:
   inputFiles: SINGLE
   outputFiles: SINGLE
   form:
-    autofocusedName: format
+    autofocusedName: input-image
     children:
       - type: DIV
         dir: ROW
@@ -26,6 +26,7 @@ interface:
             text: Input Image
             child:
               type: FILE
+              name: input-image
           - type: LABEL
             text: Output Image Format
             child:
