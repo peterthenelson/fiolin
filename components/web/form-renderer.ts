@@ -2,43 +2,84 @@ import { typeSwitch } from '../../common/tagged-unions';
 import { FiolinScriptInterface } from '../../common/types';
 import { FiolinFormComponent } from '../../common/types/form';
 
-// Note: the fileChooserCb should trigger the file chooser and then, if
-// submitWith is specified, then it will submit the form with that as the
-// submitter.
-export function renderForm(ui: FiolinScriptInterface): HTMLFormElement {
-  const form = document.createElement('form');
-  if (!ui.form) return form;
+export interface RenderedForm {
+  form: HTMLFormElement;
+  uniquelyIdentifiedElems: Record<string, HTMLElement>;
+}
+
+export function renderForm(ui: FiolinScriptInterface): RenderedForm {
+  const rendered: RenderedForm = {
+    form: document.createElement('form'),
+    uniquelyIdentifiedElems: {},
+  }
+  if (!ui.form) return rendered;
   const ctx: RenderContext = {
-    form,
+    form: rendered.form,
     ui,
-    autofocusedName: ui.form.autofocusedName,
-    autofocusedValue: ui.form.autofocusedValue,
+    ids: {},
   };
   for (const c of ui.form.children) {
-    form.append(renderComponent(c, ctx));
+    rendered.form.append(renderComponent(c, ctx));
   }
-  return form;
+  rendered.uniquelyIdentifiedElems = ctx.ids;
+  if (ui.form.autofocusedName) {
+    const autofocusedId = nameValToId(ui.form.autofocusedName, ui.form.autofocusedValue);
+    if (autofocusedId in rendered.uniquelyIdentifiedElems) {
+      rendered.uniquelyIdentifiedElems[autofocusedId].autofocus = true;
+    } else {
+      throw new Error(`Could not find element to autofocus (${nameValToHumanReadable(ui.form.autofocusedName, ui.form.autofocusedValue)})`);
+    }
+  }
+  return rendered;
+}
+
+function nameValToHumanReadable(name: string, value?: string): string {
+  const maybeVal = value !== undefined ? `, value=${value}` : '';
+  return `name=${name}${maybeVal}`;
+}
+
+function idToNameVal(id: string): [string, string | undefined] {
+  const slash = id.indexOf('/');
+  if (slash === -1) {
+    return [id, undefined];
+  } else {
+    return [id.substring(0, slash), id.substring(slash + 1)];
+  }
+}
+
+function nameValToId(name: string, value?: string): string {
+  if (!name.match(/^[A-za-z][A-Za-z0-9_:\.-]*$/)) {
+    throw new Error(`Invalid form input name: ${name}`);
+  }
+  if (value === undefined) {
+    return name;
+  } else {
+    return `${name}/${value}`;
+  }
+}
+
+function maybeComponentToId(component: FiolinFormComponent): string | undefined {
+  let name: string;
+  if (component.name === undefined) {
+    return undefined;
+  }
+  name = component.name;
+  let value: string | undefined;
+  if ('value' in component && component.value !== undefined) {
+    value = component.value.toString();
+  }
+  return nameValToId(name, value);
 }
 
 interface RenderContext {
   form: HTMLFormElement;
   ui: FiolinScriptInterface;
-  autofocusedName?: string;
-  autofocusedValue?: string;
-}
-
-function maybeAutofocus(component: FiolinFormComponent, element: HTMLElement, ctx: RenderContext) {
-  if ('name' in component && component.name === ctx.autofocusedName) {
-    if (!ctx.autofocusedValue) {
-      element.autofocus = true;
-    } else if ('value' in component && component.value === ctx.autofocusedValue) {
-      element.autofocus = true;
-    }
-  }
+  ids: Record<string, HTMLElement>;
 }
 
 function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HTMLElement {
-  return typeSwitch(component, {
+  const id = maybeComponentToId(component);
+  const e: HTMLElement = typeSwitch(component, {
     'DIV': (component) => {
       const div = document.createElement('div');
       div.classList.add(`flex-${component.dir.toLowerCase()}-wrap`);
@@ -56,7 +97,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'CHECKBOX': (component) => {
       const input = document.createElement('input');
       input.type = 'checkbox';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value;
       if (component.checked) input.checked = true;
@@ -65,7 +105,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'COLOR': (component) => {
       const input = document.createElement('input');
       input.type = 'color';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value.toString();
       return input;
@@ -73,7 +112,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'DATE': (component) => {
       const input = document.createElement('input');
       input.type = 'date';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value;
       if (component.required) input.required = true;
@@ -85,7 +123,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'DATETIME_LOCAL': (component) => {
       const input = document.createElement('input');
       input.type = 'date';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value;
       if (component.required) input.required = true;
@@ -97,7 +134,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'EMAIL': (component) => {
       const input = document.createElement('input');
       input.type = 'text';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value;
       if (component.multiple) input.multiple = component.multiple;
@@ -111,7 +147,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       // TODO: Don't just make an input. Make a little panel.
       const input = document.createElement('input');
       input.type = 'file';
-      maybeAutofocus(component, input, ctx);
       if (component.name) input.name = component.name;
       if (component.multiple) input.multiple = component.multiple;
       const accept = component.accept || ctx.ui.inputAccept;
@@ -132,7 +167,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'NUMBER': (component) => {
       const input = document.createElement('input');
       input.type = 'number';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value.toString();
       if (component.required) input.required = true;
@@ -145,7 +179,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'RADIO': (component) => {
       const input = document.createElement('input');
       input.type = 'radio';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       input.value = component.value;
       if (component.checked) input.checked = true;
@@ -155,7 +188,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'RANGE': (component) => {
       const input = document.createElement('input');
       input.type = 'range';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value.toString();
       input.min = component.min.toString();
@@ -166,7 +198,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'TEL': (component) => {
       const input = document.createElement('input');
       input.type = 'tel';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value;
       if (component.pattern) input.pattern = component.pattern;
@@ -178,7 +209,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'TEXT': (component) => {
       const input = document.createElement('input');
       input.type = 'text';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value;
       if (component.pattern) input.pattern = component.pattern;
@@ -190,7 +220,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'TIME': (component) => {
       const input = document.createElement('input');
       input.type = 'time';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value;
       if (component.required) input.required = true;
@@ -202,7 +231,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     'URL': (component) => {
       const input = document.createElement('input');
       input.type = 'url';
-      maybeAutofocus(component, input, ctx);
       input.name = component.name;
       if (component.value) input.value = component.value;
       if (component.pattern) input.pattern = component.pattern;
@@ -213,7 +241,6 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     },
     'SELECT': (component) => {
       const select = document.createElement('select');
-      maybeAutofocus(component, select, ctx);
       select.name = component.name;
       if (component.multiple) select.multiple = true;
       if (component.required) select.required = true;
@@ -228,11 +255,18 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
     },
     'BUTTON': (component) => {
       const button = document.createElement('button');
-      maybeAutofocus(component, button, ctx);
       button.append(component.text);
       if (component.name) button.name = component.name;
       if (component.value) button.value = component.value;
       return button;
     }
   });
+  if (id !== undefined) {
+    if (id in ctx.ids) {
+      throw new Error(`Two components indistinguishable (${nameValToHumanReadable(...idToNameVal(id))}; )`)
+    } else {
+      ctx.ids[id] = e;
+    }
+  }
+  return e;
 }

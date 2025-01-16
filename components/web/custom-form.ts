@@ -1,7 +1,7 @@
 import { FiolinScript, FiolinScriptInterface } from '../../common/types';
 import { getByRelIdAs, selectAllAs } from '../../web-utils/select-as';
 import { FormComponent } from './form-component';
-import { renderForm } from './form-renderer';
+import { RenderedForm, renderForm } from './form-renderer';
 
 export interface CustomFormCallbacks {
   runScript(files: File[], args?: Record<string, string>): Promise<void>;
@@ -9,16 +9,16 @@ export interface CustomFormCallbacks {
 }
 
 export class CustomForm extends FormComponent {
-  private form: HTMLFormElement;
+  private rendered: RenderedForm;
   private readonly cbs: CustomFormCallbacks;
   private ui?: FiolinScriptInterface;
 
   constructor(container: HTMLElement, callbacks: CustomFormCallbacks) {
     super();
-    this.form = getByRelIdAs(container, 'script-form', HTMLFormElement);
+    this.rendered = { form: getByRelIdAs(container, 'script-form', HTMLFormElement), uniquelyIdentifiedElems: {} };
     this.cbs = callbacks;
     // Disable it until the script is set.
-    this.form.onsubmit = (e) => e.preventDefault();
+    this.rendered.form.onsubmit = (e) => e.preventDefault();
   }
 
   private isEnabled(): boolean {
@@ -26,25 +26,25 @@ export class CustomForm extends FormComponent {
   }
 
   reportValidity(): boolean {
-    return this.form.reportValidity();
+    return this.rendered.form.reportValidity();
   }
 
   onLoad(script: FiolinScript): void {
     this.ui = script.interface;
-    let newForm: HTMLFormElement;
+    let newForm: RenderedForm;
     if (this.ui.form) {
       newForm = renderForm(this.ui);
-      newForm.onsubmit = (e) => {
+      newForm.form.onsubmit = (e) => {
         e.preventDefault();
         const files: File[] = [];
-        for (const fileChooser of selectAllAs(this.form, 'input[type="file"]', HTMLInputElement)) {
+        for (const fileChooser of selectAllAs(this.rendered.form, 'input[type="file"]', HTMLInputElement)) {
           if (fileChooser.files !== null) {
             for (const f of fileChooser.files) {
               files.push(f);
             }
           }
         }
-        const formData = new FormData(this.form, e.submitter);
+        const formData = new FormData(this.rendered.form, e.submitter);
         const args: Record<string, string> = {};
         for (const [k, v] of formData.entries()) {
           const vo = v.valueOf();
@@ -57,10 +57,10 @@ export class CustomForm extends FormComponent {
         this.cbs.runScript(files, args);
       }
     } else {
-      newForm = document.createElement('form');
+      newForm = { form: document.createElement('form'), uniquelyIdentifiedElems: {} };
     }
-    this.form.replaceWith(newForm);
-    this.form = newForm;
+    this.rendered.form.replaceWith(newForm.form);
+    this.rendered = newForm;
   }
 
   onRun(inputs: File[], args?: Record<string, string>): void {
