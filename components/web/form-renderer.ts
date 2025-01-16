@@ -1,4 +1,4 @@
-import { typeSwitch } from '../../common/type-switch';
+import { typeSwitch } from '../../common/tagged-unions';
 import { FiolinScriptInterface } from '../../common/types';
 import { FiolinFormComponent } from '../../common/types/form';
 

@@ -33,12 +33,14 @@ const pDir = pStrUnion<('ROW' | 'COL')[]>(['ROW', 'COL']);
 
 const pDiv = pObjWithProps<FiolinFormDiv>({
   type: pStrLit('DIV'),
+  name: pOpt(pStr),
   dir: pDir,
   children: pArr(pComponent),
 });
 
 const pLabel = pObjWithProps<FiolinFormLabel>({
   type: pStrLit('LABEL'),
+  name: pOpt(pStr),
   text: pStr,
   child: pComponent,
 });

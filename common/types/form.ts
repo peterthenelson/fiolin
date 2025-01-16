@@ -1,3 +1,5 @@
+import { ExtractTagType } from '../tagged-unions';
+
 // Form inputs and layout used to get args from the user.
 export interface FiolinForm {
   // The children (either layout or content) of the form
@@ -20,12 +22,15 @@ export type FiolinFormComponent = (
 );
 
 // The type tags for components
-export type FiolinFormComponentType = FiolinFormComponent extends { type: infer T } ? T : never;
+export type FiolinFormComponentType = ExtractTagType<FiolinFormComponent>;
 
 // A div (to make a row or column of components).
 export interface FiolinFormDiv {
   // Type id
   type: 'DIV';
+  // Optional name. Does not affect form submission, but is needed for
+  // interactive for updates.
+  name?: string;
   // Direction (as a flex-row-wrap or flex-col-wrap)
   dir: 'ROW' | 'COL';
   // The children in the row
@@ -36,6 +41,9 @@ export interface FiolinFormDiv {
 export interface FiolinFormLabel {
   // Type id
   type: 'LABEL';
+  // Optional name. Does not affect form submission, but is needed for
+  // interactive for updates.
+  name?: string;
   // The text of the label
   text: string;
   // The wrapped child component

@@ -1,4 +1,4 @@
-import { typeSwitch } from '../../common/type-switch';
+import { typeSwitch } from '../../common/tagged-unions';
 import { FiolinScript, FiolinScriptInterface } from '../../common/types';
 import { getByRelIdAs } from '../../web-utils/select-as';
 import { FormCallbacks, FormComponent } from './form-component';

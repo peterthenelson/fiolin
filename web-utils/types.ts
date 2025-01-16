@@ -1,12 +1,13 @@
 import { FiolinLogLevel, FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../common/types';
 import { toErr } from '../common/errors';
+import { ExtractTagType } from '../common/tagged-unions';
 
 export type WorkerMessage = (
   LoadedMessage | LogMessage | InstallPackagesMessage |
   PackagesInstalledMessage | RunMessage | SuccessMessage | ErrorMessage
 );
 
-export type WorkerMessageType = WorkerMessage extends { type: infer T } ? T : never;
+export type WorkerMessageType = ExtractTagType<WorkerMessage>;
 
 export interface LoadedMessage { type: 'LOADED' }
 

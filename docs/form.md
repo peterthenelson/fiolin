@@ -21,7 +21,7 @@ distinguish between multiple components with the same name.
 
 > Union type of all the form components
 
-## FiolinFormComponentType = FiolinFormComponent extends { type: infer T } ? T :
+## FiolinFormComponentType =
 
 > The type tags for components
 
@@ -32,6 +32,11 @@ distinguish between multiple components with the same name.
 **type**: _'DIV'_
 
 > Type id
+
+**name?**: _string_
+
+> Optional name. Does not affect form submission, but is needed for
+interactive for updates.
 
 **dir**: _'ROW' | 'COL'_
 
@@ -48,6 +53,11 @@ distinguish between multiple components with the same name.
 **type**: _'LABEL'_
 
 > Type id
+
+**name?**: _string_
+
+> Optional name. Does not affect form submission, but is needed for
+interactive for updates.
 
 **text**: _string_
 
