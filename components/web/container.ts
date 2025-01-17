@@ -1,7 +1,7 @@
 import { WorkerMessage } from '../../web-utils/types';
 import { Deferred } from '../../common/deferred';
 import { getErrMsg, toErr } from '../../common/errors';
-import { FiolinScript } from '../../common/types';
+import { FiolinRunRequest, FiolinScript } from '../../common/types';
 import { TypedWorker } from '../../web-utils/typed-worker';
 import type { FiolinScriptEditorModel } from '../../web-utils/monaco';
 import { DeployDialog } from '../../components/web/deploy-dialog';
@@ -159,7 +159,8 @@ export class Container {
     if (!this.form.reportValidity()) {
       return;
     }
-    this.form.onRun(files, args);
+    const request: FiolinRunRequest = { inputs: files, args };
+    this.form.onRun(request);
     const script = await this.script;
     await this.readyToRun.promise;
     this.container.classList.remove('error');
@@ -175,7 +176,7 @@ export class Container {
       this.worker.postMessage({
         type: 'RUN',
         script,
-        request: { inputs: files, args }
+        request,
       });
     }
   }
@@ -189,7 +190,7 @@ export class Container {
     } else if (msg.type === 'LOG') {
       this.terminal.log(msg.level, msg.value);
     } else if (msg.type === 'SUCCESS') {
-      this.form.onSuccess(msg.response.outputs, msg.response.partial);
+      this.form.onSuccess(msg.response);
       this.container.classList.remove('running');
     } else if (msg.type === 'ERROR') {
       this.form.onError();

@@ -1,5 +1,6 @@
 import type { PyodideInterface } from 'pyodide';
 import { FiolinScript } from './fiolin-script';
+import { FiolinFormComponentId } from './form';
 
 // Used for encapsulating running a script.
 export interface FiolinRunRequest {
@@ -16,7 +17,15 @@ export interface FiolinRunResponse {
   error?: Error;
   lineno?: number;
   partial?: boolean;
+  formUpdates?: FormUpdate[];
 }
+
+export type FormUpdate = (
+  { type: 'HIDDEN', id: FiolinFormComponentId, value: boolean } |
+  { type: 'DISABLED', id: FiolinFormComponentId, value: boolean } |
+  { type: 'FOCUS', id: FiolinFormComponentId }
+  // TODO: value updates
+);
 
 export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // Inputs and outputs are filenames w/in /input and /output rather than File
@@ -31,6 +40,9 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // Used to signal that the script is not done and further interactions should
   // be allowed.
   partial?: boolean;
+
+  // Used to signal any updates to be made to the form
+  enqueueFormUpdate(update: FormUpdate): void;
 
   // Other properties may be temporarily needed during the loading phase.
   [key: string]: any;

@@ -15,7 +15,8 @@
 **autofocusedValue?**: _string_
 
 > The autofocused component (identified by value) if any; only used to
-distinguish between multiple components with the same name.
+distinguish between multiple components with the same name (e.g., RADIOs or
+BUTTONs)
 
 ## FiolinFormComponent =
 
@@ -24,6 +25,31 @@ distinguish between multiple components with the same name.
 ## FiolinFormComponentType =
 
 > The type tags for components
+
+## FiolinFormComponentId
+
+> For utility code that manipulates forms, it's helpful to have a way to refer
+to components. Name + optional value is an intuitive way to identify form
+components, and it's always possible to set up a form in such a way that any
+given component can be uniquely identified this way.
+
+**name**: _string_
+
+> The name of the component
+
+**value?**: _string_
+
+> The (optional) value of the component. This is only used for components
+where multiple components are intended to share a name (e.g., RADIOs and
+BUTTONs).
+
+## FiolinFormComponentMap<T>
+
+> The interface for maps that use FiolinFormComponentIds as keys.
+
+**get(id**: _FiolinFormComponentId): T | undefined_
+
+> Retrieve the value associated with the id; returns undefined if missing.
 
 ## FiolinFormDiv
 
@@ -41,6 +67,10 @@ interactive for updates.
 **dir**: _'ROW' | 'COL'_
 
 > Direction (as a flex-row-wrap or flex-col-wrap)
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
 
 **children**: _FiolinFormComponent[]_
 
@@ -62,6 +92,10 @@ interactive for updates.
 **text**: _string_
 
 > The text of the label
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
 
 **child**: _FiolinFormComponent_
 
@@ -87,6 +121,14 @@ interactive for updates.
 
 > Whether to begin with this box checked
 
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
+
 ## FiolinFormColor
 
 > An input type="color" element
@@ -102,6 +144,14 @@ interactive for updates.
 **value?**: _string_
 
 > The (optional) initial value
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
 
 ## FiolinFormDate
 
@@ -135,6 +185,14 @@ interactive for updates.
 
 > Step-size for selector (in number of days)
 
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
+
 ## FiolinFormDatetimeLocal
 
 > An input type="datetime-local" element
@@ -166,6 +224,14 @@ interactive for updates.
 **step?**: _number_
 
 > Step-size for selector (in number of seconds)
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
 
 ## FiolinFormEmail
 
@@ -203,6 +269,14 @@ interactive for updates.
 
 > The size in characters
 
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
+
 ## FiolinFormFile
 
 > An input type="file" element. Can optionally serve as a submit button too.
@@ -230,6 +304,14 @@ optionally overridden on a per-file component basis.
 **submit?**: _boolean_
 
 > Trigger form submission upon file choice.
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
 
 ## FiolinFormNumber
 
@@ -267,6 +349,14 @@ optionally overridden on a per-file component basis.
 
 > Step-size for selector
 
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
+
 ## FiolinFormRadio
 
 > An input type="radio" element
@@ -282,7 +372,9 @@ same name are a mutually exclusive set of options.
 
 **value**: _string_
 
-> The value to associate with this radio button
+> The value to associate with this radio button. Unlike most form inputs,
+multiple radio buttons share a name, so for them, value is also used to
+identify them.
 
 **checked?**: _boolean_
 
@@ -291,6 +383,14 @@ same name are a mutually exclusive set of options.
 **required?**: _boolean_
 
 > Is a selection of one of the radio buttons sharing this name required?
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
 
 ## FiolinFormRange
 
@@ -319,6 +419,14 @@ same name are a mutually exclusive set of options.
 **step?**: _number_
 
 > Step-size for selector
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
 
 ## FiolinFormTel
 
@@ -352,6 +460,14 @@ same name are a mutually exclusive set of options.
 
 > The size in characters
 
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
+
 ## FiolinFormText
 
 > An input type="text" element
@@ -383,6 +499,14 @@ same name are a mutually exclusive set of options.
 **size?**: _number_
 
 > The size in characters
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
 
 ## FiolinFormTime
 
@@ -416,6 +540,14 @@ same name are a mutually exclusive set of options.
 
 > Step-size for selector (in number of seconds)
 
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
+
 ## FiolinFormUrl
 
 > An input type="url" element
@@ -448,6 +580,14 @@ same name are a mutually exclusive set of options.
 
 > The size in characters
 
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
+
 ## FiolinFormSelect
 
 > An select element
@@ -471,6 +611,14 @@ same name are a mutually exclusive set of options.
 **required?**: _boolean_
 
 > Is a non-empty choice required?
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
 
 ## FiolinFormSelectOption
 
@@ -506,6 +654,15 @@ same name are a mutually exclusive set of options.
 
 **value?**: _string_
 
-> The value to be submitted when it's clicked (optional, but logically should
-be present whenever name is present and vice versa).
+> The value to be submitted when it's clicked (optional, but must be present
+if name is, and vice versa). Note that the id for a button includes both
+the name and value.
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
 

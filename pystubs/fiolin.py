@@ -33,3 +33,9 @@ def errno_to_str(code):
   return ''
 def cp(src, dest):
   pass
+def form_set_hidden(name, value=None, hidden=True):
+  pass
+def form_set_disabled(name, value=None, disabled=True):
+  pass
+def form_set_focus(name, value=None):
+  pass

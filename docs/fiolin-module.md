@@ -26,6 +26,18 @@ fiolin.**extract_exc**(e=None)
 
 > Extract line number from (last) exception and format stack trace.
 
+fiolin.**form_set_disabled**(name, value=None, disabled=True)
+
+> Enqueue a form update to disable/enabled a given form component.
+
+fiolin.**form_set_focus**(name, value=None)
+
+> Enqueue a form update to focus a given form component.
+
+fiolin.**form_set_hidden**(name, value=None, hidden=True)
+
+> Enqueue a form update to hide/show a given form component.
+
 fiolin.**get_input_basename**(suffix='', ext=None)
 
 > Gets the (assumed to be single) input file basename.

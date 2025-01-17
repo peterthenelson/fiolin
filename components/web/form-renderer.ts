@@ -1,80 +1,44 @@
 import { typeSwitch } from '../../common/tagged-unions';
 import { FiolinScriptInterface } from '../../common/types';
-import { FiolinFormComponent } from '../../common/types/form';
+import { FiolinFormComponentMapImpl, idToRepr, makeId, maybeComponentToId } from '../../common/form-utils';
+import { FiolinFormComponent, FiolinFormComponentMap } from '../../common/types/form';
 
 export interface RenderedForm {
   form: HTMLFormElement;
-  uniquelyIdentifiedElems: Record<string, HTMLElement>;
+  uniquelyIdentifiedElems: FiolinFormComponentMap<HTMLElement>;
 }
 
 export function renderForm(ui: FiolinScriptInterface): RenderedForm {
   const rendered: RenderedForm = {
     form: document.createElement('form'),
-    uniquelyIdentifiedElems: {},
+    uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(),
   }
   if (!ui.form) return rendered;
   const ctx: RenderContext = {
     form: rendered.form,
     ui,
-    ids: {},
+    ids: new FiolinFormComponentMapImpl(),
   };
   for (const c of ui.form.children) {
     rendered.form.append(renderComponent(c, ctx));
   }
   rendered.uniquelyIdentifiedElems = ctx.ids;
   if (ui.form.autofocusedName) {
-    const autofocusedId = nameValToId(ui.form.autofocusedName, ui.form.autofocusedValue);
-    if (autofocusedId in rendered.uniquelyIdentifiedElems) {
-      rendered.uniquelyIdentifiedElems[autofocusedId].autofocus = true;
+    const id = makeId(ui.form.autofocusedName, ui.form.autofocusedValue);
+    const e = rendered.uniquelyIdentifiedElems.get(id);
+    if (e) {
+      e.autofocus = true;
     } else {
-      throw new Error(`Could not find element to autofocus (${nameValToHumanReadable(ui.form.autofocusedName, ui.form.autofocusedValue)})`);
+      throw new Error(`Could not find element to autofocus (${idToRepr(id)})`);
     }
   }
   return rendered;
 }
 
-function nameValToHumanReadable(name: string, value?: string): string {
-  const maybeVal = value !== undefined ? `, value=${value}` : '';
-  return `name=${name}${maybeVal}`;
-}
-
-function idToNameVal(id: string): [string, string | undefined] {
-  const slash = id.indexOf('/');
-  if (slash === -1) {
-    return [id, undefined];
-  } else {
-    return [id.substring(0, slash), id.substring(slash + 1)];
-  }
-}
-
-function nameValToId(name: string, value?: string): string {
-  if (!name.match(/^[A-za-z][A-Za-z0-9_:\.-]*$/)) {
-    throw new Error(`Invalid form input name: ${name}`);
-  }
-  if (value === undefined) {
-    return name;
-  } else {
-    return `${name}/${value}`;
-  }
-}
-
-function maybeComponentToId(component: FiolinFormComponent): string | undefined {
-  let name: string;
-  if (component.name === undefined) {
-    return undefined;
-  }
-  name = component.name;
-  let value: string | undefined;
-  if ('value' in component && component.value !== undefined) {
-    value = component.value.toString();
-  }
-  return nameValToId(name, value);
-}
-
 interface RenderContext {
   form: HTMLFormElement;
   ui: FiolinScriptInterface;
-  ids: Record<string, HTMLElement>;
+  ids: FiolinFormComponentMapImpl<HTMLElement>;
 }
 
 function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HTMLElement {
@@ -100,6 +64,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       input.name = component.name;
       if (component.value) input.value = component.value;
       if (component.checked) input.checked = true;
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'COLOR': (component) => {
@@ -107,6 +72,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       input.type = 'color';
       input.name = component.name;
       if (component.value) input.value = component.value.toString();
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'DATE': (component) => {
@@ -118,6 +84,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.min) input.min = component.min;
       if (component.max) input.max = component.max;
       if (component.step) input.step = component.step.toString();
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'DATETIME_LOCAL': (component) => {
@@ -129,6 +96,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.min) input.min = component.min;
       if (component.max) input.max = component.max;
       if (component.step) input.step = component.step.toString();
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'EMAIL': (component) => {
@@ -141,6 +109,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.required) input.required = true;
       if (component.placeholder) input.placeholder = component.placeholder;
       if (component.size) input.size = component.size;
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'FILE': (component) => {
@@ -162,6 +131,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
           input.value = '';
         }
       }
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'NUMBER': (component) => {
@@ -174,6 +144,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.min) input.min = component.min.toString();
       if (component.max) input.max = component.max.toString();
       if (component.step) input.step = component.step.toString();
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'RADIO': (component) => {
@@ -183,6 +154,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       input.value = component.value;
       if (component.checked) input.checked = true;
       if (component.required) input.required = true;
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'RANGE': (component) => {
@@ -193,6 +165,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       input.min = component.min.toString();
       input.max = component.max.toString();
       if (component.step) input.step = component.step.toString();
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'TEL': (component) => {
@@ -204,6 +177,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.required) input.required = true;
       if (component.placeholder) input.placeholder = component.placeholder;
       if (component.size) input.size = component.size;
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'TEXT': (component) => {
@@ -215,6 +189,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.required) input.required = true;
       if (component.placeholder) input.placeholder = component.placeholder;
       if (component.size) input.size = component.size;
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'TIME': (component) => {
@@ -226,6 +201,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.min) input.min = component.min;
       if (component.max) input.max = component.max;
       if (component.step) input.step = component.step.toString();
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'URL': (component) => {
@@ -237,6 +213,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.required) input.required = true;
       if (component.placeholder) input.placeholder = component.placeholder;
       if (component.size) input.size = component.size;
+      if (component.disabled) input.disabled = true;
       return input;
     },
     'SELECT': (component) => {
@@ -251,6 +228,7 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
         if (opt.value) option.value = opt.value;
         select.append(option);
       }
+      if (component.disabled) select.disabled = true;
       return select;
     },
     'BUTTON': (component) => {
@@ -258,14 +236,18 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       button.append(component.text);
       if (component.name) button.name = component.name;
       if (component.value) button.value = component.value;
+      if (component.disabled) button.disabled = true;
       return button;
     }
   });
+  if (component.hidden) {
+    e.classList.add('hidden');
+  }
   if (id !== undefined) {
-    if (id in ctx.ids) {
-      throw new Error(`Two components indistinguishable (${nameValToHumanReadable(...idToNameVal(id))}; )`)
+    if (ctx.ids.has(id)) {
+      throw new Error(`Two components indistinguishable (${idToRepr(id)})`)
     } else {
-      ctx.ids[id] = e;
+      ctx.ids.set(id, e);
     }
   }
   return e;

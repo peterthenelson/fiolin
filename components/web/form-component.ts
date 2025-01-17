@@ -1,4 +1,4 @@
-import { FiolinScript } from '../../common/types';
+import { FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../../common/types';
 
 export interface FormCallbacks {
   runScript(files: File[], args?: Record<string, string>): Promise<void>;
@@ -16,10 +16,10 @@ export abstract class FormComponent {
   abstract onLoad(script: FiolinScript): void;
 
   // Update the UI in preparation for the imminent run of the script.
-  abstract onRun(inputs: File[], args?: Record<string, string>): void;
+  abstract onRun(request: FiolinRunRequest): void;
 
   // Update the UI after a successful run of the script.
-  abstract onSuccess(outputs: File[], partial?: boolean): void;
+  abstract onSuccess(response: FiolinRunResponse): void;
 
   // Update the UI after an error occurs (could occur at different parts of the
   // lifecycle of running a script).

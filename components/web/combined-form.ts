@@ -1,4 +1,4 @@
-import { FiolinScript } from '../../common/types';
+import { FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../../common/types';
 import { FormComponent } from './form-component';
 
 // Multiple forms together, with events delegated to all of them.
@@ -20,12 +20,12 @@ export class CombinedForm extends FormComponent {
     this.forms.forEach((f) => f.onLoad(script));
   }
 
-  onRun(inputs: File[], args?: Record<string, string>): void {
-    this.forms.forEach((f) => f.onRun(inputs, args));
+  onRun(request: FiolinRunRequest): void {
+    this.forms.forEach((f) => f.onRun(request));
   }
 
-  onSuccess(outputs: File[], partial?: boolean): void {
-    this.forms.forEach((f) => f.onSuccess(outputs, partial));
+  onSuccess(response: FiolinRunResponse): void {
+    this.forms.forEach((f) => f.onSuccess(response));
   }
 
   onError(): void {

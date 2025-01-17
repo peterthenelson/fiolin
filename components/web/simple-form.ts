@@ -1,5 +1,5 @@
 import { typeSwitch } from '../../common/tagged-unions';
-import { FiolinScript, FiolinScriptInterface } from '../../common/types';
+import { FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptInterface } from '../../common/types';
 import { getByRelIdAs } from '../../web-utils/select-as';
 import { FormCallbacks, FormComponent } from './form-component';
 
@@ -62,19 +62,19 @@ export class SimpleForm extends FormComponent {
     }
   }
 
-  onRun(inputs: File[], args?: Record<string, string>) {
+  onRun(request: FiolinRunRequest): void {
     this.fileChooser.disabled = true;
     this.fileChooser.value = '';
     this.outputFileText.title = '';
     this.outputFileText.textContent = '';
   }
 
-  onSuccess(outputs: File[], partial?: boolean) {
+  onSuccess(response: FiolinRunResponse): void {
     this.fileChooser.disabled = false;
-    this.outputFileText.textContent = outputs.map((f) => f.name).join();
-    this.outputFileText.title = outputs.map((f) => f.name).join();
-    if (this.isEnabled() && !partial) {
-      for (const f of outputs) {
+    this.outputFileText.textContent = response.outputs.map((f) => f.name).join();
+    this.outputFileText.title = response.outputs.map((f) => f.name).join();
+    if (this.isEnabled() && !response.partial) {
+      for (const f of response.outputs) {
         this.cbs.downloadFile(f);
       }
     }

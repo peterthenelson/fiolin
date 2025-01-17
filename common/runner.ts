@@ -1,8 +1,12 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule, InstallPkgsError } from './types';
+import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule, FormUpdate, InstallPkgsError } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
 import { getFiolinPy, getWrapperPy } from './pylib';
 import { cmpSet } from './cmp';
+import { FiolinFormComponentMapImpl, idToComponentMap, idToRepr } from './form-utils';
+import { FiolinFormComponent, FiolinFormComponentMap } from './types/form';
+import { parseAs } from './parse';
+import { pFormUpdate } from './parse-run';
 
 export interface ConsoleLike {
   debug(s: string): void;
@@ -46,13 +50,20 @@ export class PyodideRunner implements FiolinRunner {
   private readonly _indexUrl?: string;
   private readonly _console: ConsoleLike;
   private _log: [FiolinLogLevel, string][];
+  private _formUpdates: FormUpdate[];
+  private _formIds: FiolinFormComponentMap<FiolinFormComponent>;
   private _loaders: Record<string, FiolinWasmLoader>;
   public loaded: Promise<void>;
 
   constructor(options?: PyodideRunnerOptions) {
-    this._shared = { inputs: [], outputs: [], args: {} };
+    this._shared = {
+      inputs: [], outputs: [], args: {},
+      enqueueFormUpdate: (update) => this.enqueueFormUpdate(update),
+    };
     const innerConsole: ConsoleLike = options?.console || console;
     this._log = [];
+    this._formUpdates = [];
+    this._formIds = new FiolinFormComponentMapImpl();
     this._console = {
       debug: (s) => {
         innerConsole.debug(s);
@@ -74,6 +85,23 @@ export class PyodideRunner implements FiolinRunner {
     this._indexUrl = options?.indexUrl;
     this._loaders = options?.loaders || {};
     this.loaded = this.load();
+  }
+
+  private enqueueFormUpdate(update: FormUpdate): void {
+    // Value is probably from python, so we should convert and parse it.
+    const o: Object = update;
+    let v: unknown;
+    if ('toJs' in o && typeof o.toJs === 'function') {
+      v = o.toJs({ dict_converter: Object.fromEntries });
+    } else {
+      v = o;
+    }
+    update = parseAs(pFormUpdate, v);
+    if (this._formIds.get(update.id)) {
+      this._formUpdates.push(update);
+    } else {
+      throw new Error(`Could not find component with ${idToRepr(update.id)}`)
+    }
   }
 
   private resetFs() {
@@ -237,6 +265,12 @@ export class PyodideRunner implements FiolinRunner {
     this.resetShared();
     Object.assign(this._shared.args!, request.args || {});
     try {
+      this._formUpdates = [];
+      if (script.interface.form) {
+        this._formIds = idToComponentMap(script.interface.form);
+      } else {
+        this._formIds = new FiolinFormComponentMapImpl();
+      }
       await this.installPkgs(script);
       await this._pyodide.loadPackagesFromImports(script.code.python);
       this.resetFs();
@@ -247,15 +281,19 @@ export class PyodideRunner implements FiolinRunner {
         return {
           outputs: [], log: this._log,
           error: new Error(this._shared.errorMsg), lineno: this._shared.errorLine,
-          partial: this._shared.partial,
+          partial: this._shared.partial, formUpdates: this._formUpdates,
         };
       }
       const outputs = this.extractOutputs(script);
-      return { outputs, log: this._log };
+      return {
+        outputs, log: this._log,
+        partial: this._shared.partial, formUpdates: this._formUpdates,
+      };
     } catch (e) {
       const error = toErrWithErrno(e);
       return {
-        outputs: [], log: this._log, error
+        outputs: [], log: this._log, error,
+        partial: this._shared.partial, formUpdates: this._formUpdates,
       };
     }
   }

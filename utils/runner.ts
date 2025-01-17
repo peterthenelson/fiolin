@@ -38,6 +38,9 @@ export class NodeFiolinRunner {
     if (response.partial) {
       throw new Error(`Script reached only partial completion; perhaps some required args were missing`);
     }
+    if (response.formUpdates && response.formUpdates.length > 0) {
+      console.warn(`Ignoring ${response.formUpdates.length} form updates`);
+    }
     const outputBasenames: string[] = [];
     for (const f of response.outputs) {
       outputBasenames.push(f.name);

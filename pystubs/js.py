@@ -6,3 +6,5 @@ errorMsg = None
 errorLine = None
 partial = None
 args = {}
+def enqueueFormUpdate(update):
+  pass

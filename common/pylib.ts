@@ -7,6 +7,7 @@ import enum
 import functools
 import js
 import os
+from pyodide import ffi
 import re
 import sys
 import traceback
@@ -174,6 +175,29 @@ def cp(src, dest):
   with open(src, 'rb') as infile:
     with open(dest, 'wb') as outfile:
       outfile.write(infile.read())
+
+def form_set_hidden(name, value=None, hidden=True):
+  """Enqueue a form update to hide/show a given form component."""
+  js.enqueueFormUpdate({
+    'type': 'HIDDEN',
+    'id': { 'name': name, 'value': value },
+    'value': hidden,
+  })
+
+def form_set_disabled(name, value=None, disabled=True):
+  """Enqueue a form update to disable/enabled a given form component."""
+  js.enqueueFormUpdate({
+    'type': 'DISABLED',
+    'id': { 'name': name, 'value': value },
+    'value': disabled,
+  })
+
+def form_set_focus(name, value=None):
+  """Enqueue a form update to focus a given form component."""
+  js.enqueueFormUpdate({
+    'type': 'FOCUS',
+    'id': { 'name': name, 'value': value },
+  })
 `;
 }
 
