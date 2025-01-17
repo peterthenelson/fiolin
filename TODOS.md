@@ -14,19 +14,22 @@ A not-necessarily-exhaustive list of TODOs:
     package so that people can import fiolin from their fiolin-template cloned
     projects and do local development. Update the repo template as needed.
 - Core functionality
+  - Bug w/error propagation across js->py boundary ("return without exception set")
   - Canvas
-  - Multi-stage callback based scripts
-  - Get some emscripten binaries working in the same file-system as pyodide.
-    (imagemagick done; maybe a document or ffmpeg one next)
+  - Emscripten modules:
       - Fix unsafe-eval issue with imagemagick
       - Figure out how to pass in bytes to imagemagick read
+      - ffmpeg 
+      - some kind of document conversion thing
+      - some kind of ebook converter
+      - more archive format converters
   - Some kind of (interactive?) canvas functionality
   - Debug command that can trigger some kind of interactive repl
 - Scripts
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)
+    - Demonstrating multi-step scripts
     - Demonstrating canvas (when it works)
-    - Demonstrating callbacks (when they work)
   - More file-conversion scripts for real tasks
     - SVG recolor
     - Extracting text and tables from PDFs
@@ -57,6 +60,7 @@ A not-necessarily-exhaustive list of TODOs:
   - Controls:
     - Run button (on custom form) firing pre-load bug
     - Make custom form lock up during run (and glow)
+    - Add an "output" component to display stuff
     - Add a "download files" component for the custom form
     - Make FILE component have a logo and text and panel and whatnot
   - Terminal:
