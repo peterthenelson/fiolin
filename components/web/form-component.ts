@@ -23,5 +23,5 @@ export abstract class FormComponent {
 
   // Update the UI after an error occurs (could occur at different parts of the
   // lifecycle of running a script).
-  abstract onError(): void;
+  abstract onError(response?: FiolinRunResponse): void;
 }

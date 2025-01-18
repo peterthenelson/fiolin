@@ -19,7 +19,7 @@ export type FiolinFormComponent = (
   FiolinFormDate | FiolinFormDatetimeLocal | FiolinFormEmail | FiolinFormFile |
   FiolinFormNumber | FiolinFormRadio | FiolinFormRange | FiolinFormTel |
   FiolinFormText | FiolinFormTime | FiolinFormUrl | FiolinFormSelect |
-  FiolinFormButton
+  FiolinFormButton | FiolinFormOutput
 );
 
 // The type tags for components
@@ -391,4 +391,17 @@ export interface FiolinFormButton {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+}
+
+// An output element
+export interface FiolinFormOutput {
+  // Type id
+  type: 'OUTPUT';
+  // The name (used to identify the component; doesn't contribute to form
+  // submission).
+  name: string;
+  // Optional initial value.
+  value?: string;
+  // Is this component (initially) hidden?
+  hidden?: boolean;
 }

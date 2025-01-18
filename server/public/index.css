@@ -224,7 +224,7 @@ form label:focus-within  {
   text-shadow: 0 0 3px var(--blueish);
 }
 
-:is(form, .script-header) :is(input, select) {
+:is(form, .script-header) :is(input, output, select) {
   font-size: medium;
   background-color: var(--medGrey);
   color: var(--whitish);
@@ -232,6 +232,7 @@ form label:focus-within  {
   border-radius: 5px;
   padding: .5em;
   margin: .5em 1em 0.1em 1em;
+  min-height: 2.1em;
 }
 
 :is(form, .script-header) :is(input, select):focus {

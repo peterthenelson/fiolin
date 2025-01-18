@@ -38,6 +38,10 @@ fiolin.**form_set_hidden**(name, value=None, hidden=True)
 
 > Enqueue a form update to hide/show a given form component.
 
+fiolin.**form_set_value**(name, value)
+
+> Enqueue a form update to change value for a given form component.
+
 fiolin.**get_input_basename**(suffix='', ext=None)
 
 > Gets the (assumed to be single) input file basename.

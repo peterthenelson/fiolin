@@ -28,6 +28,11 @@ export function pFormUpdate(p: ObjPath, v: unknown): FormUpdate {
       type: pStrLit('FOCUS'),
       id: pFiolinFormComponentId,
     }),
+    'VALUE': pObjWithProps({
+      type: pStrLit('VALUE'),
+      id: pFiolinFormComponentId,
+      value: pStr,
+    }),
   })(p, v);
 };
 

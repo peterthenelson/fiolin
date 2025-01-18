@@ -198,6 +198,14 @@ def form_set_focus(name, value=None):
     'type': 'FOCUS',
     'id': { 'name': name, 'value': value },
   })
+
+def form_set_value(name, value):
+  """Enqueue a form update to change value for a given form component."""
+  js.enqueueFormUpdate({
+    'type': 'VALUE',
+    'id': { 'name': name },
+    'value': value,
+  })
 `;
 }
 

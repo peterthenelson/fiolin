@@ -23,8 +23,8 @@ export interface FiolinRunResponse {
 export type FormUpdate = (
   { type: 'HIDDEN', id: FiolinFormComponentId, value: boolean } |
   { type: 'DISABLED', id: FiolinFormComponentId, value: boolean } |
-  { type: 'FOCUS', id: FiolinFormComponentId }
-  // TODO: value updates
+  { type: 'FOCUS', id: FiolinFormComponentId } |
+  { type: 'VALUE', id: FiolinFormComponentId, value: string }
 );
 
 export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {

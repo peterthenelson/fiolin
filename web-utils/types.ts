@@ -40,10 +40,11 @@ export interface ErrorMessage {
   error: Error;
   name?: string;
   lineno?: number;
+  response?: FiolinRunResponse;
 }
 
-export function mkErrorMessage(e: unknown, lineno?: number): ErrorMessage {
-  const em: ErrorMessage = { type: 'ERROR', error: toErr(e), lineno };
+export function mkErrorMessage(e: unknown, lineno?: number, response?: FiolinRunResponse): ErrorMessage {
+  const em: ErrorMessage = { type: 'ERROR', error: toErr(e), lineno, response };
   em.name = em.error.name;
   return em;
 }

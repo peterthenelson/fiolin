@@ -475,6 +475,7 @@ describe('PyodideRunner', () => {
         fiolin.form_set_disabled(name='radio', value='opt-1', disabled=False)
         fiolin.form_set_hidden(name='button', value='', hidden=False)
         fiolin.form_set_disabled(name='divs-too')
+        fiolin.form_set_value(name='text', value='new value')
       `, {
         form: {
           children: [
@@ -497,6 +498,7 @@ describe('PyodideRunner', () => {
         { type: 'DISABLED', id: { name: 'radio', value: 'opt-1' }, value: false },
         { type: 'HIDDEN', id: { name: 'button', value: '' }, value: false },
         { type: 'DISABLED', id: { name: 'divs-too' }, value: true },
+        { type: 'VALUE', id: { name: 'text' }, value: 'new value' },
       ]);
     });
   });

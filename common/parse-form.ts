@@ -1,5 +1,5 @@
 import { ObjPath, pArr, pBool, pNum, pObjWithProps, pOpt, pStr, pStrLit, pStrUnion, pTaggedUnion } from './parse';
-import { FiolinForm, FiolinFormButton, FiolinFormDiv, FiolinFormComponent, FiolinFormText, FiolinFormLabel, FiolinFormSelect, FiolinFormSelectOption, FiolinFormCheckbox, FiolinFormColor, FiolinFormDate, FiolinFormDatetimeLocal, FiolinFormNumber, FiolinFormEmail, FiolinFormRadio, FiolinFormRange, FiolinFormTel, FiolinFormUrl, FiolinFormTime, FiolinFormFile, FiolinFormComponentId  } from './types/form';
+import { FiolinForm, FiolinFormButton, FiolinFormDiv, FiolinFormComponent, FiolinFormText, FiolinFormLabel, FiolinFormSelect, FiolinFormSelectOption, FiolinFormCheckbox, FiolinFormColor, FiolinFormDate, FiolinFormDatetimeLocal, FiolinFormNumber, FiolinFormEmail, FiolinFormRadio, FiolinFormRange, FiolinFormTel, FiolinFormUrl, FiolinFormTime, FiolinFormFile, FiolinFormComponentId, FiolinFormOutput  } from './types/form';
 
 export const pForm = pObjWithProps<FiolinForm>({
   children: pArr(pComponent),
@@ -26,6 +26,7 @@ function pComponent(p: ObjPath, v: unknown): FiolinFormComponent {
     'URL': pUrl,
     'SELECT': pSelect,
     'BUTTON': pButton,
+    'OUTPUT': pOutput,
   })(p, v);
 }
 
@@ -221,4 +222,11 @@ const pButton = pObjWithProps<FiolinFormButton>({
   value: pOpt(pStr),
   hidden: pOpt(pBool),
   disabled: pOpt(pBool),
+});
+
+const pOutput = pObjWithProps<FiolinFormOutput>({
+  type: pStrLit('OUTPUT'),
+  name: pStr,
+  value: pOpt(pStr),
+  hidden: pOpt(pBool),
 });

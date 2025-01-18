@@ -666,3 +666,24 @@ the name and value.
 
 > Is this component (initially) disabled?
 
+## FiolinFormOutput
+
+> An output element
+
+**type**: _'OUTPUT'_
+
+> Type id
+
+**name**: _string_
+
+> The name (used to identify the component; doesn't contribute to form
+submission).
+
+**value?**: _string_
+
+> Optional initial value.
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+

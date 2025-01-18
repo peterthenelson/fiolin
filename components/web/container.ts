@@ -193,7 +193,7 @@ export class Container {
       this.form.onSuccess(msg.response);
       this.container.classList.remove('running');
     } else if (msg.type === 'ERROR') {
-      this.form.onError();
+      this.form.onError(msg.response);
       this.container.classList.add('error');
       this.container.classList.remove('running');
       if (typeof msg.lineno !== 'undefined') {

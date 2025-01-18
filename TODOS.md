@@ -60,7 +60,6 @@ A not-necessarily-exhaustive list of TODOs:
   - Controls:
     - Run button (on custom form) firing pre-load bug
     - Make custom form lock up during run (and glow)
-    - Add an "output" component to display stuff
     - Add a "download files" component for the custom form
     - Make FILE component have a logo and text and panel and whatnot
   - Terminal:

@@ -238,7 +238,13 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
       if (component.value) button.value = component.value;
       if (component.disabled) button.disabled = true;
       return button;
-    }
+    },
+    'OUTPUT': (component) => {
+      const output = document.createElement('output');
+      output.name = component.name;
+      if (component.value) output.value = component.value;
+      return output;
+    },
   });
   if (component.hidden) {
     e.classList.add('hidden');

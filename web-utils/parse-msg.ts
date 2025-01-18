@@ -64,6 +64,7 @@ export function pErrorMessage(p: ObjPath, v: unknown) {
     error: pInst(Error),
     name: pStr,
     lineno: pOpt(pNum),
+    response: pOpt(pFiolinRunResponse),
   })(p, v);
   if (em.name) {
     try {

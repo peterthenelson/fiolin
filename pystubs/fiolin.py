@@ -39,3 +39,5 @@ def form_set_disabled(name, value=None, disabled=True):
   pass
 def form_set_focus(name, value=None):
   pass
+def form_set_value(name, value):
+  pass

@@ -28,7 +28,7 @@ export class CombinedForm extends FormComponent {
     this.forms.forEach((f) => f.onSuccess(response));
   }
 
-  onError(): void {
-    this.forms.forEach((f) => f.onError());
+  onError(response?: FiolinRunResponse): void {
+    this.forms.forEach((f) => f.onError(response));
   }
 }

@@ -80,7 +80,7 @@ export class SimpleForm extends FormComponent {
     }
   }
 
-  onError() {
+  onError(response?: FiolinRunResponse): void {
     this.fileChooser.disabled = false;
   }
 

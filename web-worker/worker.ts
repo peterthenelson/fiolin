@@ -59,7 +59,7 @@ async function onRun(msg: RunMessage): Promise<void> {
   try {
     const response = await runner.run(msg.script, msg.request);
     if (response.error) {
-      postMessage(mkErrorMessage(response.error, response.lineno));
+      postMessage(mkErrorMessage(response.error, response.lineno, response));
     } else {
       postMessage({ type: 'SUCCESS', response });
     }

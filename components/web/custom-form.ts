@@ -2,6 +2,7 @@ import { FiolinFormComponentMapImpl, idToRepr } from '../../common/form-utils';
 import { typeSwitch } from '../../common/tagged-unions';
 import { FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptInterface, FormUpdate } from '../../common/types';
 import { getByRelIdAs, selectAllAs } from '../../web-utils/select-as';
+import { setSelected } from '../../web-utils/set-selected';
 import { FormComponent } from './form-component';
 import { RenderedForm, renderForm } from './form-renderer';
 
@@ -52,6 +53,15 @@ export class CustomForm extends FormComponent {
       },
       'FOCUS': () => {
         e.focus();
+      },
+      'VALUE': (fu) => {
+        if (e instanceof HTMLInputElement || e instanceof HTMLOutputElement || e instanceof HTMLButtonElement) {
+          e.value = fu.value;
+        } else if (e instanceof HTMLSelectElement) {
+          setSelected(e, fu.value);
+        } else {
+          console.warn(`${e} does not have have .value property`);
+        }
       }
     })
   }
@@ -120,8 +130,13 @@ export class CustomForm extends FormComponent {
     }
   }
 
-  onError(): void {
+  onError(response?: FiolinRunResponse): void {
     // TODO: When they exist:
     // - reenable submit buttons of any sort
+    if (response?.formUpdates) {
+      for (const fu of response.formUpdates) {
+        this.applyUpdate(fu);
+      }
+    }
   }
 }
