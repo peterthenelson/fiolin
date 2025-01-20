@@ -1,0 +1,1 @@
+export type Result<V, E = Error> = { ok: true, value: V } | { ok: false, error: E };

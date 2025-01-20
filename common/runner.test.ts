@@ -461,9 +461,7 @@ describe('PyodideRunner', () => {
       `, { form: { children: [ { type: 'TEXT', name: 'foo' } ] } });
       const response = await runner.run(script, { inputs: [] });
       expect(response.error).not.toBeUndefined();
-      // TODO: This error gets translated via FFI inconsistently and sometimes
-      // the relevant error message is missing. :(
-      // expect(response.error?.message).toMatch(/Could not find component with name=bar/);
+      expect(response.error?.message).toMatch(/Could not find component with name=bar/);
     });
 
     it('reports updates otherwise', async () => {

@@ -176,36 +176,42 @@ def cp(src, dest):
     with open(dest, 'wb') as outfile:
       outfile.write(infile.read())
 
+def _unwrap(result):
+  if result.ok:
+    return result.value
+  else:
+    raise result.error
+
 def form_set_hidden(name, value=None, hidden=True):
   """Enqueue a form update to hide/show a given form component."""
-  js.enqueueFormUpdate({
+  _unwrap(js.enqueueFormUpdate({
     'type': 'HIDDEN',
     'id': { 'name': name, 'value': value },
     'value': hidden,
-  })
+  }))
 
 def form_set_disabled(name, value=None, disabled=True):
   """Enqueue a form update to disable/enabled a given form component."""
-  js.enqueueFormUpdate({
+  _unwrap(js.enqueueFormUpdate({
     'type': 'DISABLED',
     'id': { 'name': name, 'value': value },
     'value': disabled,
-  })
+  }))
 
 def form_set_focus(name, value=None):
   """Enqueue a form update to focus a given form component."""
-  js.enqueueFormUpdate({
+  _unwrap(js.enqueueFormUpdate({
     'type': 'FOCUS',
     'id': { 'name': name, 'value': value },
-  })
+  }))
 
 def form_set_value(name, value):
   """Enqueue a form update to change value for a given form component."""
-  js.enqueueFormUpdate({
+  _unwrap(js.enqueueFormUpdate({
     'type': 'VALUE',
     'id': { 'name': name },
     'value': value,
-  })
+  }))
 `;
 }
 

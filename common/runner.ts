@@ -7,6 +7,7 @@ import { FiolinFormComponentMapImpl, idToComponentMap, idToRepr } from './form-u
 import { FiolinFormComponent, FiolinFormComponentMap } from './types/form';
 import { parseAs } from './parse';
 import { pFormUpdate } from './parse-run';
+import { resultify } from './resultify';
 
 export interface ConsoleLike {
   debug(s: string): void;
@@ -58,7 +59,7 @@ export class PyodideRunner implements FiolinRunner {
   constructor(options?: PyodideRunnerOptions) {
     this._shared = {
       inputs: [], outputs: [], args: {},
-      enqueueFormUpdate: (update) => this.enqueueFormUpdate(update),
+      enqueueFormUpdate: resultify((update) => this.enqueueFormUpdate(update)),
     };
     const innerConsole: ConsoleLike = options?.console || console;
     this._log = [];

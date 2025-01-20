@@ -1,6 +1,7 @@
 import type { PyodideInterface } from 'pyodide';
 import { FiolinScript } from './fiolin-script';
 import { FiolinFormComponentId } from './form';
+import { Result } from './result';
 
 // Used for encapsulating running a script.
 export interface FiolinRunRequest {
@@ -42,7 +43,8 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   partial?: boolean;
 
   // Used to signal any updates to be made to the form
-  enqueueFormUpdate(update: FormUpdate): void;
+  // Note: Resultified callbacks due to unresolved js/py ffi issue.
+  enqueueFormUpdate(update: FormUpdate): Result<void>;
 
   // Other properties may be temporarily needed during the loading phase.
   [key: string]: any;

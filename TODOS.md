@@ -14,7 +14,8 @@ A not-necessarily-exhaustive list of TODOs:
     package so that people can import fiolin from their fiolin-template cloned
     projects and do local development. Update the repo template as needed.
 - Core functionality
-  - Bug w/error propagation across js->py boundary ("return without exception set")
+  - Bug w/error propagation across js->py boundary ("return without exception
+    set"). Still exists but workaround added.
   - Canvas
   - Emscripten modules:
       - Fix unsafe-eval issue with imagemagick
