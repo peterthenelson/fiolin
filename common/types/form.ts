@@ -1,4 +1,4 @@
-import { ExtractTagType } from '../tagged-unions';
+import { ExtractTagType, TypedPartial } from '../tagged-unions';
 
 // Form inputs and layout used to get args from the user.
 export interface FiolinForm {
@@ -12,15 +12,30 @@ export interface FiolinForm {
   autofocusedValue?: string;
 }
 
-// Union type of all the form components
-export type FiolinFormComponent = (
-  // The collection of component types
-  FiolinFormDiv | FiolinFormLabel | FiolinFormCheckbox | FiolinFormColor |
-  FiolinFormDate | FiolinFormDatetimeLocal | FiolinFormEmail | FiolinFormFile |
-  FiolinFormNumber | FiolinFormRadio | FiolinFormRange | FiolinFormTel |
-  FiolinFormText | FiolinFormTime | FiolinFormUrl | FiolinFormSelect |
-  FiolinFormButton | FiolinFormOutput
+// Component/entity type pairs. Mostly used by utility code, but it's more
+// helpful for this to be the canonical listing and have FiolinFormComponent be
+// infered.
+export type FiolinFormComponentElement = (
+  [FiolinFormDiv, HTMLDivElement] | [FiolinFormLabel, HTMLLabelElement] |
+  [FiolinFormCheckbox, HTMLInputElement] | [FiolinFormColor, HTMLInputElement] |
+  [FiolinFormDate, HTMLInputElement] |
+  [FiolinFormDatetimeLocal, HTMLInputElement] |
+  [FiolinFormEmail, HTMLInputElement] | [FiolinFormFile, HTMLInputElement] |
+  [FiolinFormNumber, HTMLInputElement] | [FiolinFormRadio, HTMLInputElement] |
+  [FiolinFormRange, HTMLInputElement] | [FiolinFormTel, HTMLInputElement] |
+  [FiolinFormText, HTMLInputElement] | [FiolinFormTime, HTMLInputElement] |
+  [FiolinFormUrl, HTMLInputElement] | [FiolinFormSelect, HTMLSelectElement] |
+  [FiolinFormButton, HTMLButtonElement] | [FiolinFormOutput, HTMLOutputElement]
 );
+
+// Type assertion helper
+type _Extends<T extends U, U> = true;
+
+// Type assertion that second part of FiolinFormComponentElement extends HTMLElement
+type _PairsHaveElements = _Extends<FiolinFormComponentElement extends [any, infer T] ? T : never, HTMLElement>;
+
+// Union type of all the form components
+export type FiolinFormComponent = FiolinFormComponentElement extends [infer T, any] ? T : never;
 
 // The type tags for components
 export type FiolinFormComponentType = ExtractTagType<FiolinFormComponent>;
@@ -37,6 +52,12 @@ export interface FiolinFormComponentId {
   // BUTTONs).
   value?: string;
 }
+
+// Partialize first element
+type _PartializeFirst<T extends string, U> = U extends [infer C extends { type: T }, infer E] ? [TypedPartial<T, C>, E] : never;
+
+// Pairs of types where the non-type fields are optionalized
+export type FiolinFormPartialComponentElement = _PartializeFirst<FiolinFormComponentType, FiolinFormComponentElement>;
 
 // The interface for maps that use FiolinFormComponentIds as keys.
 export interface FiolinFormComponentMap<T> {

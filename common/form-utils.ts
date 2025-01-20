@@ -1,4 +1,5 @@
-import { FiolinForm, FiolinFormComponent, FiolinFormComponentId, FiolinFormComponentMap } from './types/form';
+import { TypedPartial } from './tagged-unions';
+import { FiolinForm, FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentId, FiolinFormComponentMap, FiolinFormComponentType, FiolinFormPartialComponentElement } from './types/form';
 
 export function makeId(name: string, value?: string): FiolinFormComponentId {
   if (!name.match(/^[A-za-z][A-Za-z0-9_:\.-]*$/)) {
@@ -87,4 +88,13 @@ function formToIdsHelper(component: FiolinFormComponent, map: FiolinFormComponen
   } else if (component.type === 'LABEL') {
     formToIdsHelper(component.child, map);
   }
+}
+
+export function swapToPartial(pair: FiolinFormComponentElement, partial: TypedPartial<FiolinFormComponentType, FiolinFormComponent>): FiolinFormPartialComponentElement {
+  const maybeId = maybeComponentToId(pair[0]);
+  const idStr = maybeId ? idToRepr(maybeId) : 'component';
+  if (pair[0].type !== partial.type) {
+    throw new Error(`Component type mismatch; ${idStr} has type ${pair[0].type} but got ${partial.type}`);
+  }
+  return [partial, pair[1]] as FiolinFormPartialComponentElement;
 }

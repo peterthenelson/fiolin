@@ -10,3 +10,7 @@ export function typeSwitch<T extends { type: string }, V>(input: T, cases: { [K 
   }
   throw new Error(`Expected input.type be one of ${Object.keys(cases).join(' | ')}; got ${input.type}`);
 }
+
+// Utility to define something like Partial<T> that works over tagged unions and
+// leaves the type tag as required.
+export type TypedPartial<T extends string, U extends { type: T }> = Partial<U> & { type: T };

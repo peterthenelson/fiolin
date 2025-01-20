@@ -182,36 +182,50 @@ def _unwrap(result):
   else:
     raise result.error
 
+def _enqueue_helper(form_update):
+  _unwrap(js.enqueueFormUpdate(ffi.to_js(form_update, create_pyproxies=False, dict_converter=js.Object.fromEntries)))
+
 def form_set_hidden(name, value=None, hidden=True):
   """Enqueue a form update to hide/show a given form component."""
-  _unwrap(js.enqueueFormUpdate({
+  _enqueue_helper({
     'type': 'HIDDEN',
     'id': { 'name': name, 'value': value },
     'value': hidden,
-  }))
+  })
 
 def form_set_disabled(name, value=None, disabled=True):
   """Enqueue a form update to disable/enabled a given form component."""
-  _unwrap(js.enqueueFormUpdate({
+  _enqueue_helper({
     'type': 'DISABLED',
     'id': { 'name': name, 'value': value },
     'value': disabled,
-  }))
+  })
 
 def form_set_focus(name, value=None):
   """Enqueue a form update to focus a given form component."""
-  _unwrap(js.enqueueFormUpdate({
+  _enqueue_helper({
     'type': 'FOCUS',
     'id': { 'name': name, 'value': value },
-  }))
+  })
 
 def form_set_value(name, value):
   """Enqueue a form update to change value for a given form component."""
-  _unwrap(js.enqueueFormUpdate({
+  _enqueue_helper({
     'type': 'VALUE',
     'id': { 'name': name },
     'value': value,
-  }))
+  })
+
+def form_update(name, partial, value=None):
+  """Enqueue a form update to change arbitrary attributes of a form component.
+
+  Note: The 'type' field is required!
+  """
+  _enqueue_helper({
+    'type': 'PARTIAL',
+    'id': { 'name': name, 'value': value },
+    'value': partial,
+  })
 `;
 }
 

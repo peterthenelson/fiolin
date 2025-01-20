@@ -88,8 +88,8 @@ function genTsDoc(tsPath: string, mdPath: string) {
   for (const line of ts.split('\n')) {
     const commentMatch = line.match(/^\s*\/\/ ?(.*)/);
     const importMatch = line.match(/^import.*/);
-    const interfaceTypeMatch = line.match(/^(?:export )(interface|type) (.*) (?:.*)/);
-    const fieldMatch = line.match(/^\s*([a-zA-Z][^:]*): (.*);$/);
+    const interfaceTypeMatch = line.match(/^(?:export )?(interface|type) (.*) (?:.*)/);
+    const fieldMatch = line.match(/^\s*([a-zA-Z_][^:]*): (.*);$/);
     const isWhitespace = line.match(/^\s*$/) !== null;
     if (state === 'WAIT_IT_COMMENT') {
       if (commentMatch) {

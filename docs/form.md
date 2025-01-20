@@ -18,7 +18,21 @@
 distinguish between multiple components with the same name (e.g., RADIOs or
 BUTTONs)
 
-## FiolinFormComponent =
+## FiolinFormComponentElement =
+
+> Component/entity type pairs. Mostly used by utility code, but it's more
+helpful for this to be the canonical listing and have FiolinFormComponent be
+infered.
+
+## _Extends<T extends U, U> =
+
+> Type assertion helper
+
+## _PairsHaveElements = _Extends<FiolinFormComponentElement extends [any, infer T] ? T : never,
+
+> Type assertion that second part of FiolinFormComponentElement extends HTMLElement
+
+## FiolinFormComponent = FiolinFormComponentElement extends [infer T, any] ? T :
 
 > Union type of all the form components
 
@@ -42,6 +56,14 @@ given component can be uniquely identified this way.
 > The (optional) value of the component. This is only used for components
 where multiple components are intended to share a name (e.g., RADIOs and
 BUTTONs).
+
+## _PartializeFirst<T extends string, U> = U extends [infer C extends { type: T }, infer E] ? [TypedPartial<T, C>, E] :
+
+> Partialize first element
+
+## FiolinFormPartialComponentElement = _PartializeFirst<FiolinFormComponentType,
+
+> Pairs of types where the non-type fields are optionalized
 
 ## FiolinFormComponentMap<T>
 

@@ -1,33 +1,29 @@
 import { typeSwitch } from '../../common/tagged-unions';
 import { FiolinScriptInterface } from '../../common/types';
 import { FiolinFormComponentMapImpl, idToRepr, makeId, maybeComponentToId } from '../../common/form-utils';
-import { FiolinFormComponent, FiolinFormComponentMap } from '../../common/types/form';
+import { FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentMap, FiolinFormPartialComponentElement } from '../../common/types/form';
 
 export interface RenderedForm {
   form: HTMLFormElement;
-  uniquelyIdentifiedElems: FiolinFormComponentMap<HTMLElement>;
+  ui: FiolinScriptInterface;
+  uniquelyIdentifiedElems: FiolinFormComponentMap<FiolinFormComponentElement>;
 }
 
 export function renderForm(ui: FiolinScriptInterface): RenderedForm {
   const rendered: RenderedForm = {
     form: document.createElement('form'),
+    ui,
     uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(),
   }
   if (!ui.form) return rendered;
-  const ctx: RenderContext = {
-    form: rendered.form,
-    ui,
-    ids: new FiolinFormComponentMapImpl(),
-  };
   for (const c of ui.form.children) {
-    rendered.form.append(renderComponent(c, ctx));
+    rendered.form.append(renderComponent(c, rendered)[1]);
   }
-  rendered.uniquelyIdentifiedElems = ctx.ids;
   if (ui.form.autofocusedName) {
     const id = makeId(ui.form.autofocusedName, ui.form.autofocusedValue);
-    const e = rendered.uniquelyIdentifiedElems.get(id);
-    if (e) {
-      e.autofocus = true;
+    const ce = rendered.uniquelyIdentifiedElems.get(id);
+    if (ce) {
+      ce[1].autofocus = true;
     } else {
       throw new Error(`Could not find element to autofocus (${idToRepr(id)})`);
     }
@@ -35,89 +31,121 @@ export function renderForm(ui: FiolinScriptInterface): RenderedForm {
   return rendered;
 }
 
-interface RenderContext {
-  form: HTMLFormElement;
-  ui: FiolinScriptInterface;
-  ids: FiolinFormComponentMapImpl<HTMLElement>;
+function createAndPairElement(component: FiolinFormComponent): FiolinFormComponentElement {
+  return typeSwitch(component, {
+    'DIV': (c) => [c, document.createElement('div')],
+    'LABEL': (c) => [c, document.createElement('label')],
+    'CHECKBOX': (c) => [c, document.createElement('input')],
+    'COLOR': (c) => [c, document.createElement('input')],
+    'DATE': (c) => [c, document.createElement('input')],
+    'DATETIME_LOCAL': (c) => [c, document.createElement('input')],
+    'EMAIL': (c) => [c, document.createElement('input')],
+    'FILE': (c) => [c, document.createElement('input')],
+    'NUMBER': (c) => [c, document.createElement('input')],
+    'RADIO': (c) => [c, document.createElement('input')],
+    'RANGE': (c) => [c, document.createElement('input')],
+    'TEL': (c) => [c, document.createElement('input')],
+    'TEXT': (c) => [c, document.createElement('input')],
+    'TIME': (c) => [c, document.createElement('input')],
+    'URL': (c) => [c, document.createElement('input')],
+    'SELECT': (c) => [c, document.createElement('select')],
+    'BUTTON': (c) => [c, document.createElement('button')],
+    'OUTPUT': (c) => [c, document.createElement('output')],
+  });
 }
 
-function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HTMLElement {
-  const id = maybeComponentToId(component);
-  const e: HTMLElement = typeSwitch(component, {
-    'DIV': (component) => {
-      const div = document.createElement('div');
-      div.classList.add(`flex-${component.dir.toLowerCase()}-wrap`);
-      for (const c of component.children) {
-        div.append(renderComponent(c, ctx));
+function ceSwitch<V>(input: FiolinFormPartialComponentElement, cases: { [K in FiolinFormPartialComponentElement[0]['type']]: (input: Extract<FiolinFormPartialComponentElement, [{ type: K }, any]>) => V }): V {
+  for (const [k, val] of Object.entries(cases)) {
+    if (k === input[0].type) {
+      return (val as (input: unknown) => V)(input);
+    }
+  }
+  throw new Error(`Expected input.type be one of ${Object.keys(cases).join(' | ')}; got ${input[0].type}`);
+}
+
+function updateField<T extends keyof any, U>(obj: Record<T, U>, key: T, value?: U) {
+  if (value === undefined) return;
+  obj[key] = value;
+}
+
+function updateFieldToStr<T extends keyof any, U>(obj: Record<T, string>, key: T, value?: U) {
+  if (value === undefined || value === null) return;
+  obj[key] = value.toString();
+}
+
+export function renderInPlace(ce: FiolinFormPartialComponentElement, ctx: RenderedForm, initial: boolean) {
+  ceSwitch(ce, {
+    'DIV': ([component, div]) => {
+      if (component.dir) div.classList.add(`flex-${component.dir.toLowerCase()}-wrap`);
+      if (initial) {
+        for (const c of (component.children || [])) {
+          div.append(renderComponent(c, ctx)[1]);
+        }
+      } else if ((component.children || []).length > 0) {
+        console.warn('Form update for div specifies children: ignoring');
       }
-      return div;
     },
-    'LABEL': (component) => {
-      const label = document.createElement('label');
-      label.append(component.text);
-      label.append(renderComponent(component.child, ctx));
-      return label;
+    'LABEL': ([component, label]) => {
+      if (initial) {
+        label.append(component.text || '');
+      } else if (component.text !== undefined) {
+        label.firstChild!.textContent = component.text;
+      }
+      if (initial && component.child) {
+        label.append(renderComponent(component.child, ctx)[1]);
+      } else if (component.child) {
+        console.warn('Form update for label specifies child: ignoring');
+      }
     },
-    'CHECKBOX': (component) => {
-      const input = document.createElement('input');
+    'CHECKBOX': ([component, input]) => {
       input.type = 'checkbox';
-      input.name = component.name;
-      if (component.value) input.value = component.value;
-      if (component.checked) input.checked = true;
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateField(input, 'value', component.value);
+      updateField(input, 'checked', component.checked);
+      updateField(input, 'disabled', component.disabled);
     },
-    'COLOR': (component) => {
-      const input = document.createElement('input');
+    'COLOR': ([component, input]) => {
       input.type = 'color';
-      input.name = component.name;
-      if (component.value) input.value = component.value.toString();
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateFieldToStr(input, 'value', component.value);
+      updateField(input, 'disabled', component.disabled);
     },
-    'DATE': (component) => {
-      const input = document.createElement('input');
+    'DATE': ([component, input]) => {
       input.type = 'date';
-      input.name = component.name;
-      if (component.value) input.value = component.value;
-      if (component.required) input.required = true;
-      if (component.min) input.min = component.min;
-      if (component.max) input.max = component.max;
-      if (component.step) input.step = component.step.toString();
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateField(input, 'value', component.value);
+      updateField(input, 'required', component.required);
+      updateField(input, 'min', component.min);
+      updateField(input, 'max', component.max);
+      updateFieldToStr(input, 'step', component.step);
+      updateField(input, 'disabled', component.disabled);
     },
-    'DATETIME_LOCAL': (component) => {
-      const input = document.createElement('input');
+    'DATETIME_LOCAL': ([component, input]) => {
       input.type = 'date';
-      input.name = component.name;
-      if (component.value) input.value = component.value;
-      if (component.required) input.required = true;
-      if (component.min) input.min = component.min;
-      if (component.max) input.max = component.max;
-      if (component.step) input.step = component.step.toString();
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateField(input, 'value', component.value);
+      updateField(input, 'required', component.required);
+      updateField(input, 'min', component.min);
+      updateField(input, 'max', component.max);
+      updateFieldToStr(input, 'step', component.step);
+      updateField(input, 'disabled', component.disabled);
     },
-    'EMAIL': (component) => {
-      const input = document.createElement('input');
+    'EMAIL': ([component, input]) => {
       input.type = 'text';
-      input.name = component.name;
-      if (component.value) input.value = component.value;
-      if (component.multiple) input.multiple = component.multiple;
-      if (component.pattern) input.pattern = component.pattern;
-      if (component.required) input.required = true;
-      if (component.placeholder) input.placeholder = component.placeholder;
-      if (component.size) input.size = component.size;
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateField(input, 'value', component.value);
+      updateField(input, 'multiple', component.multiple);
+      updateField(input, 'pattern', component.pattern);
+      updateField(input, 'required', component.required);
+      updateField(input, 'placeholder', component.placeholder);
+      updateField(input, 'size', component.size);
+      updateField(input, 'disabled', component.disabled);
     },
-    'FILE': (component) => {
+    'FILE': ([component, input]) => {
       // TODO: Don't just make an input. Make a little panel.
-      const input = document.createElement('input');
       input.type = 'file';
-      if (component.name) input.name = component.name;
-      if (component.multiple) input.multiple = component.multiple;
+      updateField(input, 'name', component.name);
+      updateField(input, 'multiple', component.multiple);
       const accept = component.accept || ctx.ui.inputAccept;
       if (accept) input.accept = accept;
       if (component.submit) {
@@ -131,130 +159,125 @@ function renderComponent(component: FiolinFormComponent, ctx: RenderContext): HT
           input.value = '';
         }
       }
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'disabled', component.disabled);
     },
-    'NUMBER': (component) => {
-      const input = document.createElement('input');
+    'NUMBER': ([component, input]) => {
       input.type = 'number';
-      input.name = component.name;
-      if (component.value) input.value = component.value.toString();
-      if (component.required) input.required = true;
-      if (component.placeholder) input.placeholder = component.placeholder;
-      if (component.min) input.min = component.min.toString();
-      if (component.max) input.max = component.max.toString();
-      if (component.step) input.step = component.step.toString();
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateFieldToStr(input, 'value', component.value);
+      updateField(input, 'required', component.required);
+      updateField(input, 'placeholder', component.placeholder);
+      updateFieldToStr(input, 'min', component.min);
+      updateFieldToStr(input, 'max', component.max);
+      updateFieldToStr(input, 'step', component.step);
+      updateField(input, 'disabled', component.disabled);
     },
-    'RADIO': (component) => {
-      const input = document.createElement('input');
+    'RADIO': ([component, input]) => {
       input.type = 'radio';
-      input.name = component.name;
-      input.value = component.value;
-      if (component.checked) input.checked = true;
-      if (component.required) input.required = true;
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateField(input, 'value', component.value);
+      updateField(input, 'checked', component.checked);
+      updateField(input, 'required', component.required);
+      updateField(input, 'disabled', component.disabled);
     },
-    'RANGE': (component) => {
-      const input = document.createElement('input');
+    'RANGE': ([component, input]) => {
       input.type = 'range';
-      input.name = component.name;
-      if (component.value) input.value = component.value.toString();
-      input.min = component.min.toString();
-      input.max = component.max.toString();
-      if (component.step) input.step = component.step.toString();
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateFieldToStr(input, 'value', component.value);
+      updateFieldToStr(input, 'min', component.min);
+      updateFieldToStr(input, 'max', component.max);
+      updateFieldToStr(input, 'step', component.step);
+      updateField(input, 'disabled', component.disabled);
     },
-    'TEL': (component) => {
-      const input = document.createElement('input');
+    'TEL': ([component, input]) => {
       input.type = 'tel';
-      input.name = component.name;
-      if (component.value) input.value = component.value;
-      if (component.pattern) input.pattern = component.pattern;
-      if (component.required) input.required = true;
-      if (component.placeholder) input.placeholder = component.placeholder;
-      if (component.size) input.size = component.size;
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateField(input, 'value', component.value);
+      updateField(input, 'pattern', component.pattern);
+      updateField(input, 'required', component.required);
+      updateField(input, 'placeholder', component.placeholder);
+      updateField(input, 'size', component.size);
+      updateField(input, 'disabled', component.disabled);
     },
-    'TEXT': (component) => {
-      const input = document.createElement('input');
+    'TEXT': ([component, input]) => {
       input.type = 'text';
-      input.name = component.name;
-      if (component.value) input.value = component.value;
-      if (component.pattern) input.pattern = component.pattern;
-      if (component.required) input.required = true;
-      if (component.placeholder) input.placeholder = component.placeholder;
-      if (component.size) input.size = component.size;
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateField(input, 'value', component.value);
+      updateField(input, 'pattern', component.pattern);
+      updateField(input, 'required', component.required);
+      updateField(input, 'placeholder', component.placeholder);
+      updateField(input, 'size', component.size);
+      updateField(input, 'disabled', component.disabled);
     },
-    'TIME': (component) => {
-      const input = document.createElement('input');
+    'TIME': ([component, input]) => {
       input.type = 'time';
-      input.name = component.name;
-      if (component.value) input.value = component.value;
-      if (component.required) input.required = true;
-      if (component.min) input.min = component.min;
-      if (component.max) input.max = component.max;
-      if (component.step) input.step = component.step.toString();
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateField(input, 'value', component.value);
+      updateField(input, 'required', component.required);
+      updateField(input, 'min', component.min);
+      updateField(input, 'max', component.max);
+      updateFieldToStr(input, 'step', component.step);
+      updateField(input, 'disabled', component.disabled);
     },
-    'URL': (component) => {
-      const input = document.createElement('input');
+    'URL': ([component, input]) => {
       input.type = 'url';
-      input.name = component.name;
-      if (component.value) input.value = component.value;
-      if (component.pattern) input.pattern = component.pattern;
-      if (component.required) input.required = true;
-      if (component.placeholder) input.placeholder = component.placeholder;
-      if (component.size) input.size = component.size;
-      if (component.disabled) input.disabled = true;
-      return input;
+      updateField(input, 'name', component.name);
+      updateField(input, 'value', component.value);
+      updateField(input, 'pattern', component.pattern);
+      updateField(input, 'required', component.required);
+      updateField(input, 'placeholder', component.placeholder);
+      updateField(input, 'size', component.size);
+      updateField(input, 'disabled', component.disabled);
     },
-    'SELECT': (component) => {
-      const select = document.createElement('select');
-      select.name = component.name;
-      if (component.multiple) select.multiple = true;
-      if (component.required) select.required = true;
-      for (const opt of component.options) {
+    'SELECT': ([component, select]) => {
+      updateField(select, 'name', component.name);
+      updateField(select, 'multiple', component.multiple);
+      updateField(select, 'required', component.required);
+      const children: Node[] = [];
+      for (const opt of (component.options || [])) {
         const option = document.createElement('option');
         option.append(opt.text);
         if (opt.selected) option.selected = true;
         if (opt.value) option.value = opt.value;
-        select.append(option);
+        children.push(option);
       }
-      if (component.disabled) select.disabled = true;
-      return select;
+      select.replaceChildren(...children);
+      updateField(select, 'disabled', component.disabled);
     },
-    'BUTTON': (component) => {
-      const button = document.createElement('button');
-      button.append(component.text);
-      if (component.name) button.name = component.name;
-      if (component.value) button.value = component.value;
-      if (component.disabled) button.disabled = true;
-      return button;
+    'BUTTON': ([component, button]) => {
+      if (component.text !== undefined) {
+        const txt = document.createTextNode(component.text)
+        button.replaceChildren(txt);
+      }
+      updateField(button, 'name', component.name);
+      updateField(button, 'value', component.value);
+      updateField(button, 'disabled', component.disabled);
     },
-    'OUTPUT': (component) => {
-      const output = document.createElement('output');
-      output.name = component.name;
-      if (component.value) output.value = component.value;
-      return output;
+    'OUTPUT': ([component, output]) => {
+      updateField(output, 'name', component.name);
+      updateField(output, 'value', component.value);
     },
   });
-  if (component.hidden) {
-    e.classList.add('hidden');
-  }
-  if (id !== undefined) {
-    if (ctx.ids.has(id)) {
-      throw new Error(`Two components indistinguishable (${idToRepr(id)})`)
+  if (ce[0].hidden !== undefined) {
+    if (ce[0].hidden) {
+      ce[1].classList.add('hidden');
     } else {
-      ctx.ids.set(id, e);
+      ce[1].classList.remove('hidden');
     }
   }
-  return e;
+}
+
+function renderComponent(component: FiolinFormComponent, ctx: RenderedForm): FiolinFormComponentElement {
+  const id = maybeComponentToId(component);
+  const ce: FiolinFormComponentElement = createAndPairElement(component);
+  renderInPlace(ce, ctx, true);
+  const mutable = ctx.uniquelyIdentifiedElems as FiolinFormComponentMapImpl<FiolinFormComponentElement>;
+  if (id !== undefined) {
+    if (mutable.has(id)) {
+      throw new Error(`Two components indistinguishable (${idToRepr(id)})`)
+    } else {
+      mutable.set(id, ce);
+    }
+  }
+  return ce;
 }

@@ -1,7 +1,8 @@
 import type { PyodideInterface } from 'pyodide';
 import { FiolinScript } from './fiolin-script';
-import { FiolinFormComponentId } from './form';
+import { FiolinFormComponent, FiolinFormComponentId, FiolinFormComponentType } from './form';
 import { Result } from './result';
+import { TypedPartial } from '../tagged-unions';
 
 // Used for encapsulating running a script.
 export interface FiolinRunRequest {
@@ -24,8 +25,9 @@ export interface FiolinRunResponse {
 export type FormUpdate = (
   { type: 'HIDDEN', id: FiolinFormComponentId, value: boolean } |
   { type: 'DISABLED', id: FiolinFormComponentId, value: boolean } |
+  { type: 'VALUE', id: FiolinFormComponentId, value: string } |
   { type: 'FOCUS', id: FiolinFormComponentId } |
-  { type: 'VALUE', id: FiolinFormComponentId, value: string }
+  { type: 'PARTIAL', id: FiolinFormComponentId, value: TypedPartial<FiolinFormComponentType, FiolinFormComponent> }
 );
 
 export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
@@ -45,6 +47,11 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // Used to signal any updates to be made to the form
   // Note: Resultified callbacks due to unresolved js/py ffi issue.
   enqueueFormUpdate(update: FormUpdate): Result<void>;
+
+  // Basic objects helpful for serialization code
+  Array: typeof Array;
+  Map: typeof Map;
+  Object: typeof Object;
 
   // Other properties may be temporarily needed during the loading phase.
   [key: string]: any;

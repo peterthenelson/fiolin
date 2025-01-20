@@ -60,6 +60,7 @@ export class PyodideRunner implements FiolinRunner {
     this._shared = {
       inputs: [], outputs: [], args: {},
       enqueueFormUpdate: resultify((update) => this.enqueueFormUpdate(update)),
+      Array, Map, Object,
     };
     const innerConsole: ConsoleLike = options?.console || console;
     this._log = [];
@@ -89,20 +90,16 @@ export class PyodideRunner implements FiolinRunner {
   }
 
   private enqueueFormUpdate(update: FormUpdate): void {
-    // Value is probably from python, so we should convert and parse it.
-    const o: Object = update;
-    let v: unknown;
-    if ('toJs' in o && typeof o.toJs === 'function') {
-      v = o.toJs({ dict_converter: Object.fromEntries });
-    } else {
-      v = o;
-    }
-    update = parseAs(pFormUpdate, v);
-    if (this._formIds.get(update.id)) {
-      this._formUpdates.push(update);
-    } else {
+    // Value is actually from python, so we should reparse it.
+    update = parseAs(pFormUpdate, update);
+    const current = this._formIds.get(update.id);
+    if (!current) {
       throw new Error(`Could not find component with ${idToRepr(update.id)}`)
     }
+    if (update.type === 'PARTIAL' && current.type !== update.value.type) {
+      throw new Error(`Component type mismatch; ${idToRepr(update.id)} has type ${current.type} but got ${update.value.type}`);
+    }
+    this._formUpdates.push(update);
   }
 
   private resetFs() {
@@ -210,7 +207,6 @@ export class PyodideRunner implements FiolinRunner {
     }
     try {
       this._console.debug(`${pkgs.length} python packages to be installed`);
-      this._shared['Object'] = Object;
       this._shared['fetch'] = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
         this._console.debug(`micropip fetching ${input}`);
         return fetch(input, init);
@@ -247,7 +243,6 @@ export class PyodideRunner implements FiolinRunner {
       this._console.debug(`Finished installing packages/modules`);
       this._installed = structuredClone(script.runtime);
     } finally {
-      this._shared['Object'] = undefined;
       this._shared['fetch'] = undefined;
     }
   }

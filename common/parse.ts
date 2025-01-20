@@ -1,3 +1,5 @@
+import { TypedPartial } from './tagged-unions';
+
 // Half-assed validation/parsing library for javascript objects.
 export type Parser<V> = (p: ObjPath, v: unknown) => V;
 export function parseAs<T>(type: Parser<T>, v: unknown): T {
@@ -59,6 +61,19 @@ export function pObjWithProps<T>(props: { [K in keyof Required<T>]: Parser<T[K]>
     }
     return parsed as T;
   }
+}
+
+export function pTypedPartialWithProps<T extends string, U extends { type: T }>(props: { [K in keyof Required<U>]: Parser<U[K]> }): Parser<TypedPartial<T, U>> {
+  const optionalized = {
+    type: props.type,
+  } as { [K in keyof Required<U>]: Parser<U[K] | undefined> };
+  for (const key of Object.keys(props) as (keyof Required<U>)[]) {
+    if (key !== 'type') {
+      optionalized[key] = pOpt(props[key]);
+    }
+  }
+  // TODO: should probably use a more specific cast here.
+  return pObjWithProps<TypedPartial<T, U>>(optionalized as any);
 }
 
 export function pInst<V>(cls: new (...args: any[])=> V): Parser<V> {
@@ -175,5 +190,5 @@ export function pTuple<T extends any[]>(elems: { [K in keyof T]: Parser<T[K]> })
       vals.push(elems[i](p._(`[${i}]`), v[i]));
     }
     return (vals as T);
-  }
+  };
 }

@@ -1,5 +1,5 @@
 import { pArr, pInst, pNum, pRec, pStr, pObjWithProps, pOpt, pTuple, pStrUnion, pBool, ObjPath, pTaggedUnion, pStrLit } from './parse';
-import { pFiolinFormComponentId } from './parse-form';
+import { pFiolinFormComponentId, pPartialFiolinFormComponent } from './parse-form';
 import { FiolinLogLevel, FiolinRunRequest, FiolinRunResponse, FormUpdate } from './types';
 
 export const pFiolinRunRequest = pObjWithProps<FiolinRunRequest>({
@@ -24,14 +24,19 @@ export function pFormUpdate(p: ObjPath, v: unknown): FormUpdate {
       id: pFiolinFormComponentId,
       value: pBool,
     }),
-    'FOCUS': pObjWithProps({
-      type: pStrLit('FOCUS'),
-      id: pFiolinFormComponentId,
-    }),
     'VALUE': pObjWithProps({
       type: pStrLit('VALUE'),
       id: pFiolinFormComponentId,
       value: pStr,
+    }),
+    'FOCUS': pObjWithProps({
+      type: pStrLit('FOCUS'),
+      id: pFiolinFormComponentId,
+    }),
+    'PARTIAL': pObjWithProps({
+      type: pStrLit('PARTIAL'),
+      id: pFiolinFormComponentId,
+      value: pPartialFiolinFormComponent,
     }),
   })(p, v);
 };

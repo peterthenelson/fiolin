@@ -1,10 +1,11 @@
-import { FiolinFormComponentMapImpl, idToRepr } from '../../common/form-utils';
+import { FiolinFormComponentMapImpl, idToRepr, swapToPartial } from '../../common/form-utils';
 import { typeSwitch } from '../../common/tagged-unions';
 import { FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptInterface, FormUpdate } from '../../common/types';
+import { FiolinFormPartialComponentElement } from '../../common/types/form';
 import { getByRelIdAs, selectAllAs } from '../../web-utils/select-as';
 import { setSelected } from '../../web-utils/set-selected';
 import { FormComponent } from './form-component';
-import { RenderedForm, renderForm } from './form-renderer';
+import { RenderedForm, renderForm, renderInPlace } from './form-renderer';
 
 export interface CustomFormCallbacks {
   runScript(files: File[], args?: Record<string, string>): Promise<void>;
@@ -20,6 +21,7 @@ export class CustomForm extends FormComponent {
     super();
     this.rendered = {
       form: getByRelIdAs(container, 'script-form', HTMLFormElement),
+      ui: { inputFiles: 'ANY', outputFiles: 'ANY' },
       uniquelyIdentifiedElems: new FiolinFormComponentMapImpl()
     };
     this.cbs = callbacks;
@@ -32,36 +34,40 @@ export class CustomForm extends FormComponent {
   }
 
   private applyUpdate(formUpdate: FormUpdate) {
-    const e = this.rendered.uniquelyIdentifiedElems.get(formUpdate.id);
-    if (!e) {
+    const ce = this.rendered.uniquelyIdentifiedElems.get(formUpdate.id);
+    if (!ce) {
       throw new Error(`Cannot find element with ${idToRepr(formUpdate.id)}`);
     }
     typeSwitch(formUpdate, {
       'HIDDEN': (fu) => {
         if (fu.value) {
-          e.classList.add('hidden');
+          ce[1].classList.add('hidden');
         } else {
-          e.classList.remove('hidden');
+          ce[1].classList.remove('hidden');
         }
       },
       'DISABLED': (fu) => {
-        if (e instanceof HTMLInputElement || e instanceof HTMLSelectElement || e instanceof HTMLButtonElement) {
-          e.disabled = fu.value;
+        if (ce[1] instanceof HTMLInputElement || ce[1] instanceof HTMLSelectElement || ce[1] instanceof HTMLButtonElement) {
+          ce[1].disabled = fu.value;
         } else {
-          console.warn(`${e} does not have have .disabled property`);
+          console.warn(`${ce[1]} does not have have .disabled property`);
+        }
+      },
+      'VALUE': (fu) => {
+        if (ce[1] instanceof HTMLInputElement || ce[1] instanceof HTMLOutputElement || ce[1] instanceof HTMLButtonElement) {
+          ce[1].value = fu.value;
+        } else if (ce[1] instanceof HTMLSelectElement) {
+          setSelected(ce[1], fu.value);
+        } else {
+          console.warn(`${ce[1]} does not have have .value property`);
         }
       },
       'FOCUS': () => {
-        e.focus();
+        ce[1].focus();
       },
-      'VALUE': (fu) => {
-        if (e instanceof HTMLInputElement || e instanceof HTMLOutputElement || e instanceof HTMLButtonElement) {
-          e.value = fu.value;
-        } else if (e instanceof HTMLSelectElement) {
-          setSelected(e, fu.value);
-        } else {
-          console.warn(`${e} does not have have .value property`);
-        }
+      'PARTIAL': (fu) => {
+        const update = swapToPartial(ce, fu.value);
+        renderInPlace(update, this.rendered, false)
       }
     })
   }
@@ -100,6 +106,7 @@ export class CustomForm extends FormComponent {
     } else {
       newForm = {
         form: document.createElement('form'),
+        ui: { inputFiles: 'ANY', outputFiles: 'ANY' },
         uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(), 
       };
     }
