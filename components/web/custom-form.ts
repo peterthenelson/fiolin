@@ -116,14 +116,13 @@ export class CustomForm extends FormComponent {
 
   onRun(request: FiolinRunRequest): void {
     // TODO: When they exist:
-    // - disable submit buttons of any sort
     // - reset file/run component values
     // - reset the output file display component.
+    this.rendered.form.inert = true;
   }
 
   onSuccess(response: FiolinRunResponse): void {
-    // TODO: When they exists:
-    // - reenable submit buttons of any sort
+    // TODO: When they exist:
     // - update the output file display component.
     if (this.isEnabled() && !response.partial) {
       for (const f of response.outputs) {
@@ -135,15 +134,15 @@ export class CustomForm extends FormComponent {
         this.applyUpdate(fu);
       }
     }
+    this.rendered.form.inert = false;
   }
 
   onError(response?: FiolinRunResponse): void {
-    // TODO: When they exist:
-    // - reenable submit buttons of any sort
     if (response?.formUpdates) {
       for (const fu of response.formUpdates) {
         this.applyUpdate(fu);
       }
     }
+    this.rendered.form.inert = false;
   }
 }

@@ -17,6 +17,7 @@
   --medGrey: #404040;
   --lightGrey: #8a8a8a;
   --greenish: #608b4e;
+  --lightGreenish: #304627;
   --buttonColor: var(--blueish);
   --fuzzSvg: url(/fuzz.svg);
   --tabHeight: 26px;
@@ -243,6 +244,16 @@ form button {
   padding: .5em;
   margin: .5em 1em 0.1em 1em;
   font-size: medium;
+}
+
+.running form button  {
+  --buttonColor: var(--greenish);
+  animation: controls-pulse 2.5s infinite;
+}
+
+.running form :is(input, select, output)  {
+  background-color: var(--lightGreenish);
+  animation: controls-pulse 2.5s infinite;
 }
 
 .script-desc {
