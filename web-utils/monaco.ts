@@ -139,6 +139,12 @@ export class FiolinScriptEditor {
   }
 }
 
+/**
+ * TODO: Not currently actionable (works in js but no .d.ts entries for relevant
+ * exports), but if we ever want json colorization to work, we need to manually
+ * trigger language setup for it:
+ * https://github.com/microsoft/monaco-editor/issues/3105#issuecomment-2562693504
+ */
 export function colorize(e: HTMLElement, lang: string): Promise<void> {
   if (lang === 'py') {
     lang = 'python';
