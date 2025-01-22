@@ -148,7 +148,6 @@ def extract_exc(e=None):
     js.errorMsg = 'extract_exc called but no Exception occured'
     return (js.errorLine, js.errorMsg)
   # Skip the stackframes from pyodide wrapper code
-  # TODO: This doesn't work when the error in script.py is a syntax error
   tb = e.__traceback__
   while tb:
     if tb.tb_frame.f_code.co_filename == '/home/pyodide/script.py':
@@ -241,6 +240,9 @@ try:
   else:
     importlib.import_module('script')
   fiolin.set_output_basenames()
+except SyntaxError as e:
+  fiolin.js.errorMsg = repr(e)
+  fiolin.js.errorLine = e.lineno
 except SystemExit as e:
   if e.code:
     fiolin.js.errorMsg = str(e)

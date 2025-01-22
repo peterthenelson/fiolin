@@ -101,6 +101,17 @@ describe('PyodideRunner', () => {
       expect(response.lineno).toEqual(3);
     });
 
+    it('reports SyntaxErrors with line numbers', async () => {
+      const runner = mkRunner();
+      const script = mkScript(`
+        1 + (2 * # line 2
+      `);
+      const response = await runner.run(script, { inputs: [] });
+      expect(response.error).not.toBeUndefined();
+      expect(response.error?.message).toMatch(/SyntaxError\("'\(' was never closed"/);
+      expect(response.lineno).toEqual(2);
+    });
+
     it('reports non-zero sys.exit as error with message', async () => {
       const runner = mkRunner();
       {
