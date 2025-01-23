@@ -4,6 +4,18 @@ import { pFiolinRunRequest, pFiolinRunResponse } from '../common/parse-run';
 import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, LogMessage, SuccessMessage, WorkerMessage, WorkerMessageType, InitMessage } from './types';
 import { FiolinLogLevel } from '../common/types';
 
+function getWindow() {
+  try {
+    return window;
+  } catch (e) {
+    try {
+      return global;
+    } catch (e) {
+      return globalThis;
+    }
+  }
+}
+
 export function pWorkerMessage(p: ObjPath, v: unknown): WorkerMessage {
   return pTaggedUnion<WorkerMessage>({
     'INIT': pInitMessage,
@@ -28,10 +40,12 @@ export const pWorkerMessageType = pStrUnion<WorkerMessageType[]>([
   'ERROR',
 ]);
 
-export const pInitMessage = pObjWithProps<InitMessage>({
-  type: pStrLit('INIT'),
-  canvas: pInst((global || window).OffscreenCanvas),
-});
+export function pInitMessage(p: ObjPath, v: unknown): InitMessage {
+  return pObjWithProps<InitMessage>({
+    type: pStrLit('INIT'),
+    canvas: pInst(getWindow().OffscreenCanvas),
+  })(p, v);
+}
   
 export const pLoadedMessage = pObjWithProps<LoadedMessage>({
   type: pStrLit('LOADED')
