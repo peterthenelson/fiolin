@@ -23,7 +23,7 @@ export class TypedWorker {
     }
   }
 
-  postMessage(msg: WorkerMessage) {
-    this.worker.postMessage(msg);
+  postMessage(msg: WorkerMessage, transfer?: Transferable[]) {
+    this.worker.postMessage(msg, transfer || []);
   }
 }

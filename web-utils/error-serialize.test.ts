@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { mkErrorMessage } from './types';
 import { parseAs } from '../common/parse';
 import { pErrorMessage } from './parse-msg';
@@ -9,6 +9,22 @@ class TestError extends Error {
     this.name = 'TestError';
   }
 }
+
+// Canvas doesn't work in node
+global.OffscreenCanvas = vi.fn().mockImplementation((width: number, height: number) => {
+  return {
+    height,
+    width,
+    oncontextlost: jest.fn(),
+    oncontextrestored: jest.fn(),
+    getContext: jest.fn(() => undefined),
+    convertToBlob: jest.fn(),
+    transferToImageBitmap: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn()
+  } as unknown as OffscreenCanvas;
+});
 
 describe('worker message error serialization', () => {
   it('works with built-in errors', async () => {

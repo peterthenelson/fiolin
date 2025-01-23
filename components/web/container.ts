@@ -97,6 +97,8 @@ export class Container {
     this.worker.onmessage = (msg) => {
       this.handleMessage(msg);
     }
+    const offscreen = getByRelIdAs(container, 'canvas', HTMLCanvasElement).transferControlToOffscreen();
+    this.worker.postMessage({ type: 'INIT', canvas: offscreen }, [offscreen]);
     this.script = this.loadScript();
     this.setupHandlers();
     this.readyToRun = new Deferred();

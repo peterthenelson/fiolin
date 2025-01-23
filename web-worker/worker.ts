@@ -23,6 +23,7 @@ self.onmessage = async (e) => {
 let runner: PyodideRunner | undefined = undefined;
 async function load(): Promise<void> {
   try {
+    // TODO: pass ctx2d to PyodideRunner
     const tmp = new PyodideRunner({
       console: {
         debug: (s) => postMessage({ type: 'LOG', level: 'DEBUG', value: s }),
@@ -39,12 +40,17 @@ async function load(): Promise<void> {
     postMessage(mkErrorMessage(e));
   }
 }
-const loaded = load();
+let loaded: Promise<void> | undefined;
 
 let toInstall: FiolinScript | undefined;
 
+let ctx2d: OffscreenCanvasRenderingContext2D | null = null;
+
 async function onMessage(msg: WorkerMessage): Promise<void> {
-  if (msg.type === 'INSTALL_PACKAGES') {
+  if (msg.type === 'INIT') {
+    ctx2d = msg.canvas.getContext('2d');
+    loaded = load();
+  } else if (msg.type === 'INSTALL_PACKAGES') {
     await onInstallPackages(msg);
   } else if (msg.type === 'RUN') {
     await onRun(msg);

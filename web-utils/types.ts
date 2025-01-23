@@ -3,11 +3,16 @@ import { toErr } from '../common/errors';
 import { ExtractTagType } from '../common/tagged-unions';
 
 export type WorkerMessage = (
-  LoadedMessage | LogMessage | InstallPackagesMessage |
+  InitMessage | LoadedMessage | LogMessage | InstallPackagesMessage |
   PackagesInstalledMessage | RunMessage | SuccessMessage | ErrorMessage
 );
 
 export type WorkerMessageType = ExtractTagType<WorkerMessage>;
+
+export interface InitMessage {
+  type: 'INIT';
+  canvas: OffscreenCanvas;
+}
 
 export interface LoadedMessage { type: 'LOADED' }
 

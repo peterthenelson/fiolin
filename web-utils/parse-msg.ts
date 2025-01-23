@@ -1,11 +1,12 @@
 import { ObjPath, pInst, pNum, pStr, pStrLit, pObjWithProps, pStrUnion, pOpt, pTaggedUnion } from '../common/parse';
 import { pFiolinScript } from '../common/parse-script';
 import { pFiolinRunRequest, pFiolinRunResponse } from '../common/parse-run';
-import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, LogMessage, SuccessMessage, WorkerMessage, WorkerMessageType } from './types';
+import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, LogMessage, SuccessMessage, WorkerMessage, WorkerMessageType, InitMessage } from './types';
 import { FiolinLogLevel } from '../common/types';
 
 export function pWorkerMessage(p: ObjPath, v: unknown): WorkerMessage {
   return pTaggedUnion<WorkerMessage>({
+    'INIT': pInitMessage,
     'LOADED': pLoadedMessage,
     'LOG': pLogMessage,
     'INSTALL_PACKAGES': pInstallPackagesMessage,
@@ -17,6 +18,7 @@ export function pWorkerMessage(p: ObjPath, v: unknown): WorkerMessage {
 }
 
 export const pWorkerMessageType = pStrUnion<WorkerMessageType[]>([
+  'INIT',
   'LOADED',
   'LOG',
   'INSTALL_PACKAGES',
@@ -25,6 +27,11 @@ export const pWorkerMessageType = pStrUnion<WorkerMessageType[]>([
   'SUCCESS',
   'ERROR',
 ]);
+
+export const pInitMessage = pObjWithProps<InitMessage>({
+  type: pStrLit('INIT'),
+  canvas: pInst((global || window).OffscreenCanvas),
+});
   
 export const pLoadedMessage = pObjWithProps<LoadedMessage>({
   type: pStrLit('LOADED')
