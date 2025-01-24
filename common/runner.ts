@@ -1,5 +1,5 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule, FormUpdate, InstallPkgsError } from './types';
+import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule, FormUpdate, ICanvasRenderingContext2D, InstallPkgsError } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
 import { getFiolinPy, getWrapperPy } from './pylib';
 import { cmpSet } from './cmp';
@@ -9,7 +9,7 @@ import { parseAs } from './parse';
 import { pFormUpdate } from './parse-run';
 import { resultify } from './resultify';
 
-export interface ConsoleLike {
+export interface IConsole {
   debug(s: string): void;
   info(s: string): void;
   warn(s: string): void;
@@ -17,7 +17,8 @@ export interface ConsoleLike {
 };
 
 export interface PyodideRunnerOptions {
-  console?: ConsoleLike;
+  canvas?: ICanvasRenderingContext2D;
+  console?: IConsole;
   indexUrl?: string;
   loaders?: Record<string, FiolinWasmLoader>;
 }
@@ -49,7 +50,7 @@ export class PyodideRunner implements FiolinRunner {
   private _pyodide?: PyodideInterface;
   private _installed?: FiolinScriptRuntime;
   private readonly _indexUrl?: string;
-  private readonly _console: ConsoleLike;
+  private readonly _console: IConsole;
   private _log: [FiolinLogLevel, string][];
   private _formUpdates: FormUpdate[];
   private _formIds: FiolinFormComponentMap<FiolinFormComponent>;
@@ -61,8 +62,9 @@ export class PyodideRunner implements FiolinRunner {
       inputs: [], outputs: [], args: {},
       enqueueFormUpdate: resultify((update) => this.enqueueFormUpdate(update)),
       Array, Map, Object,
+      canvas: options?.canvas,
     };
-    const innerConsole: ConsoleLike = options?.console || console;
+    const innerConsole: IConsole = options?.console || console;
     this._log = [];
     this._formUpdates = [];
     this._formIds = new FiolinFormComponentMapImpl();

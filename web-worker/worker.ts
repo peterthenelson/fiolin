@@ -23,8 +23,8 @@ self.onmessage = async (e) => {
 let runner: PyodideRunner | undefined = undefined;
 async function load(): Promise<void> {
   try {
-    // TODO: pass ctx2d to PyodideRunner
     const tmp = new PyodideRunner({
+      canvas: ctx2d || undefined,
       console: {
         debug: (s) => postMessage({ type: 'LOG', level: 'DEBUG', value: s }),
         info: (s) => postMessage({ type: 'LOG', level: 'INFO', value: s }),

@@ -5,6 +5,7 @@ import { dedent } from './indent';
 import { ImageMagickLoader } from './image-magick';
 import { readFileSync } from 'node:fs';
 import { FiolinForm } from './types/form';
+import { DummyCanvasRenderingContext2D } from './fake-canvas';
 
 interface mkScriptOptions {
   pkgs?: string[];
@@ -62,8 +63,12 @@ const loaders = (() => {
   };
 })();
 
-function mkRunner(): PyodideRunner {
-  return new PyodideRunner({ indexUrl, loaders });
+function mkRunner(onFirstCanvasCall?: () => void): PyodideRunner {
+  onFirstCanvasCall ??= () => {
+    console.debug('Canvas disabled; all calls to canvas will be ignored')
+  };
+  const canvas = new DummyCanvasRenderingContext2D(onFirstCanvasCall);
+  return new PyodideRunner({ canvas, indexUrl, loaders });
 }
 
 function multiRe(...res: RegExp[]): RegExp {
@@ -518,5 +523,22 @@ describe('PyodideRunner', () => {
         },
       ]);
     });
+  });
+
+  it('exposes canvas functionality', async () => {
+    let called = false;
+    const runner = mkRunner(() => {
+      console.debug('Canvas functionality invoked');
+      called = true;
+    });
+    const script = mkScript(`
+      import fiolin
+      canvas = fiolin.canvas()
+      canvas.fillStyle = 'red'
+      canvas.fillRect(10, 20, 100, 200)
+    `);
+    const response = await runner.run(script, { inputs: [] });
+    expect(response.error).toBeUndefined();
+    expect(called).toBe(true);
   });
 });

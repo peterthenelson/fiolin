@@ -3,6 +3,7 @@ import { FiolinScript } from './fiolin-script';
 import { FiolinFormComponent, FiolinFormComponentId, FiolinFormComponentType } from './form';
 import { Result } from './result';
 import { TypedPartial } from '../tagged-unions';
+import { ICanvasRenderingContext2D } from './canvas';
 
 // Used for encapsulating running a script.
 export interface FiolinRunRequest {
@@ -47,6 +48,9 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // Used to signal any updates to be made to the form
   // Note: Resultified callbacks due to unresolved js/py ffi issue.
   enqueueFormUpdate(update: FormUpdate): Result<void>;
+
+  // A canvas to render output to (n.b., possibly empty or fake).
+  canvas?: ICanvasRenderingContext2D;
 
   // Basic objects helpful for serialization code
   Array: typeof Array;

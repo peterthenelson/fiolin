@@ -225,6 +225,14 @@ def form_update(name, partial, value=None):
     'id': { 'name': name, 'value': value },
     'value': partial,
   })
+
+def has_canvas():
+  """Is there a canvas object?"""
+  return bool(js.canvas)
+
+def canvas():
+  """Get the canvas object, if any."""
+  return js.canvas
 `;
 }
 

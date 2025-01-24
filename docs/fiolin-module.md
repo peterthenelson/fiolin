@@ -10,6 +10,10 @@ fiolin.**args**()
 
 > Get the args dictionary.
 
+fiolin.**canvas**()
+
+> Get the canvas object, if any.
+
 fiolin.**continue_with**(new_state)
 
 > Set the continue bit and save state for the next run.
@@ -66,6 +70,10 @@ fiolin.**get_input_path**()
 fiolin.**get_input_paths**()
 
 > Gets the input file paths.
+
+fiolin.**has_canvas**()
+
+> Is there a canvas object?
 
 fiolin.**set_output_basename**(output)
 

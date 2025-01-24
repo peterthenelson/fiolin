@@ -16,21 +16,20 @@ A not-necessarily-exhaustive list of TODOs:
 - Core functionality
   - Bug w/error propagation across js->py boundary ("return without exception
     set"). Still exists but workaround added.
-  - Canvas
   - Emscripten modules:
-      - Fix unsafe-eval issue with imagemagick
-      - Figure out how to pass in bytes to imagemagick read
-      - ffmpeg 
-      - some kind of document conversion thing
-      - some kind of ebook converter
-      - more archive format converters
-  - Some kind of (interactive?) canvas functionality
+    - Fix unsafe-eval issue with imagemagick
+    - Figure out how to pass in bytes to imagemagick read
+    - ffmpeg 
+    - some kind of document conversion thing
+    - some kind of ebook converter
+    - more archive format converters
+  - Canvas interaction?
   - Debug command that can trigger some kind of interactive repl
 - Scripts
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)
     - Demonstrating multi-step scripts
-    - Demonstrating canvas (when it works)
+    - Demonstrating canvas
   - More file-conversion scripts for real tasks
     - SVG recolor
     - Extracting text and tables from PDFs

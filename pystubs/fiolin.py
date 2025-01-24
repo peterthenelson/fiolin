@@ -43,3 +43,7 @@ def form_set_value(name, value):
   pass
 def form_update(name, partial, value=None):
   pass
+def has_canvas():
+  return False
+def canvas():
+  return None
