@@ -45,6 +45,7 @@ export class Container {
   private readonly deployDialog: DeployDialog;
   private readonly form: FormComponent;
   private readonly editor: Editor;
+  private readonly canvas: HTMLCanvasElement;
   private readonly terminal: Terminal;
   private readonly worker: TypedWorker;
   public script: Promise<FiolinScript>;
@@ -97,7 +98,8 @@ export class Container {
     this.worker.onmessage = (msg) => {
       this.handleMessage(msg);
     }
-    const offscreen = getByRelIdAs(container, 'canvas', HTMLCanvasElement).transferControlToOffscreen();
+    this.canvas = getByRelIdAs(container, 'canvas', HTMLCanvasElement);
+    const offscreen = this.canvas.transferControlToOffscreen();
     this.worker.postMessage({ type: 'INIT', canvas: offscreen }, [offscreen]);
     this.script = this.loadScript();
     this.setupHandlers();
@@ -107,6 +109,7 @@ export class Container {
   private async updateUiForScript(script: FiolinScript) {
     this.scriptTitle.textContent = script.meta.title;
     this.scriptDesc.textContent = script.meta.description;
+    this.canvas.classList.add('hidden');
     this.form.onLoad(script);
   }
 
