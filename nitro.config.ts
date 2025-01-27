@@ -81,6 +81,7 @@ export default defineNitroConfig({
     // '/**': csp(noneCsp),
   },
   prerender: {
+    // TODO: Release third-party by rendering /third-party/
     routes: ['/', '/playground/load-tutorial', '/doc/third-party'],
     crawlLinks: true,
   }

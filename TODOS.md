@@ -58,6 +58,7 @@ A not-necessarily-exhaustive list of TODOs:
     - Add the docs
     - Modal/overlaid warnings w/dev avatar
     - Stored approvals
+    - Release publicly by updating prerendering
   - Editor:
     - Why is monaco occasionally triggering a request for clipboard permissions?
   - Controls:
