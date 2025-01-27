@@ -9,17 +9,18 @@ try {
 import(endpoints.host || '/bundle/host.js').then((host) => {
   const params = new URLSearchParams(window.location.search);
   const gh = params.get('gh');
-  const url = params.get('url');
+  let base = params.get('base');
+  if (base !== null && !base.match(/http:\/\/localhost:\d+/)) {
+    die(`base parameter must be http://localhost:PORT; got ${base}`);
+  }
   if (gh) {
     const re = /^([A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)\/([A-Za-z0-9._\/-]+)$/;
     const m = re.exec(gh);
     if (!m) {
       die(`Invalid gh parameter; ${gh}`);
     } 
-    host.initFiolin({ url: `https://${m[1]}.github.io/${m[2]}.json`, showLoading: true });
-  } else if (url) {
-    host.initFiolin({ url, showLoading: true});
+    host.initFiolin({ type: '3P', username: m[1], path: m[2], githubIoBase: base || undefined });
   } else {
-    host.die(`Neither gh nor url parameters specified!`);
+    host.die(`gh parameter not specified!`);
   }
 });

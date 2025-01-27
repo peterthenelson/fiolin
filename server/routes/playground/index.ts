@@ -5,8 +5,8 @@ import { renderContainer } from '../../../components/server/container';
 import { versionedLink } from '../../../utils/versioned-link';
 
 export default defineEventHandler(async () => {
-  const tutorial = await loadAllTutorials();
-  const contents = JSON.stringify(tutorial);
+  const tutorials = await loadAllTutorials();
+  const contents = JSON.stringify(tutorials);
   return dedent(`
     <!DOCTYPE html>
     <html>
@@ -17,7 +17,7 @@ export default defineEventHandler(async () => {
         <script src="${versionedLink('/init-fiol.js')}&tutorialVar=tutorials" type="module" defer></script>
       </head>
       <body>
-        ${renderContainer({ playground: true, tutorial, numSpaces: 4 })}
+        ${renderContainer({ mode: 'PLAYGROUND', tutorials, numSpaces: 4 })}
       </body>
     </html>
   `);

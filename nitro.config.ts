@@ -8,8 +8,6 @@ const noneCsp = "default-src 'none'; frame-ancestors 'none'";
 const commonCsp = [
   // Default to self only.
   "default-src 'self'",
-  // Note: base64 images used by monaco
-  "img-src 'self' data:",
   // Note: inline css is used by monaco.
   "style-src 'self' 'unsafe-inline'",
   // No iframing of this page allowed.
@@ -19,13 +17,22 @@ const commonCsp = [
 // The host/UI page and code use this CSP.
 // Note: cloudflare analytics
 const indexCsp = commonCsp.concat([
+  // Cloudflare for analytics.
   "connect-src 'self' https://cloudflareinsights.com/cdn-cgi/rum",
   "script-src 'self' https://static.cloudflareinsights.com/beacon.min.js",
+  // Note: base64 images used by monaco.
+  "img-src 'self' data:",
 ]);
 
 // The 3p host/UI page additionally needs to fetch scripts from github.
 // (and the dev version needs to hit localhost)
-const thirdPartyCsp = commonCsp.concat('connect-src https://*.github.io http://localhost:3001');
+const thirdPartyCsp = commonCsp.concat([
+  // Cloudflare for analytics, localhost for testing, github.io for 3p scripts.
+  "connect-src 'self' https://*.github.io http://localhost:3001 https://cloudflareinsights.com/cdn-cgi/rum",
+  "script-src 'self' https://static.cloudflareinsights.com/beacon.min.js",
+  // Note: base64 images used by monaco, github for gravatars.
+  "img-src 'self' data: https://github.com https://avatars.githubusercontent.com",
+]);
 
 // The worker/script runner can use WASM and access pyodide and pypi packages.
 // TODO: Can this be narrowed?
@@ -74,7 +81,7 @@ export default defineNitroConfig({
     // '/**': csp(noneCsp),
   },
   prerender: {
-    routes: ['/', '/playground/load-tutorial'],
+    routes: ['/', '/playground/load-tutorial', '/doc/third-party'],
     crawlLinks: true,
   }
 });

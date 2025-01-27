@@ -1,5 +1,5 @@
 import { FiolinScript } from '../../common/types';
-import { maybeGetByRelIdAs } from '../../web-utils/select-as';
+import { getByRelIdAs } from '../../web-utils/select-as';
 import { setSelected } from '../../web-utils/set-selected';
 import { LoaderComponent } from './loader-component';
 
@@ -15,7 +15,7 @@ export class TutorialLoader extends LoaderComponent {
 
   constructor(container: HTMLElement, opts: TutorialOptions) {
     super();
-    this.tutorialSelect = maybeGetByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
+    this.tutorialSelect = getByRelIdAs(container, 'tutorial-select', HTMLSelectElement);
     this.tutorials = opts.tutorials || {};
     this.triggerReload = opts.triggerReload;
     this.setUpHandlers();

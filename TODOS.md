@@ -18,12 +18,15 @@ A not-necessarily-exhaustive list of TODOs:
     set"). Still exists but workaround added.
   - Emscripten modules:
     - Fix unsafe-eval issue with imagemagick
-    - Figure out how to pass in bytes to imagemagick read
     - ffmpeg 
     - some kind of document conversion thing
     - some kind of ebook converter
     - more archive format converters
-  - Canvas interaction?
+  - Canvas
+    - Figure out some actual use-cases and work through them
+    - Should this be subsumed under forms?
+    - How to control visibility and size?
+    - Interaction?
   - Debug command that can trigger some kind of interactive repl
 - Scripts
   - Playground examples
@@ -52,7 +55,7 @@ A not-necessarily-exhaustive list of TODOs:
   - Landing page: autocomplete
   - Add some transition animations for the buttons to invite interaction.
   - Third party:
-    - Add a component
+    - Add the docs
     - Modal/overlaid warnings w/dev avatar
     - Stored approvals
   - Editor:

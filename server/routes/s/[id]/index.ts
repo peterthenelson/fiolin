@@ -16,7 +16,7 @@ export default defineEventHandler((event) => {
         <script src="${versionedLink('/init-fiol.js')}&fiol=${name}" type="module" defer></script>
       </head>
       <body>
-        ${renderContainer({ title: script.meta.title, desc: script.meta.description, numSpaces: 4 })}
+        ${renderContainer({ mode: '1P', title: script.meta.title, desc: script.meta.description, numSpaces: 4 })}
         <a href="/s/${name}/script.json" class="hidden">fiolin script source</a>
       </body>
     </html>

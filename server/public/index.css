@@ -162,7 +162,7 @@ button:focus-visible, .button:focus-visible {
   margin: 0.25em 0.5em;
 }
 
-.script-header, .script, .script-controls, .script-output {
+.script-header, .script, .script-controls, .script-output, .third-party {
   width: 100%;
 }
 
@@ -213,6 +213,12 @@ dialog::backdrop {
   max-width: 25em;
   padding: 1em;
   color: var(--whitish);
+}
+
+.avatar {
+  max-width: 4em;
+  max-height: 4em;
+  border-radius: 50%;
 }
 
 form label {

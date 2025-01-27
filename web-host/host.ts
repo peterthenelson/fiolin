@@ -1,17 +1,7 @@
-import { FiolinScript } from '../common/types';
-import { Container } from '../components/web/container';
+import { Container, ContainerOpts } from '../components/web/container';
 const monaco = import('../web-utils/monaco');
 
-export interface FromUrlOpts {
-  url: string;
-  showLoading?: boolean;
-}
-
-export interface FromTutorialOpts {
-  tutorial: Record<string, FiolinScript>;
-}
-
-export async function initFiolin(opts: FromUrlOpts | FromTutorialOpts): Promise<Container> {
+export async function initFiolin(opts: ContainerOpts): Promise<Container> {
   let endpoints: Record<string, string> = {};
   try {
     const resp = await fetch(`/bundle/versions.json?v=${Math.random()}`);

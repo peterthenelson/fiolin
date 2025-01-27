@@ -17,6 +17,7 @@ import { TutorialLoader } from './tutorial-loader';
 import { UrlLoader } from './url-loader';
 import { LoaderComponent } from './loader-component';
 import { CombinedLoader } from './combined-loader';
+import { ThirdParty } from './third-party';
 
 function downloadFile(f: File) {
   const elem = document.createElement('a');
@@ -27,12 +28,52 @@ function downloadFile(f: File) {
   document.body.removeChild(elem);
 }
 
-export interface ContainerOptions {
-  url?: string;
+export type ContainerOpts = CommonContainerOpts & (FirstPartyContainerOpts | ThirdPartyContainerOpts | PlaygroundContainerOpts);
+
+export interface CommonContainerOpts {
   workerEndpoint?: string;
-  showLoading?: boolean;
-  tutorials?: Record<string, FiolinScript>;
   storage?: StorageLike;
+}
+
+export interface FirstPartyContainerOpts {
+  type: '1P';
+  fiol: string;
+}
+
+export interface ThirdPartyContainerOpts {
+  type: '3P';
+  username: string;
+  path: string;
+  githubIoBase?: string;
+}
+
+export interface PlaygroundContainerOpts {
+  type: 'PLAYGROUND';
+  tutorials: Record<string, FiolinScript>;
+}
+
+function loaderFromOpts(container: HTMLElement, opts: ContainerOpts, triggerReload: () => void, setTitleAndDesc: (title: string, desc: string) => void): LoaderComponent {
+  if (opts.type === '1P') {
+    return new UrlLoader({
+      url: `/s/${opts.fiol}/script.json`,
+    });
+  } else if (opts.type === '3P') {
+    const url = (
+      opts.githubIoBase !== undefined ?
+      opts.githubIoBase :
+      `https://${opts.username}.github.io`) + `/${opts.path}.json`;
+    return new UrlLoader({
+      url,
+      setLoadingText: (s) => {
+        setTitleAndDesc(s, `Fetching script from\n${s}`);
+      },
+    });
+  } else {
+    return new TutorialLoader(container, {
+      tutorials: opts.tutorials,
+      triggerReload,
+    });
+  }
 }
 
 export class Container {
@@ -40,6 +81,7 @@ export class Container {
   private readonly scriptTitle: HTMLDivElement;
   private readonly modeButton: HTMLDivElement;
   private readonly deployButton: HTMLDivElement;
+  private readonly thirdParty: ThirdParty;
   private readonly scriptDesc: HTMLPreElement;
   private readonly loader: LoaderComponent;
   private readonly deployDialog: DeployDialog;
@@ -51,28 +93,25 @@ export class Container {
   public script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
 
-  constructor(container: HTMLElement, opts?: ContainerOptions) {
-    opts = opts || {};
+  constructor(container: HTMLElement, opts: ContainerOpts) {
     this.container = container;
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
+    const thirdPartyOpts = (
+      opts.type === '3P' ?
+      { username: opts.username, path: opts.path } :
+      undefined);
+    this.thirdParty = new ThirdParty(container, thirdPartyOpts);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
-    this.loader = new CombinedLoader([
-      new UrlLoader({
-        url: opts.url,
-        setLoadingText: opts.showLoading ? (s) => {
-          this.scriptTitle.textContent = s;
-          this.scriptDesc.textContent = `Fetching script from\n${s}`;
-        } : undefined,
-      }),
-      new TutorialLoader(container, {
-        tutorials: opts.tutorials,
-        triggerReload: () => {
-          this.script = this.loadScript();
-        },
-      })
-    ])
+    this.loader = loaderFromOpts(
+      container, opts,
+      () => { this.script = this.loadScript() },
+      (title, desc) => {
+        this.scriptTitle.textContent = title;
+        this.scriptDesc.textContent = desc;
+      }
+    );
     this.deployDialog = new DeployDialog(container, {
       storage: opts.storage || window.localStorage,
       downloadFile,
@@ -114,6 +153,7 @@ export class Container {
   }
 
   private async loadScript(): Promise<FiolinScript> {
+    this.thirdParty.onLoad();
     try {
       let script: FiolinScript;
       if (this.loader.isEnabled()) {

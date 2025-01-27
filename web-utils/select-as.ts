@@ -1,7 +1,9 @@
-export function maybeSelectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T {
+export function maybeSelectAs<T extends HTMLElement>(root: HTMLElement, sel: string, cls: new (...args: any[])=> T): T | null {
   const elem = root.querySelector(sel);
   if (elem instanceof cls) {
     return (elem as T);
+  } else if (elem === null) {
+    return null;
   } else {
     throw new Error(`${sel} is not an instance of ${cls}`);
   }
@@ -28,7 +30,7 @@ export function selectAllAs<T extends HTMLElement>(root: HTMLElement, sel: strin
   return elems;
 }
 
-export function maybeGetByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T {
+export function maybeGetByRelIdAs<T extends HTMLElement>(root: HTMLElement, relativeId: string, cls: new (...args: any[])=> T): T | null {
   return maybeSelectAs(root, `[data-rel-id="${relativeId}"]`, cls);
 }
 

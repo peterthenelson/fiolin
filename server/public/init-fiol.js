@@ -11,11 +11,11 @@ import(endpoints.host || '/bundle/host.js').then((host) => {
   const fiol = params.get('fiol')
   const tutorialVar = params.get('tutorialVar')
   if (fiol) {
-    host.initFiolin({ url: `/s/${fiol}/script.json` });
+    host.initFiolin({ type: '1P', fiol });
   } else if (tutorialVar) {
     const tutorials = window[tutorialVar];
     if (tutorials) {
-      host.initFiolin({ tutorials });
+      host.initFiolin({ type: 'PLAYGROUND', tutorials });
     } else {
       console.error(`window.${tutorialVar} doesn't exist`)
     }

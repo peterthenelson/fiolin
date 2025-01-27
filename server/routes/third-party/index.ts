@@ -13,7 +13,7 @@ export default defineEventHandler(() => {
         <script src="${versionedLink('/third-party.js')}" type="module" defer></script>
       </head>
       <body>
-        ${renderContainer({ numSpaces: 4 })}
+        ${renderContainer({ mode: '3P', numSpaces: 4 })}
       </body>
     </html>
   `);
