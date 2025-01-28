@@ -25,7 +25,8 @@ export type FiolinFormComponentElement = (
   [FiolinFormRange, HTMLInputElement] | [FiolinFormTel, HTMLInputElement] |
   [FiolinFormText, HTMLInputElement] | [FiolinFormTime, HTMLInputElement] |
   [FiolinFormUrl, HTMLInputElement] | [FiolinFormSelect, HTMLSelectElement] |
-  [FiolinFormButton, HTMLButtonElement] | [FiolinFormOutput, HTMLOutputElement]
+  [FiolinFormButton, HTMLButtonElement] | [FiolinFormOutput, HTMLOutputElement] |
+  [FiolinFormCanvas, HTMLCanvasElement]
 );
 
 // Type assertion helper
@@ -423,6 +424,21 @@ export interface FiolinFormOutput {
   name: string;
   // Optional initial value.
   value?: string;
+  // Is this component (initially) hidden?
+  hidden?: boolean;
+}
+
+// A canvas element
+export interface FiolinFormCanvas {
+  // Type id
+  type: 'CANVAS';
+  // The name (used to identify the component; doesn't contribute to form
+  // submission).
+  name: string;
+  // The initial height.
+  height: number;
+  // The initial width.
+  width: number;
   // Is this component (initially) hidden?
   hidden?: boolean;
 }

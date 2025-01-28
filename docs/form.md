@@ -709,3 +709,28 @@ submission).
 
 > Is this component (initially) hidden?
 
+## FiolinFormCanvas
+
+> A canvas element
+
+**type**: _'CANVAS'_
+
+> Type id
+
+**name**: _string_
+
+> The name (used to identify the component; doesn't contribute to form
+submission).
+
+**height**: _number_
+
+> The initial height.
+
+**width**: _number_
+
+> The initial width.
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+

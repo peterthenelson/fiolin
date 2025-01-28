@@ -51,6 +51,7 @@ function createAndPairElement(component: FiolinFormComponent): FiolinFormCompone
     'SELECT': (c) => [c, document.createElement('select')],
     'BUTTON': (c) => [c, document.createElement('button')],
     'OUTPUT': (c) => [c, document.createElement('output')],
+    'CANVAS': (c) => [c, document.createElement('canvas')],
   });
 }
 
@@ -256,6 +257,11 @@ export function renderInPlace(ce: FiolinFormPartialComponentElement, ctx: Render
     'OUTPUT': ([component, output]) => {
       updateField(output, 'name', component.name);
       updateField(output, 'value', component.value);
+    },
+    'CANVAS': ([component, output]) => {
+      output.classList.add('canvas');
+      updateField(output.style, 'height', component.height);
+      updateField(output.style, 'width', component.width);
     },
   });
   if (ce[0].hidden !== undefined) {

@@ -1,6 +1,6 @@
 import { ObjPath, pArr, Parser, pBool, pNum, pObjWithProps, pOpt, pStr, pStrLit, pStrUnion, pTaggedUnion, pTypedPartialWithProps } from './parse';
 import { TypedPartial } from './tagged-unions';
-import { FiolinForm, FiolinFormButton, FiolinFormDiv, FiolinFormComponent, FiolinFormText, FiolinFormLabel, FiolinFormSelect, FiolinFormSelectOption, FiolinFormCheckbox, FiolinFormColor, FiolinFormDate, FiolinFormDatetimeLocal, FiolinFormNumber, FiolinFormEmail, FiolinFormRadio, FiolinFormRange, FiolinFormTel, FiolinFormUrl, FiolinFormTime, FiolinFormFile, FiolinFormComponentId, FiolinFormOutput, FiolinFormComponentType  } from './types/form';
+import { FiolinForm, FiolinFormButton, FiolinFormDiv, FiolinFormComponent, FiolinFormText, FiolinFormLabel, FiolinFormSelect, FiolinFormSelectOption, FiolinFormCheckbox, FiolinFormColor, FiolinFormDate, FiolinFormDatetimeLocal, FiolinFormNumber, FiolinFormEmail, FiolinFormRadio, FiolinFormRange, FiolinFormTel, FiolinFormUrl, FiolinFormTime, FiolinFormFile, FiolinFormComponentId, FiolinFormOutput, FiolinFormComponentType, FiolinFormCanvas  } from './types/form';
 
 export const pForm = pObjWithProps<FiolinForm>({
   children: pArr(pFiolinFormComponent),
@@ -28,6 +28,7 @@ export function pFiolinFormComponent(p: ObjPath, v: unknown): FiolinFormComponen
     'SELECT': pSelect,
     'BUTTON': pButton,
     'OUTPUT': pOutput,
+    'CANVAS': pCanvas,
   })(p, v);
 }
 
@@ -51,6 +52,7 @@ export function pPartialFiolinFormComponent(p: ObjPath, v: unknown): TypedPartia
     'SELECT': pPartialSelect,
     'BUTTON': pPartialButton,
     'OUTPUT': pPartialOutput,
+    'CANVAS': pPartialCanvas,
   })(p, v);
 }
 
@@ -258,5 +260,13 @@ const [pOutput, pPartialOutput] = pObjAndPartial<FiolinFormComponentType, Fiolin
   type: pStrLit('OUTPUT'),
   name: pStr,
   value: pOpt(pStr),
+  hidden: pOpt(pBool),
+});
+
+const [pCanvas, pPartialCanvas] = pObjAndPartial<FiolinFormComponentType, FiolinFormCanvas>({
+  type: pStrLit('CANVAS'),
+  name: pStr,
+  height: pNum,
+  width: pNum,
   hidden: pOpt(pBool),
 });
