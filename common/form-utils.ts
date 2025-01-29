@@ -38,6 +38,18 @@ export class FiolinFormComponentMapImpl<T> implements FiolinFormComponentMap<T> 
     this.map = new Map();
   }
 
+  [Symbol.iterator](): Iterator<[FiolinFormComponentId, T]> {
+    const it = this.map[Symbol.iterator]();
+    return {
+      next: () => {
+        const result = it.next();
+        if (result.done) return result;
+        const [key, value] = result.value;
+        return { value: [fromKey(key), value], done: false };
+      },
+    };
+  }
+
   has(id: FiolinFormComponentId): boolean {
     return this.map.has(toKey(id));
   }
@@ -61,6 +73,15 @@ function toKey(id: FiolinFormComponentId): string {
     return id.name;
   } else {
     return `${id.name}/${id.value}`;
+  }
+}
+
+function fromKey(key: string): FiolinFormComponentId {
+  const i = key.indexOf('/');
+  if (i === -1) {
+    return { name: key };
+  } else {
+    return { name: key.substring(0, i), value: key.substring(i+1) };
   }
 }
 

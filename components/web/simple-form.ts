@@ -62,7 +62,7 @@ export class SimpleForm extends FormComponent {
     }
   }
 
-  onRun(request: FiolinRunRequest): void {
+  onRun(request: FiolinRunRequest, opts: { setCanvases?: Record<string, OffscreenCanvas> }): void {
     this.fileChooser.disabled = true;
     this.fileChooser.value = '';
     this.outputFileText.title = '';

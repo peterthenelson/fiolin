@@ -1,7 +1,6 @@
 import { FiolinFormComponentMapImpl, idToRepr, swapToPartial } from '../../common/form-utils';
 import { typeSwitch } from '../../common/tagged-unions';
 import { FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptInterface, FormUpdate } from '../../common/types';
-import { FiolinFormPartialComponentElement } from '../../common/types/form';
 import { getByRelIdAs, selectAllAs } from '../../web-utils/select-as';
 import { setSelected } from '../../web-utils/set-selected';
 import { FormComponent } from './form-component';
@@ -14,6 +13,7 @@ export interface CustomFormCallbacks {
 
 export class CustomForm extends FormComponent {
   private rendered: RenderedForm;
+  private transferred: boolean;
   private readonly cbs: CustomFormCallbacks;
   private ui?: FiolinScriptInterface;
 
@@ -24,6 +24,7 @@ export class CustomForm extends FormComponent {
       ui: { inputFiles: 'ANY', outputFiles: 'ANY' },
       uniquelyIdentifiedElems: new FiolinFormComponentMapImpl()
     };
+    this.transferred = true;
     this.cbs = callbacks;
     // Disable it until the script is set.
     this.rendered.form.onsubmit = (e) => e.preventDefault();
@@ -103,22 +104,34 @@ export class CustomForm extends FormComponent {
         }
         this.cbs.runScript(files, args);
       }
+      this.transferred = false;
     } else {
       newForm = {
         form: document.createElement('form'),
         ui: { inputFiles: 'ANY', outputFiles: 'ANY' },
         uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(), 
       };
+      this.transferred = true;
     }
     this.rendered.form.replaceWith(newForm.form);
     this.rendered = newForm;
   }
 
-  onRun(request: FiolinRunRequest): void {
+  onRun(request: FiolinRunRequest, opts: { setCanvases?: Record<string, OffscreenCanvas> }): void {
+    // TODO: update request with
     // TODO: When they exist:
     // - reset file/run component values
     // - reset the output file display component.
     this.rendered.form.inert = true;
+    if (!this.transferred) {
+      opts.setCanvases = {};
+      for (const [id, ce] of this.rendered.uniquelyIdentifiedElems) {
+        if (ce[1] instanceof HTMLCanvasElement) {
+          opts.setCanvases[id.name] = ce[1].transferControlToOffscreen();
+        }
+      }
+      this.transferred = true;
+    }
   }
 
   onSuccess(response: FiolinRunResponse): void {

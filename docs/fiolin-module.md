@@ -10,10 +10,6 @@ fiolin.**args**()
 
 > Get the args dictionary.
 
-fiolin.**canvas**()
-
-> Get the canvas object, if any.
-
 fiolin.**continue_with**(new_state)
 
 > Set the continue bit and save state for the next run.
@@ -52,6 +48,13 @@ fiolin.**form_update**(name, partial, value=None)
 > 
 > Note: The 'type' field is required!
 
+fiolin.**get_canvas**(name)
+
+> Get the named canvas object, if any.
+> 
+> May be missing even if a corresponding CANVAS exists in the form, e.g., if
+> this is running offline.
+
 fiolin.**get_input_basename**(suffix='', ext=None)
 
 > Gets the (assumed to be single) input file basename.
@@ -70,10 +73,6 @@ fiolin.**get_input_path**()
 fiolin.**get_input_paths**()
 
 > Gets the input file paths.
-
-fiolin.**has_canvas**()
-
-> Is there a canvas object?
 
 fiolin.**set_output_basename**(output)
 

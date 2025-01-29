@@ -17,7 +17,6 @@ export interface IConsole {
 };
 
 export interface PyodideRunnerOptions {
-  canvas?: ICanvasRenderingContext2D;
   console?: IConsole;
   indexUrl?: string;
   loaders?: Record<string, FiolinWasmLoader>;
@@ -62,7 +61,6 @@ export class PyodideRunner implements FiolinRunner {
       inputs: [], outputs: [], args: {},
       enqueueFormUpdate: resultify((update) => this.enqueueFormUpdate(update)),
       Array, Map, Object,
-      canvas: options?.canvas,
     };
     const innerConsole: IConsole = options?.console || console;
     this._log = [];
@@ -262,6 +260,7 @@ export class PyodideRunner implements FiolinRunner {
     this._log = [];
     this.resetShared();
     Object.assign(this._shared.args!, request.args || {});
+    this._shared.canvases = request.canvases;
     try {
       this._formUpdates = [];
       if (script.interface.form) {

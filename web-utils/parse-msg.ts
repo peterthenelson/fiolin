@@ -1,7 +1,7 @@
-import { ObjPath, pInst, pNum, pStr, pStrLit, pObjWithProps, pStrUnion, pOpt, pTaggedUnion } from '../common/parse';
+import { ObjPath, pInst, pNum, pStr, pStrLit, pObjWithProps, pStrUnion, pOpt, pTaggedUnion, pRec } from '../common/parse';
 import { pFiolinScript } from '../common/parse-script';
 import { pFiolinRunRequest, pFiolinRunResponse } from '../common/parse-run';
-import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, LogMessage, SuccessMessage, WorkerMessage, WorkerMessageType, InitMessage } from './types';
+import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, LogMessage, SuccessMessage, WorkerMessage, WorkerMessageType } from './types';
 import { FiolinLogLevel } from '../common/types';
 
 function getWindow() {
@@ -18,7 +18,6 @@ function getWindow() {
 
 export function pWorkerMessage(p: ObjPath, v: unknown): WorkerMessage {
   return pTaggedUnion<WorkerMessage>({
-    'INIT': pInitMessage,
     'LOADED': pLoadedMessage,
     'LOG': pLogMessage,
     'INSTALL_PACKAGES': pInstallPackagesMessage,
@@ -30,7 +29,6 @@ export function pWorkerMessage(p: ObjPath, v: unknown): WorkerMessage {
 }
 
 export const pWorkerMessageType = pStrUnion<WorkerMessageType[]>([
-  'INIT',
   'LOADED',
   'LOG',
   'INSTALL_PACKAGES',
@@ -40,13 +38,6 @@ export const pWorkerMessageType = pStrUnion<WorkerMessageType[]>([
   'ERROR',
 ]);
 
-export function pInitMessage(p: ObjPath, v: unknown): InitMessage {
-  return pObjWithProps<InitMessage>({
-    type: pStrLit('INIT'),
-    canvas: pInst(getWindow().OffscreenCanvas),
-  })(p, v);
-}
-  
 export const pLoadedMessage = pObjWithProps<LoadedMessage>({
   type: pStrLit('LOADED')
 });
@@ -72,6 +63,7 @@ export const pRunMessage = pObjWithProps<RunMessage>({
   type: pStrLit('RUN'),
   script: pFiolinScript,
   request: pFiolinRunRequest,
+  setCanvases: pOpt(pRec<OffscreenCanvas>(pInst(getWindow().OffscreenCanvas))),
 });
 
 export const pSuccessMessage = pObjWithProps<SuccessMessage>({

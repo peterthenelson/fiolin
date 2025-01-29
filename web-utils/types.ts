@@ -3,16 +3,11 @@ import { toErr } from '../common/errors';
 import { ExtractTagType } from '../common/tagged-unions';
 
 export type WorkerMessage = (
-  InitMessage | LoadedMessage | LogMessage | InstallPackagesMessage |
+  LoadedMessage | LogMessage | InstallPackagesMessage |
   PackagesInstalledMessage | RunMessage | SuccessMessage | ErrorMessage
 );
 
 export type WorkerMessageType = ExtractTagType<WorkerMessage>;
-
-export interface InitMessage {
-  type: 'INIT';
-  canvas: OffscreenCanvas;
-}
 
 export interface LoadedMessage { type: 'LOADED' }
 
@@ -33,6 +28,9 @@ export interface RunMessage {
   type: 'RUN';
   script: FiolinScript;
   request: FiolinRunRequest;
+  // Set/reset the canvases used in running pyodide. If left unset, it will run
+  // with previously set canvases.
+  setCanvases?: Record<string, OffscreenCanvas>;
 }
 
 export interface SuccessMessage {

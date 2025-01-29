@@ -87,7 +87,6 @@ export class Container {
   private readonly deployDialog: DeployDialog;
   private readonly form: FormComponent;
   private readonly editor: Editor;
-  private readonly canvas: HTMLCanvasElement;
   private readonly terminal: Terminal;
   private readonly worker: TypedWorker;
   public script: Promise<FiolinScript>;
@@ -137,9 +136,6 @@ export class Container {
     this.worker.onmessage = (msg) => {
       this.handleMessage(msg);
     }
-    this.canvas = getByRelIdAs(container, 'canvas', HTMLCanvasElement);
-    const offscreen = this.canvas.transferControlToOffscreen();
-    this.worker.postMessage({ type: 'INIT', canvas: offscreen }, [offscreen]);
     this.script = this.loadScript();
     this.setupHandlers();
     this.readyToRun = new Deferred();
@@ -148,7 +144,6 @@ export class Container {
   private async updateUiForScript(script: FiolinScript) {
     this.scriptTitle.textContent = script.meta.title;
     this.scriptDesc.textContent = script.meta.description;
-    this.canvas.classList.add('hidden');
     this.form.onLoad(script);
   }
 
@@ -205,7 +200,8 @@ export class Container {
       return;
     }
     const request: FiolinRunRequest = { inputs: files, args };
-    this.form.onRun(request);
+    const opts: { setCanvases?: Record<string, OffscreenCanvas> } = {};
+    this.form.onRun(request, opts);
     const script = await this.script;
     await this.readyToRun.promise;
     this.container.classList.remove('error');
@@ -222,7 +218,8 @@ export class Container {
         type: 'RUN',
         script,
         request,
-      });
+        setCanvases: opts.setCanvases,
+      }, opts.setCanvases ? Object.values(opts.setCanvases) : undefined);
     }
   }
 

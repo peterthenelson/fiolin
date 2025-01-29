@@ -3,7 +3,7 @@ import { parseAs } from '../common/parse';
 import { mkErrorMessage, InstallPackagesMessage, RunMessage, WorkerMessage } from '../web-utils/types';
 import { onlineWasmLoaders } from '../web-utils/loaders';
 import { pWorkerMessage } from '../web-utils/parse-msg';
-import { FiolinScript } from '../common/types';
+import { FiolinScript, ICanvasRenderingContext2D } from '../common/types';
 
 // Typed messaging
 const _rawPost = self.postMessage;
@@ -24,7 +24,6 @@ let runner: PyodideRunner | undefined = undefined;
 async function load(): Promise<void> {
   try {
     const tmp = new PyodideRunner({
-      canvas: ctx2d || undefined,
       console: {
         debug: (s) => postMessage({ type: 'LOG', level: 'DEBUG', value: s }),
         info: (s) => postMessage({ type: 'LOG', level: 'INFO', value: s }),
@@ -40,17 +39,12 @@ async function load(): Promise<void> {
     postMessage(mkErrorMessage(e));
   }
 }
-let loaded: Promise<void> | undefined;
+let loaded = load();
 
 let toInstall: FiolinScript | undefined;
 
-let ctx2d: OffscreenCanvasRenderingContext2D | null = null;
-
 async function onMessage(msg: WorkerMessage): Promise<void> {
-  if (msg.type === 'INIT') {
-    ctx2d = msg.canvas.getContext('2d');
-    loaded = load();
-  } else if (msg.type === 'INSTALL_PACKAGES') {
+  if (msg.type === 'INSTALL_PACKAGES') {
     await onInstallPackages(msg);
   } else if (msg.type === 'RUN') {
     await onRun(msg);
@@ -59,10 +53,15 @@ async function onMessage(msg: WorkerMessage): Promise<void> {
   }
 }
 
+let ctx2ds: Record<string, ICanvasRenderingContext2D> | undefined;
 async function onRun(msg: RunMessage): Promise<void> {
   await loaded;
   if (!runner) throw new Error(`runner missing after loaded completed`);
+  if (msg.setCanvases !== undefined) {
+    ctx2ds = Object.fromEntries(Object.entries(msg.setCanvases).map(([k, c]) => [k, c.getContext('2d')!]));
+  }
   try {
+    msg.request.canvases = ctx2ds;
     const response = await runner.run(msg.script, msg.request);
     if (response.error) {
       postMessage(mkErrorMessage(response.error, response.lineno, response));

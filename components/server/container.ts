@@ -55,7 +55,6 @@ export function renderContainer(opts?: FiolinContainerOptions): string {
         ${renderSimpleForm((opts.numSpaces || 0) + 4)}
       </div>
       <div class="script-output flex-col-wrap">
-        <canvas data-rel-id="canvas" class="canvas hidden"></canvas>
         ${renderTerminal((opts.numSpaces || 0) + 4)}
       </div>
       <div class="flow-row-wrap footer">

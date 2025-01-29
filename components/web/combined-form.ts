@@ -20,8 +20,8 @@ export class CombinedForm extends FormComponent {
     this.forms.forEach((f) => f.onLoad(script));
   }
 
-  onRun(request: FiolinRunRequest): void {
-    this.forms.forEach((f) => f.onRun(request));
+  onRun(request: FiolinRunRequest, opts: { setCanvases?: Record<string, OffscreenCanvas> }): void {
+    this.forms.forEach((f) => f.onRun(request, opts));
   }
 
   onSuccess(response: FiolinRunResponse): void {

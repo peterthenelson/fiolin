@@ -226,13 +226,15 @@ def form_update(name, partial, value=None):
     'value': partial,
   })
 
-def has_canvas():
-  """Is there a canvas object?"""
-  return bool(js.canvas)
-
-def canvas():
-  """Get the canvas object, if any."""
-  return js.canvas
+def get_canvas(name):
+  """Get the named canvas object, if any.
+  
+  May be missing even if a corresponding CANVAS exists in the form, e.g., if
+  this is running offline.
+  """
+  if js.canvases:
+    return getattr(js.canvases, name, None)
+  return None
 `;
 }
 

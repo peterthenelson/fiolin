@@ -63,12 +63,8 @@ const loaders = (() => {
   };
 })();
 
-function mkRunner(onFirstCanvasCall?: () => void): PyodideRunner {
-  onFirstCanvasCall ??= () => {
-    console.debug('Canvas disabled; all calls to canvas will be ignored')
-  };
-  const canvas = new DummyCanvasRenderingContext2D(onFirstCanvasCall);
-  return new PyodideRunner({ canvas, indexUrl, loaders });
+function mkRunner(): PyodideRunner {
+  return new PyodideRunner({ indexUrl, loaders });
 }
 
 function multiRe(...res: RegExp[]): RegExp {
@@ -526,19 +522,25 @@ describe('PyodideRunner', () => {
   });
 
   it('exposes canvas functionality', async () => {
-    let called = false;
-    const runner = mkRunner(() => {
-      console.debug('Canvas functionality invoked');
-      called = true;
-    });
+    const runner = mkRunner();
     const script = mkScript(`
       import fiolin
-      canvas = fiolin.canvas()
+      print(f'missing: {fiolin.get_canvas('missing')}')
+      canvas = fiolin.get_canvas('present')
       canvas.fillStyle = 'red'
       canvas.fillRect(10, 20, 100, 200)
     `);
-    const response = await runner.run(script, { inputs: [] });
+    let called = false;
+    const canvas = new DummyCanvasRenderingContext2D(() => {
+      console.debug('Canvas functionality invoked');
+      called = true;
+    })
+    const response = await runner.run(script, {
+      inputs: [],
+      canvases: { 'present': canvas },
+    });
     expect(response.error).toBeUndefined();
     expect(called).toBe(true);
+    expect(getStdout(response)).toMatch(/missing: None/);
   });
 });

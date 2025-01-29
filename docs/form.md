@@ -65,13 +65,17 @@ BUTTONs).
 
 > Pairs of types where the non-type fields are optionalized
 
-## FiolinFormComponentMap<T>
+## FiolinFormComponentMap<T> extends Iterable<[FiolinFormComponentId, T]>
 
 > The interface for maps that use FiolinFormComponentIds as keys.
 
 **get(id**: _FiolinFormComponentId): T | undefined_
 
 > Retrieve the value associated with the id; returns undefined if missing.
+
+**has(id**: _FiolinFormComponentId): boolean_
+
+> Check if there is a value associated with the id.
 
 ## FiolinFormDiv
 

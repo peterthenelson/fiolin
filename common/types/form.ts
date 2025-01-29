@@ -61,9 +61,11 @@ type _PartializeFirst<T extends string, U> = U extends [infer C extends { type: 
 export type FiolinFormPartialComponentElement = _PartializeFirst<FiolinFormComponentType, FiolinFormComponentElement>;
 
 // The interface for maps that use FiolinFormComponentIds as keys.
-export interface FiolinFormComponentMap<T> {
+export interface FiolinFormComponentMap<T> extends Iterable<[FiolinFormComponentId, T]> {
   // Retrieve the value associated with the id; returns undefined if missing.
   get(id: FiolinFormComponentId): T | undefined;
+  // Check if there is a value associated with the id.
+  has(id: FiolinFormComponentId): boolean;
 }
 
 // A div (to make a row or column of components).

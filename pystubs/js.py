@@ -8,4 +8,4 @@ partial = None
 args = {}
 def enqueueFormUpdate(update):
   pass
-canvas = None
+canvases = None

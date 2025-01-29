@@ -16,7 +16,7 @@ export abstract class FormComponent {
   abstract onLoad(script: FiolinScript): void;
 
   // Update the UI in preparation for the imminent run of the script.
-  abstract onRun(request: FiolinRunRequest): void;
+  abstract onRun(request: FiolinRunRequest, opts: { setCanvases?: Record<string, OffscreenCanvas> }): void;
 
   // Update the UI after a successful run of the script.
   abstract onSuccess(response: FiolinRunResponse): void;

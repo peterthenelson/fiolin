@@ -9,6 +9,7 @@ import { ICanvasRenderingContext2D } from './canvas';
 export interface FiolinRunRequest {
   inputs: File[];
   args?: Record<string, string>;
+  canvases?: Record<string, ICanvasRenderingContext2D>;
   // TODO: Add a debug section
 }
 
@@ -48,9 +49,6 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // Used to signal any updates to be made to the form
   // Note: Resultified callbacks due to unresolved js/py ffi issue.
   enqueueFormUpdate(update: FormUpdate): Result<void>;
-
-  // A canvas to render output to (n.b., possibly empty or fake).
-  canvas?: ICanvasRenderingContext2D;
 
   // Basic objects helpful for serialization code
   Array: typeof Array;
