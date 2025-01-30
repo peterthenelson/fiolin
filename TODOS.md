@@ -24,8 +24,7 @@ A not-necessarily-exhaustive list of TODOs:
     - more archive format converters
   - Canvas
     - Figure out some actual use-cases and work through them
-    - Should this be subsumed under forms?
-    - How to control visibility and size?
+    - How to control visibility? Size updating doesn't work right now.
     - Interaction?
   - Debug command that can trigger some kind of interactive repl
 - Scripts

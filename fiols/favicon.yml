@@ -12,6 +12,26 @@ interface:
   inputAccept: image/*
   inputFiles: SINGLE
   outputFiles: SINGLE
+  form:
+    autofocusedName: input
+    children:
+      - type: DIV
+        dir: ROW
+        children:
+          - type: LABEL
+            text: Input Image
+            child:
+              type: FILE
+              name: input
+              submit: true
+          - type: LABEL
+            text: Preview
+            child:
+              type: CANVAS
+              name: output
+              height: 256
+              width: 496
+          # TODO: add a download component
 runtime:
   wasmModules:
     - name: imagemagick

@@ -260,8 +260,8 @@ export function renderInPlace(ce: FiolinFormPartialComponentElement, ctx: Render
     },
     'CANVAS': ([component, output]) => {
       output.classList.add('canvas');
-      updateField(output.style, 'height', component.height);
-      updateField(output.style, 'width', component.width);
+      updateField(output, 'height', component.height);
+      updateField(output, 'width', component.width);
     },
   });
   if (ce[0].hidden !== undefined) {
