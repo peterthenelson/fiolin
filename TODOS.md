@@ -23,7 +23,7 @@ A not-necessarily-exhaustive list of TODOs:
     - some kind of ebook converter
     - more archive format converters
   - Canvas
-    - Figure out some actual use-cases and work through them
+    - Figure out more actual use-cases and work through them
     - How to control visibility? Size updating doesn't work right now.
     - Interaction?
   - Debug command that can trigger some kind of interactive repl

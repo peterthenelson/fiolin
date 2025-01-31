@@ -434,11 +434,16 @@ form button {
   width: 100%;
 }
 
-.output-term {
+.terminal {
+  display: flex;
+  flex-direction: column;
+  justify-content: top;
+  align-items: left;
   width: 100%;
   height: 10em;
-  padding: 1em;
+  margin: 1em 0;
   font-family: monospace;
+  white-space: pre-wrap;
   background-color: var(--medGrey);
   overflow: auto;
   scrollbar-width: thin;
@@ -446,7 +451,35 @@ form button {
   box-shadow: 0 0 2.5px 1px var(--offWhite);
 }
 
-.error .output-term {
+.terminal-single-msg {
+  padding: 1em;
+}
+
+.log-odd {
+  background-color: var(--medGrey);
+  min-width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+}
+
+.log-even {
+  background-color: var(--darkGrey);
+  min-width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+}
+
+.log-level {
+  min-width: 3em;
+  height: 100%;
+  margin: 0 1em;
+}
+
+.error .terminal {
   box-shadow: 0 0 2.5px 1px var(--darkRed);
 }
 
