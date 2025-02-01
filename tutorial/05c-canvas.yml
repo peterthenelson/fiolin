@@ -1,0 +1,41 @@
+meta:
+  title: 5b. Advanced UI -- Canvas
+  author: Peter Nelson
+  description: >
+    Forms can include canvas elements that can be drawn on or images displayed
+    on. Use `fiolin.get_canvas()` to get a canvas by name. Note that if your
+    script is running outside of the web browser (as may be the case in a test),
+    this will return None regardless of whether such a canvas is specified in
+    the form.
+interface:
+  inputFiles: NONE
+  outputFiles: NONE
+  form:
+    autofocusedName: routine
+    children:
+      - type: DIV
+        dir: COL
+        children:
+          - type: DIV
+            dir: ROW
+            children:
+              - type: SELECT
+                name: routine
+                required: true
+                options:
+                  - text: Square
+                    value: square
+                  - text: Smiley
+                    value: smiley
+                  - text: Loss
+                    value: loss
+              - type: BUTTON
+                text: Run
+          - type: LABEL
+            text: Output
+            child:
+              type: CANVAS
+              name: output
+              height: 400
+              width: 400
+runtime: {}
