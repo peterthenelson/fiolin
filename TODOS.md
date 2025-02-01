@@ -30,7 +30,6 @@ A not-necessarily-exhaustive list of TODOs:
 - Scripts
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)
-    - Demonstrating multi-step scripts
     - Demonstrating canvas
   - More file-conversion scripts for real tasks
     - SVG recolor

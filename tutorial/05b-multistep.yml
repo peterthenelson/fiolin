@@ -1,0 +1,63 @@
+meta:
+  title: 5b. Advanced UI -- Multi-step Scripts
+  author: Peter Nelson
+  description: >
+    You can build scripts that have multiple user interactions before they
+    produce an output. `state()` and `continue_with()` are used to retrieve and
+    store state between runs. The various `form_*()` functions can be used to
+    hide, show, or otherwise modify existing form elements.
+interface:
+  inputFiles: NONE
+  outputFiles: NONE
+  form:
+    autofocusedName: action
+    autofocusedValue: rug
+    children:
+      - type: DIV
+        dir: COL
+        children:
+        - type: DIV
+          dir: ROW
+          children:
+            - type: BUTTON
+              text: Move the rug
+              name: action
+              value: rug
+            - type: BUTTON
+              text: Open the trapdoor
+              name: action
+              value: open-trapdoor
+              hidden: true
+            - type: BUTTON
+              text: Go down
+              name: action
+              value: enter-trapdoor
+              hidden: true
+            - type: BUTTON
+              text: Look at the trophy case
+              name: action
+              value: trophy-case
+            - type: BUTTON
+              text: Take the lantern
+              name: action
+              value: take-lamp
+              hidden: true
+            - type: BUTTON
+              text: Twiddle your thumbs
+              name: action
+              value: twiddle
+              hidden: true
+            - type: BUTTON
+              text: Turn on lantern
+              name: action
+              value: lamp
+              hidden: true
+        - type: DIV
+          dir: ROW
+          children:
+            - type: OUTPUT
+              name: output
+              value: >
+                You are in the living room. There is a trophy case and a large
+                Persian rug in the center of the room.
+runtime: {}

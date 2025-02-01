@@ -18,8 +18,8 @@ def state():
 
 def continue_with(new_state):
   """Set the continue bit and save state for the next run."""
-  global state
-  state = new_state
+  global _state
+  _state = new_state
   js.partial = True
 
 def args():
