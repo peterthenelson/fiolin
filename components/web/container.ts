@@ -16,7 +16,6 @@ import { StorageLike } from '../../web-utils/types';
 import { TutorialLoader } from './tutorial-loader';
 import { UrlLoader } from './url-loader';
 import { LoaderComponent } from './loader-component';
-import { CombinedLoader } from './combined-loader';
 import { ThirdParty } from './third-party';
 
 function downloadFile(f: File) {
@@ -97,9 +96,10 @@ export class Container {
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
     this.deployButton = getByRelIdAs(container, 'deploy-button', HTMLDivElement);
+    const storage: StorageLike = opts.storage || window.localStorage;
     const thirdPartyOpts = (
       opts.type === '3P' ?
-      { username: opts.username, path: opts.path } :
+      { username: opts.username, path: opts.path, storage: storage } :
       undefined);
     this.thirdParty = new ThirdParty(container, thirdPartyOpts);
     this.scriptDesc = getByRelIdAs(container, 'script-desc', HTMLPreElement);
@@ -111,10 +111,7 @@ export class Container {
         this.scriptDesc.textContent = desc;
       }
     );
-    this.deployDialog = new DeployDialog(container, {
-      storage: opts.storage || window.localStorage,
-      downloadFile,
-    });
+    this.deployDialog = new DeployDialog(container, { storage, downloadFile });
     const formCallbacks: FormCallbacks = {
       runScript: (files, args) => this.runScript(files, args),
       downloadFile: (file) => downloadFile(file),

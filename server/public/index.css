@@ -166,6 +166,10 @@ button:focus-visible, .button:focus-visible {
   width: 100%;
 }
 
+.author-text {
+  width: 70%
+}
+
 .script-header {
   min-height: 2.4em;
   display: flex;
@@ -209,7 +213,7 @@ dialog::backdrop {
   backdrop-filter: blur(5px);
 }
 
-.deploy-readme {
+.deploy-readme, .third-party-readme {
   max-width: 25em;
   padding: 1em;
   color: var(--whitish);
@@ -219,6 +223,7 @@ dialog::backdrop {
   max-width: 4em;
   max-height: 4em;
   border-radius: 50%;
+  margin-right: 1em;
 }
 
 form label {
@@ -246,6 +251,28 @@ form label:focus-within  {
 
 :is(form, .script-header) :is(input, select):focus {
   box-shadow: 0 0 2.5px 1px var(--blueish);
+}
+
+:is(form, .script-header) [type="checkbox"] {
+  appearance: none;
+  border: 3px solid var(--lightGrey);
+  width: 2em;
+  height: 2em;
+  padding: 0;
+}
+
+:is(form, .script-header) [type="checkbox"]:before {
+  content: "";
+  color: transparent;
+  display: block;
+  width: inherit;
+  height: inherit;
+  border-radius: inherit;
+}
+
+:is(form, .script-header) [type="checkbox"]:checked {
+  border-color: var(--lightBlueish);
+  background: radial-gradient(var(--blueish), var(--medGrey) 75%);
 }
 
 form button {

@@ -30,7 +30,6 @@ A not-necessarily-exhaustive list of TODOs:
 - Scripts
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)
-    - Demonstrating canvas
   - More file-conversion scripts for real tasks
     - SVG recolor
     - Extracting text and tables from PDFs
@@ -54,8 +53,6 @@ A not-necessarily-exhaustive list of TODOs:
   - Add some transition animations for the buttons to invite interaction.
   - Third party:
     - Add the docs
-    - Modal/overlaid warnings w/dev avatar
-    - Stored approvals
     - Release publicly by updating prerendering
   - Editor:
     - Why is monaco occasionally triggering a request for clipboard permissions?
