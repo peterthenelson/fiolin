@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
       </head>
       <body>
         <div class="container">
-          <h1>ƒ<span class="home-io">ɪᴏ</span>ʟɪɴ</h1>
+          <a href="/" class="plain-link"><h1>ƒ<span class="home-io">ɪᴏ</span>ʟɪɴ</h1></a>
           <div class="home-subtitle">Your files belong to you.</div>
           <div class="home-text">
             Easily convert between file formats, combine PDFs, and more.

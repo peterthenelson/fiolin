@@ -1,4 +1,4 @@
-# ƒ<span class="home-io">ɪᴏ</span>ʟɪɴ -- Design Doc
+# <a href="/" class="plain-link">ƒ<span class="home-io">ɪᴏ</span>ʟɪɴ</a> -- Design Doc
 
 _A Fiddle For Files_
 
