@@ -50,7 +50,7 @@ function csp(policy: string | string[]) {
   return { headers: { 'Content-Security-Policy': policy } };
 }
 
-const loadTutorial: NitroRouteConfig = {
+const loadJs: NitroRouteConfig = {
   headers: {
     'Content-Type': 'text/javascript',
     ...csp(noneCsp).headers
@@ -64,12 +64,13 @@ export default defineNitroConfig({
     '/': csp(indexCsp),
     '/index.html': csp(indexCsp),
     '/index.js': csp(indexCsp),
+    '/load-suggestions': loadJs,
     '/bundle/host.js': csp(indexCsp),
     '/bundle/worker.js': csp(workerCsp),
     '/init-fiol.js': csp(indexCsp),
     '/playground/': csp(indexCsp),
     '/playground/index.html': csp(indexCsp),
-    '/playground/load-tutorial': loadTutorial,
+    '/playground/load-tutorial': loadJs,
     '/third-party/': csp(thirdPartyCsp),
     '/third-party/index.html': csp(thirdPartyCsp),
     '/third-party/index.js': csp(thirdPartyCsp),
