@@ -93,6 +93,10 @@ a.plain-link:hover, a.no-style:focus {
   margin: 1em;
 }
 
+.home-browse {
+  font-size: large;
+}
+
 .autocomplete-input {
   width: 100%;
   padding: 10px;
@@ -125,10 +129,6 @@ a.plain-link:hover, a.no-style:focus {
   padding: 0.5em;
   font-size: medium;
   list-style: none;
-}
-
-.browse {
-  font-size: large;
 }
 
 .catalog {

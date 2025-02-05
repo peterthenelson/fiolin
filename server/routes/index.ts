@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
           </div>
           <div class="search flex-col-wrap">
             ${renderAutocomplete(8)}
-            <a href="/catalog" class="browse">Or Browse The Catalog</a>
+            <a href="/catalog" class="home-browse">Or Browse The Catalog</a>
           </div>
           <div class="home-footer home-text">
             Are you a software developer? Write and share your own fiolin

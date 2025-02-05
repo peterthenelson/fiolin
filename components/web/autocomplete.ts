@@ -16,11 +16,13 @@ interface Signals {
 }
 
 export class Autocomplete {
+  private readonly container: HTMLElement;
   private readonly input: HTMLInputElement;
   private readonly list: HTMLUListElement;
   private readonly suggestions: IndexedSuggestion[];
 
   constructor(container: HTMLElement, suggestions: AutocompleteSuggestion[]) {
+    this.container = container;
     this.input = getByRelIdAs(container, 'autocomplete-input', HTMLInputElement);
     this.list = getByRelIdAs(container, 'autocomplete-list', HTMLUListElement);
     this.suggestions = suggestions.map((s) => this.index(s));
@@ -31,10 +33,12 @@ export class Autocomplete {
     this.input.oninput = () => {
       this.display(this.ranked(this.input.value, 5));
     }
-    // TODO
-    this.input.onblur = () => {
-      this.list.classList.add('hidden');
-    }
+    this.container.addEventListener('focusout', (e) => {
+      const rt = e.relatedTarget;
+      if (rt === null || (rt instanceof HTMLElement && !this.container.contains(rt))) {
+        this.list.classList.add('hidden');
+      }
+    });
   }
 
   private index(suggestion: AutocompleteSuggestion): IndexedSuggestion {

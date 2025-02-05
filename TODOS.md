@@ -49,7 +49,6 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert ebooks azw3, epub, mobi
     - Convert video?
 - Frontend
-  - Landing page: autocomplete
   - Add some transition animations for the buttons to invite interaction.
   - Third party:
     - Add the docs
