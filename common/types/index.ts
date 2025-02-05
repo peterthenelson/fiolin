@@ -1,3 +1,4 @@
+export * from './autocomplete';
 export * from './canvas';
 export * from './fiolin-script';
 export * from './form'

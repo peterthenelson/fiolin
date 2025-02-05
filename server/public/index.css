@@ -72,7 +72,6 @@ a.plain-link:hover, a.no-style:focus {
   color: inherit;
 }
 
-
 .home-io {
   color: var(--lightBlueish);
 }
@@ -86,6 +85,50 @@ a.plain-link:hover, a.no-style:focus {
   margin: 1em;
   max-width: 30em;
   text-align: center;
+}
+
+.autocomplete {
+  position: relative;
+  width: 20em;
+  margin: 1em;
+}
+
+.autocomplete-input {
+  width: 100%;
+  padding: 10px;
+  color: var(--blackish);
+  background-color: var(--whitish);
+  box-shadow: 0 0 2.5px 1px inset var(--buttonColor);
+  border: 1px solid var(--buttonColor);
+  border-radius: 5px;
+  font-size: large;
+  outline: none;
+  animation: controls-pulse 5s infinite;
+}
+
+.autocomplete-input::placeholder {
+  color: var(--darkGrey);
+}
+
+.autocomplete-input:focus {
+  animation: none;
+}
+
+.autocomplete-list {
+  background-color: var(--medGrey);
+  border-radius: 5px;
+  border: 1px solid var(--offWhite);
+  margin-top: 0.5em;
+}
+
+.autocomplete-list li {
+  padding: 0.5em;
+  font-size: medium;
+  list-style: none;
+}
+
+.browse {
+  font-size: large;
 }
 
 .catalog {

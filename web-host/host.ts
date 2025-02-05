@@ -1,4 +1,6 @@
+import { AutocompleteSuggestion } from '../common/types';
 import { Container, ContainerOpts } from '../components/web/container';
+import { Autocomplete } from '../components/web/autocomplete';
 const monaco = import('../web-utils/monaco');
 
 export async function initFiolin(opts: ContainerOpts): Promise<Container> {
@@ -15,6 +17,14 @@ export async function initFiolin(opts: ContainerOpts): Promise<Container> {
     die('#container not present; cannot initFiolin');
   }
   return new Container(container, { workerEndpoint: endpoints.worker, ...opts });
+}
+
+export function initAutocomplete(opts: { suggestions: AutocompleteSuggestion[] }): Autocomplete {
+  const container = document.getElementById('autocomplete');
+  if (container === null) {
+    die('#autocomplete not present; cannot initAutocomplete');
+  }
+  return new Autocomplete(container, opts.suggestions);
 }
 
 async function colorizeLang(lang: string): Promise<void> {

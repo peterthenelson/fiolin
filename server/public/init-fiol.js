@@ -11,7 +11,7 @@ import(endpoints.host || '/bundle/host.js').then((host) => {
   const fiol = params.get('fiol')
   const tutorialVar = params.get('tutorialVar')
   if (fiol) {
-    host.initFiolin({ type: '1P', fiol });
+    window.container = host.initFiolin({ type: '1P', fiol });
   } else if (tutorialVar) {
     const tutorials = window[tutorialVar];
     if (tutorials) {

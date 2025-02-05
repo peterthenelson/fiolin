@@ -1,12 +1,8 @@
 import { loadAll } from '../../utils/config';
 import { fiolinSharedHeaders } from '../html';
 import { versionedLink } from '../../utils/versioned-link';
-import { indent, dedent } from '../../common/indent';
-
-function mkLis(pathNamePairs: [string, string][], prefix: string): string {
-  const lis = pathNamePairs.map(([p, n]) => `<li><a href="${p}">${n}</a></li>`);
-  return indent(lis.join('\n'), prefix);
-}
+import { dedent } from '../../common/indent';
+import { generateSuggestions, renderAutocomplete } from '../../components/server/autocomplete';
 
 export default defineEventHandler(async (event) => {
   const scripts = await loadAll();
@@ -16,7 +12,8 @@ export default defineEventHandler(async (event) => {
       <head>
         ${fiolinSharedHeaders()}
         <title>ƒɪᴏʟɪɴ</title>
-        <script src="${versionedLink('/index.js')}" type="module" defer></script>
+        <script src="${versionedLink('/load-suggestions', JSON.stringify(generateSuggestions(scripts)))}" type="module" defer></script>
+        <script src="${versionedLink('/index.js')}&suggestionsVar=suggestions" type="module" defer></script>
       </head>
       <body>
         <div class="container">
@@ -26,9 +23,10 @@ export default defineEventHandler(async (event) => {
             Easily convert between file formats, combine PDFs, and more.
             Unlike other websites, your files stay on your computer!
           </div>
-          <ul>
-            ${mkLis(Object.keys(scripts).map(s => [`/s/${s}`, s]), '            ')}
-          </ul>
+          <div class="search flex-col-wrap">
+            ${renderAutocomplete(8)}
+            <a href="/catalog" class="browse">Or Browse The Catalog</a>
+          </div>
           <div class="home-footer home-text">
             Are you a software developer? Write and share your own fiolin
             scripts. Get started with the <a href="/playground/">tutorial</a> or
