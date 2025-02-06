@@ -33,6 +33,11 @@ export class Autocomplete {
     this.input.oninput = () => {
       this.display(this.ranked(this.input.value, 5));
     }
+    this.input.onfocus = () => {
+      if (this.input.value !== '') {
+        this.display(this.ranked(this.input.value, 5));
+      }
+    }
     this.container.addEventListener('focusout', (e) => {
       const rt = e.relatedTarget;
       if (rt === null || (rt instanceof HTMLElement && !this.container.contains(rt))) {
