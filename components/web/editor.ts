@@ -44,7 +44,7 @@ export class Editor {
       this.script.code.python = value;
     } else {
       try {
-        const template = YAML.parse(value);
+        const template = YAML.parse(value, { prettyErrors: true });
         const newScript = { code: { python: this.script?.code.python || '' }, ...template };
         this.script = parseAs(pFiolinScript, newScript);
         (await this.monacoEditor).clearErrors();
