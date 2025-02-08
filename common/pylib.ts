@@ -246,9 +246,12 @@ import sys
 
 try:
   if 'script' in sys.modules:
-    importlib.reload(sys.modules['script'])
+    script = importlib.reload(sys.modules['script'])
   else:
-    importlib.import_module('script')
+    script = importlib.import_module('script')
+  main = getattr(script, 'main', None)
+  if main:
+    await main()
   fiolin.set_output_basenames()
 except SyntaxError as e:
   fiolin.js.errorMsg = repr(e)
