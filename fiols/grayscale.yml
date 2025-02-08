@@ -1,0 +1,25 @@
+meta:
+  title: Image to Grayscale
+  description: >
+    Converts a color photograph into a grayscale "black and white" image.
+  author: Peter Nelson
+interface:
+  inputFiles: SINGLE
+  outputFiles: ANY #SINGLE
+  form:
+    autofocusedName: input-file
+    children:
+      - type: DIV
+        dir: COL
+        children:
+          - type: FILE
+            name: input-file
+            accept: image/*
+            submit: true
+          - type: CANVAS
+            name: output
+            height: 400
+            width: 400
+runtime:
+  wasmModules:
+    - name: imagemagick

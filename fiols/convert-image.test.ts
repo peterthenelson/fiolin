@@ -7,7 +7,7 @@ describe('convert-image', () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
 
   beforeEach(() => { output = new FiolinTmpDir(); });
-  afterEach(() => { console.error(output.path); });
+  afterEach(() => { output.cleanUp(); });
 
   // The phone.jpg test file is an edited version of this CC0 file:
   // https://www.europeana.eu/en/item/192/item_CD5CCRR4BJDYSRHGSPLM5NIHRN3E4JXV
