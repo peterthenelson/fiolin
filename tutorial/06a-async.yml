@@ -1,0 +1,10 @@
+meta:
+  title: 6a. Misc -- Async functions
+  author: Peter Nelson
+  description: >
+    Top-level await is not supported. However, if you create a main function,
+    it will be invoked and awaited.
+interface:
+  inputFiles: NONE
+  outputFiles: SINGLE
+runtime: {}

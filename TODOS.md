@@ -30,6 +30,8 @@ A not-necessarily-exhaustive list of TODOs:
 - Scripts
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)
+    - Demonstrating interactivity with controls
+    - Demonstrating interactivity with canvas
   - More file-conversion scripts for real tasks
     - SVG recolor
     - Extracting text and tables from PDFs
