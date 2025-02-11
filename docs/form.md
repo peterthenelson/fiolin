@@ -155,6 +155,14 @@ interactive for updates.
 
 > Is this component (initially) disabled?
 
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
+
 ## FiolinFormColor
 
 > An input type="color" element
@@ -178,6 +186,14 @@ interactive for updates.
 **disabled?**: _boolean_
 
 > Is this component (initially) disabled?
+
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
 
 ## FiolinFormDate
 
@@ -219,6 +235,14 @@ interactive for updates.
 
 > Is this component (initially) disabled?
 
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
+
 ## FiolinFormDatetimeLocal
 
 > An input type="datetime-local" element
@@ -258,6 +282,14 @@ interactive for updates.
 **disabled?**: _boolean_
 
 > Is this component (initially) disabled?
+
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
 
 ## FiolinFormEmail
 
@@ -303,6 +335,14 @@ interactive for updates.
 
 > Is this component (initially) disabled?
 
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
+
 ## FiolinFormFile
 
 > An input type="file" element. Can optionally serve as a submit button too.
@@ -338,6 +378,14 @@ optionally overridden on a per-file component basis.
 **disabled?**: _boolean_
 
 > Is this component (initially) disabled?
+
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
 
 ## FiolinFormNumber
 
@@ -383,6 +431,14 @@ optionally overridden on a per-file component basis.
 
 > Is this component (initially) disabled?
 
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
+
 ## FiolinFormRadio
 
 > An input type="radio" element
@@ -417,6 +473,14 @@ identify them.
 **disabled?**: _boolean_
 
 > Is this component (initially) disabled?
+
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
 
 ## FiolinFormRange
 
@@ -453,6 +517,14 @@ identify them.
 **disabled?**: _boolean_
 
 > Is this component (initially) disabled?
+
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
 
 ## FiolinFormTel
 
@@ -494,6 +566,14 @@ identify them.
 
 > Is this component (initially) disabled?
 
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
+
 ## FiolinFormText
 
 > An input type="text" element
@@ -533,6 +613,14 @@ identify them.
 **disabled?**: _boolean_
 
 > Is this component (initially) disabled?
+
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
 
 ## FiolinFormTime
 
@@ -574,6 +662,14 @@ identify them.
 
 > Is this component (initially) disabled?
 
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
+
 ## FiolinFormUrl
 
 > An input type="url" element
@@ -614,6 +710,14 @@ identify them.
 
 > Is this component (initially) disabled?
 
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
+
 ## FiolinFormSelect
 
 > An select element
@@ -645,6 +749,14 @@ identify them.
 **disabled?**: _boolean_
 
 > Is this component (initially) disabled?
+
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
 
 ## FiolinFormSelectOption
 

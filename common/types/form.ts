@@ -112,6 +112,10 @@ export interface FiolinFormCheckbox {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="color" element
@@ -126,6 +130,10 @@ export interface FiolinFormColor {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="date" element
@@ -148,6 +156,10 @@ export interface FiolinFormDate {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="datetime-local" element
@@ -170,6 +182,10 @@ export interface FiolinFormDatetimeLocal {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="email" element
@@ -194,6 +210,10 @@ export interface FiolinFormEmail {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="file" element. Can optionally serve as a submit button too.
@@ -216,6 +236,10 @@ export interface FiolinFormFile {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="number" element
@@ -240,6 +264,10 @@ export interface FiolinFormNumber {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="radio" element
@@ -261,6 +289,10 @@ export interface FiolinFormRadio {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="range" element
@@ -281,6 +313,10 @@ export interface FiolinFormRange {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="tel" element
@@ -303,6 +339,10 @@ export interface FiolinFormTel {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="text" element
@@ -325,6 +365,10 @@ export interface FiolinFormText {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="time" element
@@ -347,6 +391,10 @@ export interface FiolinFormTime {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An input type="url" element
@@ -369,6 +417,10 @@ export interface FiolinFormUrl {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An select element
@@ -387,6 +439,10 @@ export interface FiolinFormSelect {
   hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
 }
 
 // An option within a select
