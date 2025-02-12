@@ -60,7 +60,7 @@ export class PyodideRunner implements FiolinRunner {
     this._shared = {
       inputs: [], outputs: [], args: {},
       enqueueFormUpdate: resultify((update) => this.enqueueFormUpdate(update)),
-      Array, Map, Object,
+      Array, Map, Object, Promise,
     };
     const innerConsole: IConsole = options?.console || console;
     this._log = [];

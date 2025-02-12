@@ -50,10 +50,11 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // Note: Resultified callbacks due to unresolved js/py ffi issue.
   enqueueFormUpdate(update: FormUpdate): Result<void>;
 
-  // Basic objects helpful for serialization code
+  // Basic objects helpful for javascript/python ffi
   Array: typeof Array;
   Map: typeof Map;
   Object: typeof Object;
+  Promise: typeof Promise;
 
   // Other properties may be temporarily needed during the loading phase.
   [key: string]: any;
