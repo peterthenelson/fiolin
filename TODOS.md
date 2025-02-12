@@ -36,6 +36,7 @@ A not-necessarily-exhaustive list of TODOs:
     - SVG recolor
     - Extracting text and tables from PDFs
     - ImageMagick:
+      - Updating existing scripts to use async api
       - Resize / adjust quality of / trim image
       - Make thumbnails
       - Montage, append
