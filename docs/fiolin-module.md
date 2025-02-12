@@ -10,6 +10,17 @@ fiolin.**args**()
 
 > Get the args dictionary.
 
+fiolin.**callback_to_ctx**(f, *args, **kwargs)
+
+> Transform a function that passes a value to a callback into a context manager.
+> 
+> E.g., if you have function read_and_parse(path, callback_for_parsed_obj),
+> you can use it like this:
+> 
+> > async with callback_to_ctx(read_and_parse, path) as parsed_obj:
+> >   # The read_and_parse call will not end until this context manager exits
+> >   print(parsed_obj)
+
 fiolin.**continue_with**(new_state)
 
 > Set the continue bit and save state for the next run.
@@ -335,4 +346,24 @@ Errno.**EUSERS** = 136
 Errno.**EXDEV** = 75
 
 Errno.**EXFULL** = 115
+
+class fiolin.**_ValuedEvent**
+
+> Like an asyncio.Event but with a value inside; similar to a golang channel of size 1.
+
+_ValuedEvent.**clear**(self)
+
+> Unset the task and reset the value.
+
+_ValuedEvent.**is_set**(self)
+
+> Is the task currently set?
+
+_ValuedEvent.**set**(self, value)
+
+> Set the value (and trigger the event).
+
+_ValuedEvent.**wait**(self)
+
+> Wait for the event to be set and retrieve the value.
 

@@ -1,0 +1,14 @@
+meta:
+  title: 6b. Misc -- Async ImageMagick
+  author: Peter Nelson
+  description: >
+    Fiolin provides a very useful helper function for working with the
+    callback-heavy ImageMagick API. Take a look at source code for first-party
+    fiolin scripts to get an idea of typical usage patterns.
+interface:
+  inputFiles: SINGLE
+  outputFiles: SINGLE
+  inputAccept: image/*
+runtime:
+  wasmModules:
+    - name: imagemagick

@@ -3,6 +3,8 @@ import { PyodideInterface } from 'pyodide';
 export function getFiolinPy(pyodide: PyodideInterface): string {
   const codePairs = Object.entries(pyodide.ERRNO_CODES);
   return `"""Helpful fiolin-related python utilities."""
+import asyncio
+import contextlib
 import enum
 import functools
 import js
@@ -235,6 +237,78 @@ def get_canvas(name):
   if js.canvases:
     return getattr(js.canvases, name, None)
   return None
+
+class _ValuedEvent:
+  """Like an asyncio.Event but with a value inside; similar to a golang channel of size 1."""
+
+  def __init__(self):
+    """Create a _ValuedEvent."""
+    self._value = None
+    self._event = asyncio.Event()
+
+  def set(self, value):
+    """Set the value (and trigger the event)."""
+    self._value = value
+    self._event.set()
+
+  def is_set(self):
+    """Is the task currently set?"""
+    return self._event.is_set()
+
+  async def wait(self):
+    """Wait for the event to be set and retrieve the value."""
+    await self._event.wait()
+    return self._value
+
+  def clear(self):
+    """Unset the task and reset the value."""
+    self._value = None
+    self._event.clear()
+
+async def _to_coro(awaitable):
+  """Transform an awaitable maybe-coroutine into a coroutine."""
+  await awaitable
+
+def _async_to_js_promise(cb):
+  """Wrap a callback as a JS Promise."""
+  def _wrapper(*args, **kwargs):
+    awaitable = cb(*args, **kwargs)
+    async def _wrapper_inner(resolve, reject):
+      try:
+        res = await awaitable
+        resolve(res)
+      except Exception as e:
+        reject(e)
+    return js.Promise.new(_wrapper_inner)
+  return _wrapper
+
+@contextlib.asynccontextmanager
+async def callback_to_ctx(f, *args, **kwargs):
+  """Transform a function that passes a value to a callback into a context manager.
+
+  E.g., if you have function read_and_parse(path, callback_for_parsed_obj),
+  you can use it like this:
+
+  > async with callback_to_ctx(read_and_parse, path) as parsed_obj:
+  >   # The read_and_parse call will not end until this context manager exits
+  >   print(parsed_obj)
+  """
+  val = _ValuedEvent()
+  done = _ValuedEvent()
+  async def cb(v):
+    val.set(v)
+    await done.wait()
+  args = list(args)
+  if isinstance(f, ffi.JsProxy):
+    args.append(_async_to_js_promise(cb))
+  else:
+    args.append(cb)
+  task = asyncio.create_task(_to_coro(f(*args, **kwargs)))
+  try:
+    yield await val.wait()
+  finally:
+    done.set(True)
+    await task
 `;
 }
 

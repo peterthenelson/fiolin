@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getStdout, mkRunner, mkScript } from './runner-test-util';
 
-describe('PyodideRunner', () => {
+describe('PyodideRunner basics', () => {
   it('runs', async () => {
     const runner = mkRunner();
     const script = mkScript('print("hello")');

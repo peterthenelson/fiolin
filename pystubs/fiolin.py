@@ -3,6 +3,7 @@ This is just a fake module to make pylance happy. In reality, the fiolin module
 is provided by pylib.ts and saved into the emscripten file system. See the
 documentation for more information.
 """
+import contextlib
 def state():
   return None
 def continue_with(new_state):
@@ -45,3 +46,6 @@ def form_update(name, partial, value=None):
   pass
 def get_canvas(name):
   return None
+@contextlib.asynccontextmanager
+async def callback_to_ctx(f, *args, **kwargs):
+  yield None

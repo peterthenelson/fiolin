@@ -3,8 +3,7 @@ meta:
   author: Peter Nelson
   description: >
     You can configure fiolin to install some pre-selected WASM modules. This
-    currently is limited to imagemagick, although there are some issues around
-    js/py interop that may need to be ironed out. See
+    currently is limited to imagemagick. See
     https://github.com/dlemstra/magick-wasm for details on how the js api works.
     Note that the python file-system is mounted under /py in the imagemagick
     file-system.
