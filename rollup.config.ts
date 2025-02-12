@@ -47,7 +47,7 @@ function updateVersions(file: string): Plugin {
       const source = await readFile(path.join(dir, file), 'utf-8');
       const hash = createHash('shake256', { outputLength: 6 }).update(source).digest('base64url');
       let versions = await readFile(path.join(dir, 'versions.json'), 'utf-8');
-      versions = versions.replace(file, `${file}?v=${hash}`);
+      versions = versions.replace(new RegExp(file + '(\\?v=[a-zA-Z0-9_-]+)?'), `${file}?v=${hash}`);
       await writeFile(path.join(dir, 'versions.json'), versions, 'utf-8')
     }
   }
