@@ -2,10 +2,11 @@ meta:
   title: Convert Between Image Formats
   author: Peter Nelson
   description: >
-    Convert images to .bmp, .jpg, .png, .tiff, or .webp format. Supports
+    Convert images to .bmp, .gif, .jpg, .png, .tiff, or .webp format. Supports
     additional input formats beyond these.
   extensions:
     - bmp
+    - gif
     - jpg
     - jpeg
     - png
@@ -39,6 +40,8 @@ interface:
                   selected: true
                 - text: Bitmap
                   value: .bmp
+                - text: GIF
+                  value: .gif
                 - text: JPEG
                   value: .jpg
                 - text: PNG

@@ -19,6 +19,12 @@ describe('convert-image', () => {
     expect(outputs).toEqual(['phone.bmp']);
   });
 
+  it('.gif output', async () => {
+    const runner = new NodeFiolinRunner('convert-image', output.path);
+    const outputs = await runner.runWithLocalFs([phone], { args: { format: '.gif' } });
+    expect(outputs).toEqual(['phone.gif']);
+  });
+
   it('.jpg output', async () => {
     const runner = new NodeFiolinRunner('convert-image', output.path);
     const outputs = await runner.runWithLocalFs([phone], { args: { format: '.jpg' } });
