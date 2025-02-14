@@ -1,4 +1,5 @@
 import { pArr, pInst, pNum, pRec, pStr, pObjWithProps, pOpt, pTuple, pStrUnion, pBool, ObjPath, pTaggedUnion, pStrLit } from './parse';
+import { pFormEvent } from './parse-event';
 import { pFiolinFormComponentId, pPartialFiolinFormComponent } from './parse-form';
 import { FiolinLogLevel, FiolinRunRequest, FiolinRunResponse, FormUpdate, ICanvasRenderingContext2D } from './types';
 
@@ -27,6 +28,7 @@ export const pFiolinRunRequest = pObjWithProps<FiolinRunRequest>({
   inputs: pArr(pInst(File)),
   args: pOpt(pRec(pStr)),
   canvases: pOpt(pRec<ICanvasRenderingContext2D>(pCanvas2D)),
+  event: pOpt(pFormEvent),
 });
 
 export const pLogEntry = pTuple<[FiolinLogLevel, string]>([

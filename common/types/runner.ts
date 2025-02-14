@@ -4,12 +4,14 @@ import { FiolinFormComponent, FiolinFormComponentId, FiolinFormComponentType } f
 import { Result } from './result';
 import { TypedPartial } from '../tagged-unions';
 import { ICanvasRenderingContext2D } from './canvas';
+import { FiolinFormEvent } from './events';
 
 // Used for encapsulating running a script.
 export interface FiolinRunRequest {
   inputs: File[];
   args?: Record<string, string>;
   canvases?: Record<string, ICanvasRenderingContext2D>;
+  event?: FiolinFormEvent;
   // TODO: Add a debug section
 }
 
