@@ -11,12 +11,12 @@ export function pFormEvent(p: ObjPath, v: unknown): FiolinFormEvent {
       type: pStrLit('POINTER'),
       subtype: pStrUnion<[
         'pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout',
-       'pointerenter', 'pointerleave', 'pointercancel', 'gotpointercapture',
-       'lostpointercapture'
+        'pointerenter', 'pointerleave', 'pointercancel', 'gotpointercapture',
+        'lostpointercapture', 'click'
       ]>([
         'pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout',
         'pointerenter', 'pointerleave', 'pointercancel', 'gotpointercapture',
-        'lostpointercapture'
+        'lostpointercapture', 'click'
       ]),
     }),
   })(p, v);

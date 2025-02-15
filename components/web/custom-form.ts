@@ -4,7 +4,7 @@ import { FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptInterfac
 import { getByRelIdAs, selectAllAs } from '../../web-utils/select-as';
 import { setSelected } from '../../web-utils/set-selected';
 import { FormComponent } from './form-component';
-import { RenderedForm, renderForm, renderInPlace } from './form-renderer';
+import { RenderedForm } from './form-renderer';
 
 export interface CustomFormCallbacks {
   runScript(files: File[], args?: Record<string, string>): Promise<void>;
@@ -19,11 +19,7 @@ export class CustomForm extends FormComponent {
 
   constructor(container: HTMLElement, callbacks: CustomFormCallbacks) {
     super();
-    this.rendered = {
-      form: getByRelIdAs(container, 'script-form', HTMLFormElement),
-      ui: { inputFiles: 'ANY', outputFiles: 'ANY' },
-      uniquelyIdentifiedElems: new FiolinFormComponentMapImpl()
-    };
+    this.rendered = RenderedForm.render(getByRelIdAs(container, 'script-form', HTMLFormElement));
     this.transferred = true;
     this.cbs = callbacks;
     // Disable it until the script is set.
@@ -34,55 +30,15 @@ export class CustomForm extends FormComponent {
     return !!(this.ui && this.ui.form);
   }
 
-  private applyUpdate(formUpdate: FormUpdate) {
-    const ce = this.rendered.uniquelyIdentifiedElems.get(formUpdate.id);
-    if (!ce) {
-      throw new Error(`Cannot find element with ${idToRepr(formUpdate.id)}`);
-    }
-    typeSwitch(formUpdate, {
-      'HIDDEN': (fu) => {
-        if (fu.value) {
-          ce[1].classList.add('hidden');
-        } else {
-          ce[1].classList.remove('hidden');
-        }
-      },
-      'DISABLED': (fu) => {
-        if (ce[1] instanceof HTMLInputElement || ce[1] instanceof HTMLSelectElement || ce[1] instanceof HTMLButtonElement) {
-          ce[1].disabled = fu.value;
-        } else {
-          console.warn(`${ce[1]} does not have have .disabled property`);
-        }
-      },
-      'VALUE': (fu) => {
-        if (ce[1] instanceof HTMLInputElement || ce[1] instanceof HTMLOutputElement || ce[1] instanceof HTMLButtonElement) {
-          ce[1].value = fu.value;
-        } else if (ce[1] instanceof HTMLSelectElement) {
-          setSelected(ce[1], fu.value);
-        } else {
-          console.warn(`${ce[1]} does not have have .value property`);
-        }
-      },
-      'FOCUS': () => {
-        ce[1].focus();
-      },
-      'PARTIAL': (fu) => {
-        const update = swapToPartial(ce, fu.value);
-        renderInPlace(update, this.rendered, false)
-      }
-    })
-  }
-
   reportValidity(): boolean {
     return this.rendered.form.reportValidity();
   }
 
   onLoad(script: FiolinScript): void {
     this.ui = script.interface;
-    let newForm: RenderedForm;
     if (this.ui.form) {
-      newForm = renderForm(this.ui);
-      newForm.form.onsubmit = (e) => {
+      this.rendered = RenderedForm.render(this.rendered.form, this.ui);
+      this.rendered.form.onsubmit = (e) => {
         e.preventDefault();
         const files: File[] = [];
         for (const fileChooser of selectAllAs(this.rendered.form, 'input[type="file"]', HTMLInputElement)) {
@@ -106,15 +62,9 @@ export class CustomForm extends FormComponent {
       }
       this.transferred = false;
     } else {
-      newForm = {
-        form: document.createElement('form'),
-        ui: { inputFiles: 'ANY', outputFiles: 'ANY' },
-        uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(), 
-      };
+      this.rendered = RenderedForm.render(this.rendered.form);
       this.transferred = true;
     }
-    this.rendered.form.replaceWith(newForm.form);
-    this.rendered = newForm;
   }
 
   onRun(request: FiolinRunRequest, opts: { setCanvases?: Record<string, OffscreenCanvas> }): void {
@@ -124,12 +74,8 @@ export class CustomForm extends FormComponent {
     // - reset the output file display component.
     this.rendered.form.inert = true;
     if (!this.transferred) {
-      opts.setCanvases = {};
-      for (const [id, ce] of this.rendered.uniquelyIdentifiedElems) {
-        if (ce[1] instanceof HTMLCanvasElement) {
-          opts.setCanvases[id.name] = ce[1].transferControlToOffscreen();
-        }
-      }
+      opts.setCanvases ||= {};
+      Object.assign(opts.setCanvases, this.rendered.transferCanvases());
       this.transferred = true;
     }
   }
@@ -144,7 +90,7 @@ export class CustomForm extends FormComponent {
     }
     if (response.formUpdates) {
       for (const fu of response.formUpdates) {
-        this.applyUpdate(fu);
+        this.rendered.applyUpdate(fu);
       }
     }
     this.rendered.form.inert = false;
@@ -153,7 +99,7 @@ export class CustomForm extends FormComponent {
   onError(response?: FiolinRunResponse): void {
     if (response?.formUpdates) {
       for (const fu of response.formUpdates) {
-        this.applyUpdate(fu);
+        this.rendered.applyUpdate(fu);
       }
     }
     this.rendered.form.inert = false;

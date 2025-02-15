@@ -1,34 +1,105 @@
 import { typeSwitch } from '../../common/tagged-unions';
-import { FiolinScriptInterface } from '../../common/types';
-import { FiolinFormComponentMapImpl, idToRepr, makeId, maybeComponentToId } from '../../common/form-utils';
-import { FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentMap, FiolinFormPartialComponentElement } from '../../common/types/form';
+import { FiolinScriptInterface, FormUpdate } from '../../common/types';
+import { FiolinFormComponentMapImpl, idToRepr, makeId, maybeComponentToId, swapToPartial } from '../../common/form-utils';
+import { FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentId, FiolinFormComponentMap, FiolinFormPartialComponentElement } from '../../common/types/form';
+import { setSelected } from '../../web-utils/set-selected';
 
-export interface RenderedForm {
+interface RenderState {
   form: HTMLFormElement;
   ui: FiolinScriptInterface;
-  uniquelyIdentifiedElems: FiolinFormComponentMap<FiolinFormComponentElement>;
+  uniquelyIdentifiedElems: FiolinFormComponentMapImpl<FiolinFormComponentElement>;
 }
 
-export function renderForm(ui: FiolinScriptInterface): RenderedForm {
-  const rendered: RenderedForm = {
-    form: document.createElement('form'),
-    ui,
-    uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(),
-  }
-  if (!ui.form) return rendered;
-  for (const c of ui.form.children) {
-    rendered.form.append(renderComponent(c, rendered)[1]);
-  }
-  if (ui.form.autofocusedName) {
-    const id = makeId(ui.form.autofocusedName, ui.form.autofocusedValue);
-    const ce = rendered.uniquelyIdentifiedElems.get(id);
-    if (ce) {
-      ce[1].autofocus = true;
-    } else {
-      throw new Error(`Could not find element to autofocus (${idToRepr(id)})`);
+export class RenderedForm {
+  private readonly state: RenderState;
+
+  private constructor(form: HTMLFormElement, ui: FiolinScriptInterface) {
+    this.state = {
+      form,
+      ui,
+      uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(),
     }
   }
-  return rendered;
+
+  get form(): HTMLFormElement {
+    return this.state.form;
+  }
+
+  get(id: FiolinFormComponentId): FiolinFormComponentElement | undefined {
+    return this.state.uniquelyIdentifiedElems.get(id);
+  }
+
+  static render(form: HTMLFormElement, ui?: FiolinScriptInterface): RenderedForm {
+    if (!ui) {
+      ui = { inputFiles: 'ANY', outputFiles: 'ANY' };
+    }
+    const rendered = new RenderedForm(form, ui);
+    form.replaceChildren();
+    form.onsubmit = () => {};
+    if (!ui.form) return rendered;
+    for (const c of ui.form.children) {
+      rendered.state.form.append(renderComponent(c, rendered.state)[1]);
+    }
+    if (ui.form.autofocusedName) {
+      const id = makeId(ui.form.autofocusedName, ui.form.autofocusedValue);
+      const ce = rendered.get(id);
+      if (ce) {
+        ce[1].autofocus = true;
+      } else {
+        throw new Error(`Could not find element to autofocus (${idToRepr(id)})`);
+      }
+    }
+    return rendered;
+  }
+
+  applyUpdate(formUpdate: FormUpdate) {
+    const ce = this.get(formUpdate.id);
+    if (!ce) {
+      throw new Error(`Cannot find element with ${idToRepr(formUpdate.id)}`);
+    }
+    typeSwitch(formUpdate, {
+      'HIDDEN': (fu) => {
+        if (fu.value) {
+          ce[1].classList.add('hidden');
+        } else {
+          ce[1].classList.remove('hidden');
+        }
+      },
+      'DISABLED': (fu) => {
+        if (ce[1] instanceof HTMLInputElement || ce[1] instanceof HTMLSelectElement || ce[1] instanceof HTMLButtonElement) {
+          ce[1].disabled = fu.value;
+        } else {
+          console.warn(`${ce[1]} does not have have .disabled property`);
+        }
+      },
+      'VALUE': (fu) => {
+        if (ce[1] instanceof HTMLInputElement || ce[1] instanceof HTMLOutputElement || ce[1] instanceof HTMLButtonElement) {
+          ce[1].value = fu.value;
+        } else if (ce[1] instanceof HTMLSelectElement) {
+          setSelected(ce[1], fu.value);
+        } else {
+          console.warn(`${ce[1]} does not have have .value property`);
+        }
+      },
+      'FOCUS': () => {
+        ce[1].focus();
+      },
+      'PARTIAL': (fu) => {
+        const update = swapToPartial(ce, fu.value);
+        renderInPlace(update, this.state, false)
+      }
+    })
+  }
+
+  transferCanvases(): Record<string, OffscreenCanvas> {
+    const canvases: Record<string, OffscreenCanvas> = {};
+    for (const [id, ce] of this.state.uniquelyIdentifiedElems) {
+      if (ce[1] instanceof HTMLCanvasElement) {
+        canvases[id.name] = ce[1].transferControlToOffscreen();
+      }
+    }
+    return canvases;
+  }
 }
 
 function createAndPairElement(component: FiolinFormComponent): FiolinFormComponentElement {
@@ -74,13 +145,13 @@ function updateFieldToStr<T extends keyof any, U>(obj: Record<T, string>, key: T
   obj[key] = value.toString();
 }
 
-export function renderInPlace(ce: FiolinFormPartialComponentElement, ctx: RenderedForm, initial: boolean) {
+function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState, initial: boolean) {
   ceSwitch(ce, {
     'DIV': ([component, div]) => {
       if (component.dir) div.classList.add(`flex-${component.dir.toLowerCase()}-wrap`);
       if (initial) {
         for (const c of (component.children || [])) {
-          div.append(renderComponent(c, ctx)[1]);
+          div.append(renderComponent(c, state)[1]);
         }
       } else if ((component.children || []).length > 0) {
         console.warn('Form update for div specifies children: ignoring');
@@ -93,7 +164,7 @@ export function renderInPlace(ce: FiolinFormPartialComponentElement, ctx: Render
         label.firstChild!.textContent = component.text;
       }
       if (initial && component.child) {
-        label.append(renderComponent(component.child, ctx)[1]);
+        label.append(renderComponent(component.child, state)[1]);
       } else if (component.child) {
         console.warn('Form update for label specifies child: ignoring');
       }
@@ -147,16 +218,16 @@ export function renderInPlace(ce: FiolinFormPartialComponentElement, ctx: Render
       input.type = 'file';
       updateField(input, 'name', component.name);
       updateField(input, 'multiple', component.multiple);
-      const accept = component.accept || ctx.ui.inputAccept;
+      const accept = component.accept || state.ui.inputAccept;
       if (accept) input.accept = accept;
       if (component.submit) {
         input.oncancel = () => {
           input.value = '';
-          ctx.form.requestSubmit();
+          state.form.requestSubmit();
         }
         input.onchange = () => {
           // TODO: Update the text part
-          ctx.form.requestSubmit();
+          state.form.requestSubmit();
           input.value = '';
         }
       }
@@ -273,11 +344,11 @@ export function renderInPlace(ce: FiolinFormPartialComponentElement, ctx: Render
   }
 }
 
-function renderComponent(component: FiolinFormComponent, ctx: RenderedForm): FiolinFormComponentElement {
+function renderComponent(component: FiolinFormComponent, state: RenderState): FiolinFormComponentElement {
   const id = maybeComponentToId(component);
   const ce: FiolinFormComponentElement = createAndPairElement(component);
-  renderInPlace(ce, ctx, true);
-  const mutable = ctx.uniquelyIdentifiedElems as FiolinFormComponentMapImpl<FiolinFormComponentElement>;
+  renderInPlace(ce, state, true);
+  const mutable = state.uniquelyIdentifiedElems as FiolinFormComponentMapImpl<FiolinFormComponentElement>;
   if (id !== undefined) {
     if (mutable.has(id)) {
       throw new Error(`Two components indistinguishable (${idToRepr(id)})`)

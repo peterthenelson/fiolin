@@ -23,7 +23,7 @@ export type FiolinFormEventType = ExtractTagType<FiolinFormEvent>;
 export type FiolinFormPointerEventType = (
   'pointerdown' | 'pointerup' | 'pointermove' |
   'pointerover' | 'pointerout' | 'pointerenter' | 'pointerleave' |
-  'pointercancel' | 'gotpointercapture' | 'lostpointercapture'
+  'pointercancel' | 'gotpointercapture' | 'lostpointercapture' | 'click'
 );
 
 // Pointer event (includes all mouse and touchpad events)
@@ -34,6 +34,17 @@ export interface FiolinFormPointerEvent {
   subtype: FiolinFormPointerEventType;
   // TODO
 }
+
+/*
+TODO: Consider these events
+beforeinput
+beforetoggle, toggle
+cancel
+various drag and drop
+blur, focus, focusin, focusout
+keydown,keypress,keyup
+wheel
+*/
 
 // Input event names
 export type FiolinFormInputEventType = 'input' | 'change';
