@@ -57,6 +57,30 @@ given component can be uniquely identified this way.
 where multiple components are intended to share a name (e.g., RADIOs and
 BUTTONs).
 
+## FiolinFormCommon
+
+> Common options for all form components.
+
+**hidden?**: _boolean_
+
+> Is this component (initially) hidden?
+
+## FiolinFormInputCommon
+
+> Common options for all form input components.
+
+**disabled?**: _boolean_
+
+> Is this component (initially) disabled?
+
+**onchange?**: _boolean_
+
+> Fire events on change?
+
+**oninput?**: _boolean_
+
+> Fire events on input?
+
 ## _PartializeFirst<T extends string, U> = U extends [infer C extends { type: T }, infer E] ? [TypedPartial<T, C>, E] :
 
 > Partialize first element
@@ -77,7 +101,7 @@ BUTTONs).
 
 > Check if there is a value associated with the id.
 
-## FiolinFormDiv
+## FiolinFormDiv extends FiolinFormCommon
 
 > A div (to make a row or column of components).
 
@@ -94,15 +118,11 @@ interactive for updates.
 
 > Direction (as a flex-row-wrap or flex-col-wrap)
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
 **children**: _FiolinFormComponent[]_
 
 > The children in the row
 
-## FiolinFormLabel
+## FiolinFormLabel extends FiolinFormCommon
 
 > A label (implicitly for whatever it's wrapping)
 
@@ -119,15 +139,11 @@ interactive for updates.
 
 > The text of the label
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
 **child**: _FiolinFormComponent_
 
 > The wrapped child component
 
-## FiolinFormCheckbox
+## FiolinFormCheckbox extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="checkbox" element
 
@@ -147,23 +163,7 @@ interactive for updates.
 
 > Whether to begin with this box checked
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormColor
+## FiolinFormColor extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="color" element
 
@@ -179,23 +179,7 @@ interactive for updates.
 
 > The (optional) initial value
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormDate
+## FiolinFormDate extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="date" element
 
@@ -227,23 +211,7 @@ interactive for updates.
 
 > Step-size for selector (in number of days)
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormDatetimeLocal
+## FiolinFormDatetimeLocal extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="datetime-local" element
 
@@ -275,23 +243,7 @@ interactive for updates.
 
 > Step-size for selector (in number of seconds)
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormEmail
+## FiolinFormEmail extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="email" element
 
@@ -327,23 +279,7 @@ interactive for updates.
 
 > The size in characters
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormFile
+## FiolinFormFile extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="file" element. Can optionally serve as a submit button too.
 Files end up in inputs and file names show up in the args given to the
@@ -371,23 +307,7 @@ optionally overridden on a per-file component basis.
 
 > Trigger form submission upon file choice.
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormNumber
+## FiolinFormNumber extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="number" element
 
@@ -423,23 +343,7 @@ optionally overridden on a per-file component basis.
 
 > Step-size for selector
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormRadio
+## FiolinFormRadio extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="radio" element
 
@@ -466,23 +370,7 @@ identify them.
 
 > Is a selection of one of the radio buttons sharing this name required?
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormRange
+## FiolinFormRange extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="range" element
 
@@ -510,23 +398,7 @@ identify them.
 
 > Step-size for selector
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormTel
+## FiolinFormTel extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="tel" element
 
@@ -558,23 +430,7 @@ identify them.
 
 > The size in characters
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormText
+## FiolinFormText extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="text" element
 
@@ -606,23 +462,7 @@ identify them.
 
 > The size in characters
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormTime
+## FiolinFormTime extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="time" element
 
@@ -654,23 +494,7 @@ identify them.
 
 > Step-size for selector (in number of seconds)
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormUrl
+## FiolinFormUrl extends FiolinFormCommon, FiolinFormInputCommon
 
 > An input type="url" element
 
@@ -702,23 +526,7 @@ identify them.
 
 > The size in characters
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
-## FiolinFormSelect
+## FiolinFormSelect extends FiolinFormCommon, FiolinFormInputCommon
 
 > An select element
 
@@ -742,22 +550,6 @@ identify them.
 
 > Is a non-empty choice required?
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-**disabled?**: _boolean_
-
-> Is this component (initially) disabled?
-
-**onchange?**: _boolean_
-
-> Fire events on change?
-
-**oninput?**: _boolean_
-
-> Fire events on input?
-
 ## FiolinFormSelectOption
 
 > An option within a select
@@ -774,7 +566,7 @@ identify them.
 
 > Is this selected by default?
 
-## FiolinFormButton
+## FiolinFormButton extends FiolinFormCommon
 
 > A (submit) button element
 
@@ -796,15 +588,11 @@ identify them.
 if name is, and vice versa). Note that the id for a button includes both
 the name and value.
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
 **disabled?**: _boolean_
 
 > Is this component (initially) disabled?
 
-## FiolinFormOutput
+## FiolinFormOutput extends FiolinFormCommon
 
 > An output element
 
@@ -821,11 +609,7 @@ submission).
 
 > Optional initial value.
 
-**hidden?**: _boolean_
-
-> Is this component (initially) hidden?
-
-## FiolinFormCanvas
+## FiolinFormCanvas extends FiolinFormCommon
 
 > A canvas element
 

@@ -32,15 +32,21 @@ export interface FiolinScriptMeta {
   extensions?: string[];
 }
 
+// An array with the valid values for FileArity.
+export const FILE_ARITIES = ['NONE', 'SINGLE', 'MULTI', 'ANY'] as const;
+
+// The arity of file (input or output) for a script.
+export type FileArity = (typeof FILE_ARITIES)[number];
+
 // How the fiolin UI is meant to communicate with the embedded script.
 export interface FiolinScriptInterface {
   // Does the script take 0, 1, >1, or any number of files as input?
-  inputFiles: 'NONE' | 'SINGLE' | 'MULTI' | 'ANY';
+  inputFiles: FileArity;
   // What file types should the file input control accept?
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
   inputAccept?: string;
   // Does the script produce 0, 1, >1, or any number of files as output?
-  outputFiles: 'NONE' | 'SINGLE' | 'MULTI' | 'ANY';
+  outputFiles: FileArity;
   // Form presented to the user (the submitted values show up as args in the
   // FiolinRunRequest).
   form?: FiolinForm;

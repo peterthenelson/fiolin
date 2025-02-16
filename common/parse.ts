@@ -97,8 +97,13 @@ export function pStrLit<T extends string>(s: T): Parser<T> {
 
 // Note: Confusingly, you will need to manually specify the type as an array
 // and also specify all the values. Example:
-// type fooOrBar = 'foo' | 'bar'
-// pStrUnion<fooOrBar[]>(['foo', 'bar'])
+//   type fooOrBar = 'foo' | 'bar'
+//   pStrUnion<fooOrBar[]>(['foo', 'bar'])
+// If you specify the values as a const list and derive the type from it, this
+// can be terser:
+//   const FOO_OR_BAR = ['foo', 'bar'] as const;
+//   type fooOrBar = (typeof FOO_OR_BAR)[number];
+//   pStrUnion<typeof FOO_OR_BAR>(FOO_OR_BAR);
 export function pStrUnion<T extends readonly string[]>(values: T): Parser<T[number]> {
   return (p: ObjPath, v: unknown) => {
     if (typeof v === 'string' && values.includes(v)) return v;

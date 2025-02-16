@@ -1,7 +1,7 @@
 import { pArr, pInst, pNum, pRec, pStr, pObjWithProps, pOpt, pTuple, pStrUnion, pBool, ObjPath, pTaggedUnion, pStrLit } from './parse';
 import { pFormEvent } from './parse-event';
 import { pFiolinFormComponentId, pPartialFiolinFormComponent } from './parse-form';
-import { FiolinLogLevel, FiolinRunRequest, FiolinRunResponse, FormUpdate, ICanvasRenderingContext2D } from './types';
+import { FiolinLogLevel, FiolinRunRequest, FiolinRunResponse, FormUpdate, ICanvasRenderingContext2D, LOG_LEVELS } from './types';
 
 function getWindow() {
   try {
@@ -32,7 +32,7 @@ export const pFiolinRunRequest = pObjWithProps<FiolinRunRequest>({
 });
 
 export const pLogEntry = pTuple<[FiolinLogLevel, string]>([
-  pStrUnion<FiolinLogLevel[]>(['DEBUG', 'INFO', 'WARN', 'ERROR']),
+  pStrUnion<typeof LOG_LEVELS>(LOG_LEVELS),
   pStr,
 ]);
 

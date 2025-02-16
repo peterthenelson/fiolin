@@ -1,8 +1,8 @@
 import { pArr, pStr, pStrUnion, pObjWithProps, pStrLit, pOpt } from './parse';
-import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface, FiolinPyPackage, FiolinWasmModule } from './types';
+import { FiolinScript, FiolinScriptCode, FiolinScriptMeta, FiolinScriptRuntime, FiolinScriptInterface, FiolinPyPackage, FiolinWasmModule, FILE_ARITIES } from './types';
 import { pForm } from './parse-form';
 
-export const pFileEnum = pStrUnion<('NONE' | 'SINGLE' | 'MULTI' | 'ANY')[]>(['NONE', 'SINGLE', 'MULTI', 'ANY']);
+export const pFileArity = pStrUnion<typeof FILE_ARITIES>(FILE_ARITIES);
 
 const pMeta = pObjWithProps<FiolinScriptMeta>({
   title: pStr,
@@ -12,9 +12,9 @@ const pMeta = pObjWithProps<FiolinScriptMeta>({
 });
 
 const pInterface = pObjWithProps<FiolinScriptInterface>({
-  inputFiles: pFileEnum,
+  inputFiles: pFileArity,
   inputAccept: pOpt(pStr),
-  outputFiles: pFileEnum,
+  outputFiles: pFileArity,
   form: pOpt(pForm),
 });
 

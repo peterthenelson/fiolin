@@ -54,6 +54,23 @@ export interface FiolinFormComponentId {
   value?: string;
 }
 
+// Common options for all form components.
+export interface FiolinFormCommon {
+  // Is this component (initially) hidden?
+  hidden?: boolean;
+  // TODO: Pointer events
+}
+
+// Common options for all form input components.
+export interface FiolinFormInputCommon {
+  // Is this component (initially) disabled?
+  disabled?: boolean;
+  // Fire events on change?
+  onchange?: boolean;
+  // Fire events on input?
+  oninput?: boolean;
+}
+
 // Partialize first element
 type _PartializeFirst<T extends string, U> = U extends [infer C extends { type: T }, infer E] ? [TypedPartial<T, C>, E] : never;
 
@@ -69,7 +86,7 @@ export interface FiolinFormComponentMap<T> extends Iterable<[FiolinFormComponent
 }
 
 // A div (to make a row or column of components).
-export interface FiolinFormDiv {
+export interface FiolinFormDiv extends FiolinFormCommon {
   // Type id
   type: 'DIV';
   // Optional name. Does not affect form submission, but is needed for
@@ -77,14 +94,12 @@ export interface FiolinFormDiv {
   name?: string;
   // Direction (as a flex-row-wrap or flex-col-wrap)
   dir: 'ROW' | 'COL';
-  // Is this component (initially) hidden?
-  hidden?: boolean;
   // The children in the row
   children: FiolinFormComponent[];
 }
 
 // A label (implicitly for whatever it's wrapping)
-export interface FiolinFormLabel {
+export interface FiolinFormLabel extends FiolinFormCommon {
   // Type id
   type: 'LABEL';
   // Optional name. Does not affect form submission, but is needed for
@@ -92,14 +107,12 @@ export interface FiolinFormLabel {
   name?: string;
   // The text of the label
   text: string;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
   // The wrapped child component
   child: FiolinFormComponent;
 }
 
 // An input type="checkbox" element
-export interface FiolinFormCheckbox {
+export interface FiolinFormCheckbox extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'CHECKBOX';
   // The name of the arg to associate with this value
@@ -108,36 +121,20 @@ export interface FiolinFormCheckbox {
   value?: string;
   // Whether to begin with this box checked
   checked?: boolean;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="color" element
-export interface FiolinFormColor {
+export interface FiolinFormColor extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'COLOR';
   // The name of the arg to associate with this value
   name: string;
   // The (optional) initial value
   value?: string;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="date" element
-export interface FiolinFormDate {
+export interface FiolinFormDate extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'DATE';
   // The name of the arg to associate with this value
@@ -152,18 +149,10 @@ export interface FiolinFormDate {
   max?: string;
   // Step-size for selector (in number of days)
   step?: number;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="datetime-local" element
-export interface FiolinFormDatetimeLocal {
+export interface FiolinFormDatetimeLocal extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'DATETIME_LOCAL';
   // The name of the arg to associate with this value
@@ -178,18 +167,10 @@ export interface FiolinFormDatetimeLocal {
   max?: string;
   // Step-size for selector (in number of seconds)
   step?: number;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="email" element
-export interface FiolinFormEmail {
+export interface FiolinFormEmail extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'EMAIL';
   // The name of the arg to associate with this value
@@ -206,20 +187,12 @@ export interface FiolinFormEmail {
   placeholder?: string;
   // The size in characters
   size?: number;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="file" element. Can optionally serve as a submit button too.
 // Files end up in inputs and file names show up in the args given to the
 // script (the paths are rewritten to be relative to pyodide filesystem).
-export interface FiolinFormFile {
+export interface FiolinFormFile extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'FILE';
   // Optional name for this argument.
@@ -232,18 +205,10 @@ export interface FiolinFormFile {
   accept?: string;
   // Trigger form submission upon file choice.
   submit?: boolean;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="number" element
-export interface FiolinFormNumber {
+export interface FiolinFormNumber extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'NUMBER';
   // The name of the arg to associate with this value
@@ -260,18 +225,10 @@ export interface FiolinFormNumber {
   max?: number;
   // Step-size for selector
   step?: number;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="radio" element
-export interface FiolinFormRadio {
+export interface FiolinFormRadio extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'RADIO';
   // The name of the arg to associate with this value; radio buttons with the
@@ -285,18 +242,10 @@ export interface FiolinFormRadio {
   checked?: boolean;
   // Is a selection of one of the radio buttons sharing this name required?
   required?: boolean;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="range" element
-export interface FiolinFormRange {
+export interface FiolinFormRange extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'RANGE';
   // The name of the arg to associate with this value
@@ -309,18 +258,10 @@ export interface FiolinFormRange {
   max: number;
   // Step-size for selector
   step?: number;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="tel" element
-export interface FiolinFormTel {
+export interface FiolinFormTel extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'TEL';
   // The name of the arg to associate with this value
@@ -335,18 +276,10 @@ export interface FiolinFormTel {
   placeholder?: string;
   // The size in characters
   size?: number;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="text" element
-export interface FiolinFormText {
+export interface FiolinFormText extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'TEXT';
   // The name of the arg to associate with this value
@@ -361,18 +294,10 @@ export interface FiolinFormText {
   placeholder?: string;
   // The size in characters
   size?: number;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="time" element
-export interface FiolinFormTime {
+export interface FiolinFormTime extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'TIME';
   // The name of the arg to associate with this value
@@ -387,18 +312,10 @@ export interface FiolinFormTime {
   max?: string;
   // Step-size for selector (in number of seconds)
   step?: number;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An input type="url" element
-export interface FiolinFormUrl {
+export interface FiolinFormUrl extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'URL';
   // The name of the arg to associate with this value
@@ -413,18 +330,10 @@ export interface FiolinFormUrl {
   placeholder?: string;
   // The size in characters
   size?: number;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An select element
-export interface FiolinFormSelect {
+export interface FiolinFormSelect extends FiolinFormCommon, FiolinFormInputCommon {
   // Type id
   type: 'SELECT';
   // The name of the arg to associate with this value
@@ -435,14 +344,6 @@ export interface FiolinFormSelect {
   multiple?: boolean;
   // Is a non-empty choice required?
   required?: boolean;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
-  // Is this component (initially) disabled?
-  disabled?: boolean;
-  // Fire events on change?
-  onchange?: boolean;
-  // Fire events on input?
-  oninput?: boolean;
 }
 
 // An option within a select
@@ -456,7 +357,7 @@ export interface FiolinFormSelectOption {
 }
 
 // A (submit) button element
-export interface FiolinFormButton {
+export interface FiolinFormButton extends FiolinFormCommon {
   // Type id
   type: 'BUTTON';
   // The text on the button
@@ -467,14 +368,12 @@ export interface FiolinFormButton {
   // if name is, and vice versa). Note that the id for a button includes both
   // the name and value.
   value?: string;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
   // Is this component (initially) disabled?
   disabled?: boolean;
 }
 
 // An output element
-export interface FiolinFormOutput {
+export interface FiolinFormOutput extends FiolinFormCommon {
   // Type id
   type: 'OUTPUT';
   // The name (used to identify the component; doesn't contribute to form
@@ -482,12 +381,10 @@ export interface FiolinFormOutput {
   name: string;
   // Optional initial value.
   value?: string;
-  // Is this component (initially) hidden?
-  hidden?: boolean;
 }
 
 // A canvas element
-export interface FiolinFormCanvas {
+export interface FiolinFormCanvas extends FiolinFormCommon {
   // Type id
   type: 'CANVAS';
   // The name (used to identify the component; doesn't contribute to form

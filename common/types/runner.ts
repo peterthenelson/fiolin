@@ -15,7 +15,8 @@ export interface FiolinRunRequest {
   // TODO: Add a debug section
 }
 
-export type FiolinLogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
+export const LOG_LEVELS = ['DEBUG', 'INFO', 'WARN', 'ERROR'] as const;
+export type FiolinLogLevel = (typeof LOG_LEVELS)[number];
 
 export interface FiolinRunResponse {
   outputs: File[];

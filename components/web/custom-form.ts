@@ -1,8 +1,5 @@
-import { FiolinFormComponentMapImpl, idToRepr, swapToPartial } from '../../common/form-utils';
-import { typeSwitch } from '../../common/tagged-unions';
-import { FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptInterface, FormUpdate } from '../../common/types';
+import { FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptInterface } from '../../common/types';
 import { getByRelIdAs, selectAllAs } from '../../web-utils/select-as';
-import { setSelected } from '../../web-utils/set-selected';
 import { FormComponent } from './form-component';
 import { RenderedForm } from './form-renderer';
 

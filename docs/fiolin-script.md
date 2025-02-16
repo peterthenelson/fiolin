@@ -48,11 +48,19 @@ keep track of the provenance in cases of forks.
 with. Doesn't affect the actual operation of the script but is used in 1p
 fiolin for autocomplete and other UI hints.
 
+## FILE_ARITIES = ['NONE', 'SINGLE', 'MULTI', 'ANY'] as
+
+> An array with the valid values for FileArity.
+
+## FileArity = (typeof
+
+> The arity of file (input or output) for a script.
+
 ## FiolinScriptInterface
 
 > How the fiolin UI is meant to communicate with the embedded script.
 
-**inputFiles**: _'NONE' | 'SINGLE' | 'MULTI' | 'ANY'_
+**inputFiles**: _FileArity_
 
 > Does the script take 0, 1, >1, or any number of files as input?
 
@@ -61,7 +69,7 @@ fiolin for autocomplete and other UI hints.
 > What file types should the file input control accept?
 https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
 
-**outputFiles**: _'NONE' | 'SINGLE' | 'MULTI' | 'ANY'_
+**outputFiles**: _FileArity_
 
 > Does the script produce 0, 1, >1, or any number of files as output?
 

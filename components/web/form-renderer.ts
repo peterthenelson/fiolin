@@ -1,23 +1,25 @@
 import { typeSwitch } from '../../common/tagged-unions';
-import { FiolinScriptInterface, FormUpdate } from '../../common/types';
+import { FiolinFormEvent, FiolinScriptInterface, FormUpdate } from '../../common/types';
 import { FiolinFormComponentMapImpl, idToRepr, makeId, maybeComponentToId, swapToPartial } from '../../common/form-utils';
-import { FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentId, FiolinFormComponentMap, FiolinFormPartialComponentElement } from '../../common/types/form';
+import { FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentId, FiolinFormPartialComponentElement } from '../../common/types/form';
 import { setSelected } from '../../web-utils/set-selected';
 
 interface RenderState {
   form: HTMLFormElement;
   ui: FiolinScriptInterface;
   uniquelyIdentifiedElems: FiolinFormComponentMapImpl<FiolinFormComponentElement>;
+  onEvent: (id: FiolinFormComponentId, ev: FiolinFormEvent) => void,
 }
 
 export class RenderedForm {
   private readonly state: RenderState;
 
-  private constructor(form: HTMLFormElement, ui: FiolinScriptInterface) {
+  private constructor(form: HTMLFormElement, ui: FiolinScriptInterface, onEvent: (id: FiolinFormComponentId, ev: FiolinFormEvent) => void) {
     this.state = {
       form,
       ui,
       uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(),
+      onEvent,
     }
   }
 
@@ -29,11 +31,10 @@ export class RenderedForm {
     return this.state.uniquelyIdentifiedElems.get(id);
   }
 
-  static render(form: HTMLFormElement, ui?: FiolinScriptInterface): RenderedForm {
-    if (!ui) {
-      ui = { inputFiles: 'ANY', outputFiles: 'ANY' };
-    }
-    const rendered = new RenderedForm(form, ui);
+  static render(form: HTMLFormElement, ui?: FiolinScriptInterface, onEvent?: (id: FiolinFormComponentId, ev: FiolinFormEvent) => void): RenderedForm {
+    ui ||= { inputFiles: 'ANY', outputFiles: 'ANY' };
+    onEvent ||= () => {}
+    const rendered = new RenderedForm(form, ui, onEvent);
     form.replaceChildren();
     form.onsubmit = () => {};
     if (!ui.form) return rendered;
@@ -146,6 +147,7 @@ function updateFieldToStr<T extends keyof any, U>(obj: Record<T, string>, key: T
 }
 
 function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState, initial: boolean) {
+  // TODO Add event listeners
   ceSwitch(ce, {
     'DIV': ([component, div]) => {
       if (component.dir) div.classList.add(`flex-${component.dir.toLowerCase()}-wrap`);

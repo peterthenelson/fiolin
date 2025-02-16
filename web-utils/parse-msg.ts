@@ -2,7 +2,7 @@ import { ObjPath, pInst, pNum, pStr, pStrLit, pObjWithProps, pStrUnion, pOpt, pT
 import { pFiolinScript } from '../common/parse-script';
 import { pFiolinRunRequest, pFiolinRunResponse } from '../common/parse-run';
 import { ErrorMessage, InstallPackagesMessage, LoadedMessage, PackagesInstalledMessage, RunMessage, LogMessage, SuccessMessage, WorkerMessage, WorkerMessageType } from './types';
-import { FiolinLogLevel } from '../common/types';
+import { FiolinLogLevel, LOG_LEVELS } from '../common/types';
 
 function getWindow() {
   try {
@@ -42,7 +42,7 @@ export const pLoadedMessage = pObjWithProps<LoadedMessage>({
   type: pStrLit('LOADED')
 });
 
-const pLevel = pStrUnion<FiolinLogLevel[]>(['DEBUG', 'INFO', 'WARN', 'ERROR']);
+const pLevel = pStrUnion<typeof LOG_LEVELS>(LOG_LEVELS);
 
 export const pLogMessage = pObjWithProps<LogMessage>({
   type: pStrLit('LOG'),
