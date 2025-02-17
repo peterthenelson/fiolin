@@ -58,7 +58,28 @@ export interface FiolinFormComponentId {
 export interface FiolinFormCommon {
   // Is this component (initially) hidden?
   hidden?: boolean;
-  // TODO: Pointer events
+  // Fire events on pointer down?
+  onpointerdown?: boolean;
+  // Fire events on pointer up?
+  onpointerup?: boolean;
+  // Fire events on pointer move?
+  onpointermove?: boolean;
+  // Fire events on pointer over?
+  onpointerover?: boolean;
+  // Fire events on pointer out?
+  onpointerout?: boolean;
+  // Fire events on pointer enter?
+  onpointerenter?: boolean;
+  // Fire events on pointer leave?
+  onpointerleave?: boolean;
+  // Fire events on pointer cancel?
+  onpointercancel?: boolean;
+  // Fire events on pointer capture?
+  ongotpointercapture?: boolean;
+  // Fire events on loss of pointer capture?
+  onlostpointercapture?: boolean;
+  // Fire events on click?
+  onclick?: boolean;
 }
 
 // Common options for all form input components.

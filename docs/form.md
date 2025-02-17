@@ -65,6 +65,50 @@ BUTTONs).
 
 > Is this component (initially) hidden?
 
+**onpointerdown?**: _boolean_
+
+> Fire events on pointer down?
+
+**onpointerup?**: _boolean_
+
+> Fire events on pointer up?
+
+**onpointermove?**: _boolean_
+
+> Fire events on pointer move?
+
+**onpointerover?**: _boolean_
+
+> Fire events on pointer over?
+
+**onpointerout?**: _boolean_
+
+> Fire events on pointer out?
+
+**onpointerenter?**: _boolean_
+
+> Fire events on pointer enter?
+
+**onpointerleave?**: _boolean_
+
+> Fire events on pointer leave?
+
+**onpointercancel?**: _boolean_
+
+> Fire events on pointer cancel?
+
+**ongotpointercapture?**: _boolean_
+
+> Fire events on pointer capture?
+
+**onlostpointercapture?**: _boolean_
+
+> Fire events on loss of pointer capture?
+
+**onclick?**: _boolean_
+
+> Fire events on click?
+
 ## FiolinFormInputCommon
 
 > Common options for all form input components.

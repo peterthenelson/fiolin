@@ -1,5 +1,5 @@
 import { typeSwitch } from '../../common/tagged-unions';
-import { FiolinFormEvent, FiolinScriptInterface, FormUpdate } from '../../common/types';
+import { FiolinFormEvent, FiolinFormInputEventType, FiolinFormPointerEventType, FiolinScriptInterface, FormUpdate, INPUT_EVENT_TYPES, POINTER_EVENT_TYPES } from '../../common/types';
 import { FiolinFormComponentMapImpl, idToRepr, makeId, maybeComponentToId, swapToPartial } from '../../common/form-utils';
 import { FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentId, FiolinFormPartialComponentElement } from '../../common/types/form';
 import { setSelected } from '../../web-utils/set-selected';
@@ -87,7 +87,7 @@ export class RenderedForm {
       },
       'PARTIAL': (fu) => {
         const update = swapToPartial(ce, fu.value);
-        renderInPlace(update, this.state, false)
+        renderInPlace(update, this.state, false, formUpdate.id);
       }
     })
   }
@@ -146,8 +146,47 @@ function updateFieldToStr<T extends keyof any, U>(obj: Record<T, string>, key: T
   obj[key] = value.toString();
 }
 
-function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState, initial: boolean) {
-  // TODO Add event listeners
+function ignore() {};
+
+function transformEvent<E extends Event>(ev: E): FiolinFormEvent | undefined {
+  // TODO Actual other fields
+  if (ev instanceof InputEvent) {
+    const i = INPUT_EVENT_TYPES.indexOf(ev.type as FiolinFormInputEventType);
+    if (i !== -1) {
+      return { type: 'INPUT', subtype: INPUT_EVENT_TYPES[i] };
+    } else {
+      console.log('Unexpected input event subtype:', ev.type);
+    }
+  } else if (ev instanceof PointerEvent) {
+    const i = POINTER_EVENT_TYPES.indexOf(ev.type as FiolinFormPointerEventType);
+    if (i !== -1) {
+      return { type: 'POINTER', subtype: POINTER_EVENT_TYPES[i] };
+    } else {
+      console.log('Unexpected pointer event subtype:', ev.type);
+    }
+  } else if (ev instanceof MouseEvent) {
+    if (ev.type === 'click') {
+      return { type: 'POINTER', subtype: 'click' };
+    } else {
+      console.log('Unexpected mouse event subtype:', ev.type);
+    }
+  } else {
+    if (ev.type === 'change') {
+      return { type: 'INPUT', subtype: 'change' };
+    } else {
+      console.log('Unexpected event subtype:', ev.type);
+    }
+  }
+}
+
+function forwardEvent<E extends Event>(id: FiolinFormComponentId, state: RenderState): (this: GlobalEventHandlers, ev: E) => any {
+  return (ev: E) => {
+    const t = transformEvent(ev);
+    if (t) state.onEvent(id, t);
+  }
+}
+
+function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState, initial: boolean, id?: FiolinFormComponentId) {
   ceSwitch(ce, {
     'DIV': ([component, div]) => {
       if (component.dir) div.classList.add(`flex-${component.dir.toLowerCase()}-wrap`);
@@ -344,12 +383,73 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
       ce[1].classList.remove('hidden');
     }
   }
+  if (!id) {
+    // Event handlers can't do anything in these cases.
+    return;
+  }
+  if ('oninput' in ce[0]) {
+    if (ce[0].oninput) {
+      ce[1].oninput = forwardEvent(id, state);
+    } else {
+      ce[1].oninput = ignore;
+    }
+  }
+  const handled: string[] = [];
+  maybeForward('pointerdown', 'onpointerdown', PointerEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('pointerup', 'onpointerup', PointerEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('pointermove', 'onpointermove', PointerEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('pointerover', 'onpointerover', PointerEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('pointerout', 'onpointerout', PointerEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('pointerenter', 'onpointerenter', PointerEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('pointerleave', 'onpointerleave', PointerEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('pointercancel', 'onpointercancel', PointerEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('gotpointercapture', 'ongotpointercapture', PointerEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('lostpointercapture', 'onlostpointercapture', PointerEvent, ce[0], ce[1], id, state, handled)
+  maybeForward('click', 'onclick', MouseEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('input', 'oninput', InputEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('change', 'onchange', Event, ce[0], ce[1], id, state, handled);
+  checkExhaustive(handled);
+}
+
+// There's not an easy way to make this a static check, so it's dynamic. I just
+// really don't want to forget to make the lists match.
+function checkExhaustive(handled: string[]) {
+  const got = new Set(handled);
+  const want = new Set((INPUT_EVENT_TYPES as readonly string[]).concat(POINTER_EVENT_TYPES));
+  for (const g of got) {
+    if (!want.has(g)) throw new Error(`Missing type def for handled event type: ${g}`)
+  }
+  for (const w of want) {
+    if (!got.has(w)) throw new Error(`Missing handler logic for event type: ${w}`)
+  }
+}
+
+type EventHandlerHaver<T extends string, E extends Event> = Record<T, ((this: GlobalEventHandlers, ev: E) => any) | null>;
+function maybeForward<T extends string, E extends Event>(
+  eventSubtype: string, onEventProperty: T, evCls: new (...args: any[]) => E,
+  c: FiolinFormPartialComponentElement[0], elem: EventHandlerHaver<T, E>,
+  id: FiolinFormComponentId, state: RenderState, handledSubtypes: string[]
+): void {
+  if ('on' + eventSubtype !== onEventProperty) {
+    throw new Error(`Mismatched subtype and property: ${eventSubtype}, ${onEventProperty}`)
+  }
+  handledSubtypes.push(eventSubtype);
+  if (c.hasOwnProperty(onEventProperty)) {
+    const value = c[onEventProperty as keyof FiolinFormPartialComponentElement[0]];
+    if (value === undefined) {
+      return;
+    } else if (value) {
+      elem[onEventProperty] = forwardEvent<E>(id, state)
+    } else {
+      elem[onEventProperty] = null;
+    }
+  }
 }
 
 function renderComponent(component: FiolinFormComponent, state: RenderState): FiolinFormComponentElement {
   const id = maybeComponentToId(component);
   const ce: FiolinFormComponentElement = createAndPairElement(component);
-  renderInPlace(ce, state, true);
+  renderInPlace(ce, state, true, maybeComponentToId(ce[0]));
   const mutable = state.uniquelyIdentifiedElems as FiolinFormComponentMapImpl<FiolinFormComponentElement>;
   if (id !== undefined) {
     if (mutable.has(id)) {

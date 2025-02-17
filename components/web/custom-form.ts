@@ -1,4 +1,4 @@
-import { FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptInterface } from '../../common/types';
+import { FiolinFormComponentId, FiolinFormEvent, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptInterface } from '../../common/types';
 import { getByRelIdAs, selectAllAs } from '../../web-utils/select-as';
 import { FormComponent } from './form-component';
 import { RenderedForm } from './form-renderer';
@@ -34,7 +34,7 @@ export class CustomForm extends FormComponent {
   onLoad(script: FiolinScript): void {
     this.ui = script.interface;
     if (this.ui.form) {
-      this.rendered = RenderedForm.render(this.rendered.form, this.ui);
+      this.rendered = RenderedForm.render(this.rendered.form, this.ui, (id, ev) => this.onEvent(id, ev));
       this.rendered.form.onsubmit = (e) => {
         e.preventDefault();
         const files: File[] = [];
@@ -62,6 +62,11 @@ export class CustomForm extends FormComponent {
       this.rendered = RenderedForm.render(this.rendered.form);
       this.transferred = true;
     }
+  }
+
+  onEvent(id: FiolinFormComponentId, ev: FiolinFormEvent) {
+    // TODO: forward these up to the runner
+    console.log('Event: ', id, ev);
   }
 
   onRun(request: FiolinRunRequest, opts: { setCanvases?: Record<string, OffscreenCanvas> }): void {

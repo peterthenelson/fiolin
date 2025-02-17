@@ -88,7 +88,7 @@ function genTsDoc(tsPath: string, mdPath: string) {
   for (const line of ts.split('\n')) {
     const commentMatch = line.match(/^\s*\/\/ ?(.*)/);
     const importMatch = line.match(/^import.*/);
-    const interfaceTypeMatch = line.match(/^(?:export )?(interface|type) (.*) (?:.*)/);
+    const interfaceTypeMatch = line.match(/^(?:export )?(interface|type|const) (.*) (?:.*)/);
     const fieldMatch = line.match(/^\s*([a-zA-Z_][^:]*): (.*);$/);
     const isWhitespace = line.match(/^\s*$/) !== null;
     if (state === 'WAIT_IT_COMMENT') {
@@ -108,7 +108,7 @@ function genTsDoc(tsPath: string, mdPath: string) {
         state = 'WAIT_F_COMMENT';
         interfaces.push({ name: interfaceTypeMatch.at(2), comment, fields: [] });
         comment = '';
-      } else if (interfaceTypeMatch && interfaceTypeMatch.at(1) === 'type') {
+      } else if (interfaceTypeMatch && (interfaceTypeMatch.at(1) === 'type' || interfaceTypeMatch.at(1) === 'const')) {
         state = 'WAIT_T_END';
         interfaces.push({ name: interfaceTypeMatch.at(2), comment, fields: [], typeVerbatim: '' })
       } else {

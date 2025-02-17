@@ -69,20 +69,41 @@ function pObjAndPartial<T extends string, U extends { type: T }>(props: { [K in 
 
 const pDir = pStrUnion<('ROW' | 'COL')[]>(['ROW', 'COL']);
 
+const pCommonAttrs = {
+  hidden: pOpt(pBool),
+  onpointerdown: pOpt(pBool),
+  onpointerup: pOpt(pBool),
+  onpointermove: pOpt(pBool),
+  onpointerover: pOpt(pBool),
+  onpointerout: pOpt(pBool),
+  onpointerenter: pOpt(pBool),
+  onpointerleave: pOpt(pBool),
+  onpointercancel: pOpt(pBool),
+  ongotpointercapture: pOpt(pBool),
+  onlostpointercapture: pOpt(pBool),
+  onclick: pOpt(pBool),
+}
+
+const pCommonInputAttrs = {
+  disabled: pOpt(pBool),
+  oninput: pOpt(pBool),
+  onchange: pOpt(pBool),
+}
+
 const [pDiv, pPartialDiv] = pObjAndPartial<FiolinFormComponentType, FiolinFormDiv>({
   type: pStrLit('DIV'),
   name: pOpt(pStr),
   dir: pDir,
-  hidden: pOpt(pBool),
   children: pArr(pFiolinFormComponent),
+  ...pCommonAttrs,
 });
 
 const [pLabel, pPartialLabel] = pObjAndPartial<FiolinFormComponentType, FiolinFormLabel>({
   type: pStrLit('LABEL'),
   name: pOpt(pStr),
   text: pStr,
-  hidden: pOpt(pBool),
   child: pFiolinFormComponent,
+  ...pCommonAttrs,
 });
 
 const [pCheckbox, pPartialCheckbox] = pObjAndPartial<FiolinFormComponentType, FiolinFormCheckbox>({
@@ -90,20 +111,16 @@ const [pCheckbox, pPartialCheckbox] = pObjAndPartial<FiolinFormComponentType, Fi
   name: pStr,
   value: pOpt(pStr),
   checked: pOpt(pBool),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pColor, pPartialColor] = pObjAndPartial<FiolinFormComponentType, FiolinFormColor>({
   type: pStrLit('COLOR'),
   name: pStr,
   value: pOpt(pStr),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pDate, pPartialDate] = pObjAndPartial<FiolinFormComponentType, FiolinFormDate>({
@@ -114,10 +131,8 @@ const [pDate, pPartialDate] = pObjAndPartial<FiolinFormComponentType, FiolinForm
   min: pOpt(pStr),
   max: pOpt(pStr),
   step: pOpt(pNum),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pDatetimeLocal, pPartialDatetimeLocal] = pObjAndPartial<FiolinFormComponentType, FiolinFormDatetimeLocal>({
@@ -128,10 +143,8 @@ const [pDatetimeLocal, pPartialDatetimeLocal] = pObjAndPartial<FiolinFormCompone
   min: pOpt(pStr),
   max: pOpt(pStr),
   step: pOpt(pNum),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pEmail, pPartialEmail] = pObjAndPartial<FiolinFormComponentType, FiolinFormEmail>({
@@ -143,10 +156,8 @@ const [pEmail, pPartialEmail] = pObjAndPartial<FiolinFormComponentType, FiolinFo
   required: pOpt(pBool),
   placeholder: pOpt(pStr),
   size: pOpt(pNum),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pFile, pPartialFile] = pObjAndPartial<FiolinFormComponentType, FiolinFormFile>({
@@ -155,10 +166,8 @@ const [pFile, pPartialFile] = pObjAndPartial<FiolinFormComponentType, FiolinForm
   multiple: pOpt(pBool),
   accept: pOpt(pStr),
   submit: pOpt(pBool),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pNumber, pPartialNumber] = pObjAndPartial<FiolinFormComponentType, FiolinFormNumber>({
@@ -170,10 +179,8 @@ const [pNumber, pPartialNumber] = pObjAndPartial<FiolinFormComponentType, Fiolin
   min: pOpt(pNum),
   max: pOpt(pNum),
   step: pOpt(pNum),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pRadio, pPartialRadio] = pObjAndPartial<FiolinFormComponentType, FiolinFormRadio>({
@@ -182,10 +189,8 @@ const [pRadio, pPartialRadio] = pObjAndPartial<FiolinFormComponentType, FiolinFo
   value: pStr,
   checked: pOpt(pBool),
   required: pOpt(pBool),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pRange, pPartialRange] = pObjAndPartial<FiolinFormComponentType, FiolinFormRange>({
@@ -195,10 +200,8 @@ const [pRange, pPartialRange] = pObjAndPartial<FiolinFormComponentType, FiolinFo
   min: pNum,
   max: pNum,
   step: pOpt(pNum),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pTel, pPartialTel] = pObjAndPartial<FiolinFormComponentType, FiolinFormTel>({
@@ -209,10 +212,8 @@ const [pTel, pPartialTel] = pObjAndPartial<FiolinFormComponentType, FiolinFormTe
   required: pOpt(pBool),
   placeholder: pOpt(pStr),
   size: pOpt(pNum),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pText, pPartialText] = pObjAndPartial<FiolinFormComponentType, FiolinFormText>({
@@ -223,10 +224,8 @@ const [pText, pPartialText] = pObjAndPartial<FiolinFormComponentType, FiolinForm
   required: pOpt(pBool),
   placeholder: pOpt(pStr),
   size: pOpt(pNum),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pTime, pPartialTime] = pObjAndPartial<FiolinFormComponentType, FiolinFormTime>({
@@ -237,10 +236,8 @@ const [pTime, pPartialTime] = pObjAndPartial<FiolinFormComponentType, FiolinForm
   min: pOpt(pStr),
   max: pOpt(pStr),
   step: pOpt(pNum),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pUrl, pPartialUrl] = pObjAndPartial<FiolinFormComponentType, FiolinFormUrl>({
@@ -251,10 +248,8 @@ const [pUrl, pPartialUrl] = pObjAndPartial<FiolinFormComponentType, FiolinFormUr
   required: pOpt(pBool),
   placeholder: pOpt(pStr),
   size: pOpt(pNum),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const pSelectOption = pObjWithProps<FiolinFormSelectOption>({
@@ -269,10 +264,8 @@ const [pSelect, pPartialSelect] = pObjAndPartial<FiolinFormComponentType, Fiolin
   options: pArr(pSelectOption),
   multiple: pOpt(pBool),
   required: pOpt(pBool),
-  hidden: pOpt(pBool),
-  disabled: pOpt(pBool),
-  onchange: pOpt(pBool),
-  oninput: pOpt(pBool),
+  ...pCommonInputAttrs,
+  ...pCommonAttrs,
 });
 
 const [pButton, pPartialButton] = pObjAndPartial<FiolinFormComponentType, FiolinFormButton>({
@@ -280,15 +273,15 @@ const [pButton, pPartialButton] = pObjAndPartial<FiolinFormComponentType, Fiolin
   text: pStr,
   name: pOpt(pStr),
   value: pOpt(pStr),
-  hidden: pOpt(pBool),
   disabled: pOpt(pBool),
+  ...pCommonAttrs,
 });
 
 const [pOutput, pPartialOutput] = pObjAndPartial<FiolinFormComponentType, FiolinFormOutput>({
   type: pStrLit('OUTPUT'),
   name: pStr,
   value: pOpt(pStr),
-  hidden: pOpt(pBool),
+  ...pCommonAttrs,
 });
 
 const [pCanvas, pPartialCanvas] = pObjAndPartial<FiolinFormComponentType, FiolinFormCanvas>({
@@ -296,5 +289,5 @@ const [pCanvas, pPartialCanvas] = pObjAndPartial<FiolinFormComponentType, Fiolin
   name: pStr,
   height: pNum,
   width: pNum,
-  hidden: pOpt(pBool),
+  ...pCommonAttrs,
 });
