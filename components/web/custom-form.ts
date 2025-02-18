@@ -66,7 +66,7 @@ export class CustomForm extends FormComponent {
 
   onEvent(id: FiolinFormComponentId, ev: FiolinFormEvent) {
     // TODO: forward these up to the runner
-    console.log('Event: ', id, ev);
+    console.log('Event: ', ev);
   }
 
   onRun(request: FiolinRunRequest, opts: { setCanvases?: Record<string, OffscreenCanvas> }): void {

@@ -1,4 +1,5 @@
 import { ExtractTagType  } from '../tagged-unions';
+import { FiolinFormComponentId } from './form';
 
 // Event type pairs. Mostly used by utility code, but it's more
 // helpful for this to be the canonical listing and have FiolinFormEvent be
@@ -19,6 +20,11 @@ export type FiolinFormEvent = FiolinFormEventPair extends [infer T, any] ? T : n
 // The type tags for events
 export type FiolinFormEventType = ExtractTagType<FiolinFormEvent>;
 
+interface EventCommon {
+  target: FiolinFormComponentId;
+  timeStamp: number;
+}
+
 // The pointer event names as a value. Mostly useful for utility code, but it's
 // possible to derive the type from this and not the other way around.
 export const POINTER_EVENT_TYPES = [
@@ -31,7 +37,7 @@ export const POINTER_EVENT_TYPES = [
 export type FiolinFormPointerEventType = (typeof POINTER_EVENT_TYPES)[number];
 
 // Pointer event (includes all mouse and touchpad events)
-export interface FiolinFormPointerEvent {
+export interface FiolinFormPointerEvent extends EventCommon {
   // Type tag
   type: 'POINTER';
   // The name of the specific pointer event
@@ -58,7 +64,7 @@ export const INPUT_EVENT_TYPES = ['input', 'change'] as const;
 export type FiolinFormInputEventType = (typeof INPUT_EVENT_TYPES)[number];
 
 // Input event (includes oninput and onchange)
-export interface FiolinFormInputEvent {
+export interface FiolinFormInputEvent extends EventCommon {
   // Type tag
   type: 'INPUT';
   // The name of the specific input event
