@@ -69,5 +69,6 @@ export interface FiolinFormInputEvent extends EventCommon {
   type: 'INPUT';
   // The name of the specific input event
   subtype: FiolinFormInputEventType;
-  // TODO
+  // Input value
+  value: string;
 }

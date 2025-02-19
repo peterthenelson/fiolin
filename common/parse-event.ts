@@ -1,4 +1,4 @@
-import { pObjWithProps, pStrUnion, ObjPath, pTaggedUnion, pStrLit, pNum } from './parse';
+import { pObjWithProps, pStrUnion, ObjPath, pTaggedUnion, pStrLit, pNum, pStr } from './parse';
 import { pFiolinFormComponentId } from './parse-form';
 import { FiolinFormEvent, INPUT_EVENT_TYPES, POINTER_EVENT_TYPES } from './types';
 
@@ -12,6 +12,7 @@ export function pFormEvent(p: ObjPath, v: unknown): FiolinFormEvent {
     'INPUT': pObjWithProps({
       type: pStrLit('INPUT'),
       subtype: pStrUnion<typeof INPUT_EVENT_TYPES>(INPUT_EVENT_TYPES),
+      value: pStr,
       ...common,
     }),
     'POINTER': pObjWithProps({

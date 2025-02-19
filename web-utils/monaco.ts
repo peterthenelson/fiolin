@@ -127,7 +127,6 @@ export class FiolinScriptEditor {
     const line = m.getLineContent(lineno);
     const startCol = 1 + (line.match(/^\s*/)?.[0]?.length || 0);
     const endCol = 1 + line.length - (line.match(/\s*$/)?.[0]?.length || 0);
-    console.log(line, startCol, endCol);
     monaco.editor.setModelMarkers(m, 'fiolin', [{
       severity: monaco.MarkerSeverity.Error,
       message: msg,

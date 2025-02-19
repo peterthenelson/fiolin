@@ -149,31 +149,34 @@ function updateFieldToStr<T extends keyof any, U>(obj: Record<T, string>, key: T
 function ignore() {};
 
 function transformEvent<E extends Event>(ev: E, target: FiolinFormComponentId): FiolinFormEvent | undefined {
-  // TODO Actual other fields
   const common = { target, timeStamp: ev.timeStamp };
   if (ev instanceof InputEvent) {
     const i = INPUT_EVENT_TYPES.indexOf(ev.type as FiolinFormInputEventType);
     if (i !== -1) {
-      return { type: 'INPUT', subtype: INPUT_EVENT_TYPES[i], ...common };
+      const value = ev.target && 'value' in ev.target ? (ev.target.value || '').toString() : '';
+      return { type: 'INPUT', subtype: INPUT_EVENT_TYPES[i], value, ...common };
     } else {
       console.log('Unexpected input event subtype:', ev.type);
     }
   } else if (ev instanceof PointerEvent) {
     const i = POINTER_EVENT_TYPES.indexOf(ev.type as FiolinFormPointerEventType);
     if (i !== -1) {
+      // TODO Actual other fields
       return { type: 'POINTER', subtype: POINTER_EVENT_TYPES[i], ...common };
     } else {
       console.log('Unexpected pointer event subtype:', ev.type);
     }
   } else if (ev instanceof MouseEvent) {
     if (ev.type === 'click') {
+      // TODO Actual other fields
       return { type: 'POINTER', subtype: 'click', ...common };
     } else {
       console.log('Unexpected mouse event subtype:', ev.type);
     }
   } else {
     if (ev.type === 'change') {
-      return { type: 'INPUT', subtype: 'change', ...common };
+      const value = ev.target && 'value' in ev.target ? (ev.target.value || '').toString() : '';
+      return { type: 'INPUT', subtype: 'change', value, ...common };
     } else {
       console.log('Unexpected event subtype:', ev.type);
     }
