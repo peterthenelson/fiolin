@@ -42,7 +42,38 @@ export interface FiolinFormPointerEvent extends EventCommon {
   type: 'POINTER';
   // The name of the specific pointer event
   subtype: FiolinFormPointerEventType;
-  // TODO
+  // Whether the alt key was down
+  altKey: boolean;
+  // Whether the ctrl key was down
+  ctrlKey: boolean;
+  // Whether the meta key was down
+  metaKey: boolean;
+  // Whether the shift key was down
+  shiftKey: boolean;
+  // The button identifer
+  button: number;
+  // The sum of button identifiers
+  buttons: number;
+  // X coordinate in viewport coords
+  clientX: number;
+  // Y coordinate in viewport coords
+  clientY: number;
+  // X change since last event (unit varies by browser)
+  movementX: number;
+  // Y change since last event (unit varies by browser)
+  movementY: number;
+  // X offset relative to padding of target
+  offsetX: number;
+  // Y offset relative to padding of target
+  offsetY: number;
+  // X offset relative to whole document
+  pageX: number;
+  // Y offset relative to whole document
+  pageY: number;
+  // X coordinate in screen coords
+  screenX: number;
+  // Y coordinate in screen coords
+  screenY: number;
 }
 
 /*

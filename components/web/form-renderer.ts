@@ -148,6 +148,20 @@ function updateFieldToStr<T extends keyof any, U>(obj: Record<T, string>, key: T
 
 function ignore() {};
 
+function extractPointer(ev: MouseEvent) {
+  const {
+    altKey, ctrlKey, metaKey, shiftKey, button, buttons,
+    clientX, clientY, movementX, movementY, 
+    offsetX, offsetY, pageX, pageY, screenX, screenY
+  } = ev;
+  // TODO: PointerEvent stuff
+  return {
+    altKey, ctrlKey, metaKey, shiftKey, button, buttons,
+    clientX, clientY, movementX, movementY, 
+    offsetX, offsetY, pageX, pageY, screenX, screenY
+  };
+}
+
 function transformEvent<E extends Event>(ev: E, target: FiolinFormComponentId): FiolinFormEvent | undefined {
   const common = { target, timeStamp: ev.timeStamp };
   if (ev instanceof InputEvent) {
@@ -161,15 +175,13 @@ function transformEvent<E extends Event>(ev: E, target: FiolinFormComponentId): 
   } else if (ev instanceof PointerEvent) {
     const i = POINTER_EVENT_TYPES.indexOf(ev.type as FiolinFormPointerEventType);
     if (i !== -1) {
-      // TODO Actual other fields
-      return { type: 'POINTER', subtype: POINTER_EVENT_TYPES[i], ...common };
+      return { type: 'POINTER', subtype: POINTER_EVENT_TYPES[i], ...extractPointer(ev), ...common };
     } else {
       console.log('Unexpected pointer event subtype:', ev.type);
     }
   } else if (ev instanceof MouseEvent) {
     if (ev.type === 'click') {
-      // TODO Actual other fields
-      return { type: 'POINTER', subtype: 'click', ...common };
+      return { type: 'POINTER', subtype: 'click', ...extractPointer(ev), ...common };
     } else {
       console.log('Unexpected mouse event subtype:', ev.type);
     }
