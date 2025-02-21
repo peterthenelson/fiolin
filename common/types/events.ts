@@ -30,11 +30,18 @@ interface EventCommon {
 export const POINTER_EVENT_TYPES = [
   'pointerdown', 'pointerup', 'pointermove', 'pointerover', 'pointerout',
   'pointerenter', 'pointerleave', 'pointercancel', 'gotpointercapture',
-  'lostpointercapture', 'click'
+  'lostpointercapture', 'click', 'dblclick',
 ] as const;
 
 // Pointer event names
 export type FiolinFormPointerEventType = (typeof POINTER_EVENT_TYPES)[number];
+
+// The pointer type names as a value. Mostly useful for utility code, but it's
+// possible to derive the type from this and not the other way around.
+export const POINTER_TYPES = ['mouse', 'pen', 'touch'] as const;
+
+// Pointer types
+export type FiolinFormPointerType = (typeof POINTER_TYPES)[number];
 
 // Pointer event (includes all mouse and touchpad events)
 export interface FiolinFormPointerEvent extends EventCommon {
@@ -74,6 +81,31 @@ export interface FiolinFormPointerEvent extends EventCommon {
   screenX: number;
   // Y coordinate in screen coords
   screenY: number;
+  // Id to join common pointer events (or 0 if unavailable).
+  pointerId: number;
+  // The type of pointer (e.g., touch); defaults to mouse.
+  pointerType: FiolinFormPointerType;
+  // Is this the primary pointer (defaults to true).
+  isPrimary: boolean;
+  // Height of the point event (or 1 if unavailable).
+  height: number;
+  // Width of the point event (or 1 if unavailable).
+  width: number;
+  // Pressure (or 0.5 if active and pressure not available).
+  pressure: number;
+  // Tangential pressure (a.k.a. "barrel pressure", "cylinder stress"); defaults
+  // to 0 if unavailable.
+  tangentialPressure: number;
+  // Angle relative to X-Y plane (or pi/2 if unavailable).
+  altitudeAngle: number;
+  // Angle relative to Y-Z plane (or 0 if unavailable).
+  azimuthAngle: number;
+  // Angle relative to Y-Z plane (or 0 if unavailable).
+  tiltX: number;
+  // Angle relative to X-Z plane (or 0 if unavailable).
+  tiltY: number;
+  // Clockwise rotation in degrees around its major axis (or 0 if unavailable).
+  twist: number;
 }
 
 /*

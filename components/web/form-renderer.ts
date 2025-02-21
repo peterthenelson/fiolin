@@ -1,5 +1,5 @@
 import { typeSwitch } from '../../common/tagged-unions';
-import { FiolinFormEvent, FiolinFormInputEventType, FiolinFormPointerEventType, FiolinScriptInterface, FormUpdate, INPUT_EVENT_TYPES, POINTER_EVENT_TYPES } from '../../common/types';
+import { FiolinFormEvent, FiolinFormInputEventType, FiolinFormPointerEventType, FiolinFormPointerType, FiolinScriptInterface, FormUpdate, INPUT_EVENT_TYPES, POINTER_EVENT_TYPES } from '../../common/types';
 import { FiolinFormComponentMapImpl, idToRepr, makeId, maybeComponentToId, swapToPartial } from '../../common/form-utils';
 import { FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentId, FiolinFormPartialComponentElement } from '../../common/types/form';
 import { setSelected } from '../../web-utils/set-selected';
@@ -154,11 +154,36 @@ function extractPointer(ev: MouseEvent) {
     clientX, clientY, movementX, movementY, 
     offsetX, offsetY, pageX, pageY, screenX, screenY
   } = ev;
-  // TODO: PointerEvent stuff
-  return {
+  const common = {
     altKey, ctrlKey, metaKey, shiftKey, button, buttons,
     clientX, clientY, movementX, movementY, 
     offsetX, offsetY, pageX, pageY, screenX, screenY
+  };
+  let pointerId = 0, pointerType: FiolinFormPointerType = 'mouse',
+    isPrimary = true, height = 1, width = 1, pressure = buttons !== 0 ? 0.5 : 0,
+    tangentialPressure = 0, altitudeAngle = Math.PI / 2, azimuthAngle = 0,
+    tiltX = 0, tiltY = 0, twist = 0;
+  if (ev instanceof PointerEvent) {
+    pointerId = ev.pointerId;
+    pointerType = (ev.pointerType as FiolinFormPointerType);
+    isPrimary = ev.isPrimary;
+    height = ev.height;
+    width = ev.width;
+    pressure = ev.pressure;
+    tangentialPressure = ev.tangentialPressure;
+    if ('altitudeAngle' in ev && typeof ev.altitudeAngle === 'number') {
+      altitudeAngle = ev.altitudeAngle;
+    }
+    if ('azimuthAngle' in ev && typeof ev.azimuthAngle === 'number') {
+      azimuthAngle = ev.azimuthAngle;
+    }
+    tiltX = ev.tiltX;
+    tiltY = ev.tiltY;
+    twist = ev.twist;
+  }
+  return { 
+    pointerId, pointerType, isPrimary, height, width, pressure, tangentialPressure,
+    altitudeAngle, azimuthAngle, tiltX, tiltY, twist, ...common,
   };
 }
 
@@ -180,8 +205,8 @@ function transformEvent<E extends Event>(ev: E, target: FiolinFormComponentId): 
       console.log('Unexpected pointer event subtype:', ev.type);
     }
   } else if (ev instanceof MouseEvent) {
-    if (ev.type === 'click') {
-      return { type: 'POINTER', subtype: 'click', ...extractPointer(ev), ...common };
+    if (ev.type === 'click' || ev.type === 'dblclick') {
+      return { type: 'POINTER', subtype: ev.type, ...extractPointer(ev), ...common };
     } else {
       console.log('Unexpected mouse event subtype:', ev.type);
     }
@@ -422,6 +447,7 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
   maybeForward('gotpointercapture', 'ongotpointercapture', PointerEvent, ce[0], ce[1], id, state, handled);
   maybeForward('lostpointercapture', 'onlostpointercapture', PointerEvent, ce[0], ce[1], id, state, handled)
   maybeForward('click', 'onclick', MouseEvent, ce[0], ce[1], id, state, handled);
+  maybeForward('dblclick', 'ondblclick', MouseEvent, ce[0], ce[1], id, state, handled);
   maybeForward('input', 'oninput', InputEvent, ce[0], ce[1], id, state, handled);
   maybeForward('change', 'onchange', Event, ce[0], ce[1], id, state, handled);
   checkExhaustive(handled);

@@ -1,11 +1,13 @@
 import { pBool, pObjWithProps, pStrUnion, ObjPath, pTaggedUnion, pStrLit, pNum, pStr } from './parse';
 import { pFiolinFormComponentId } from './parse-form';
-import { FiolinFormEvent, INPUT_EVENT_TYPES, POINTER_EVENT_TYPES } from './types';
+import { FiolinFormEvent, INPUT_EVENT_TYPES, POINTER_EVENT_TYPES, POINTER_TYPES } from './types';
 
 const common = {
   target: pFiolinFormComponentId,
   timeStamp: pNum,
 }
+
+export const pPointerType = pStrUnion<typeof POINTER_TYPES>(POINTER_TYPES);
 
 export function pFormEvent(p: ObjPath, v: unknown): FiolinFormEvent {
   return pTaggedUnion<FiolinFormEvent>({
@@ -34,6 +36,18 @@ export function pFormEvent(p: ObjPath, v: unknown): FiolinFormEvent {
       pageY: pNum,
       screenX: pNum,
       screenY: pNum,
+      pointerId: pNum,
+      pointerType: pPointerType,
+      isPrimary: pBool,
+      height: pNum,
+      width: pNum,
+      pressure: pNum,
+      tangentialPressure: pNum,
+      altitudeAngle: pNum,
+      azimuthAngle: pNum,
+      tiltX: pNum,
+      tiltY: pNum,
+      twist: pNum,
       ...common,
     }),
   })(p, v);
