@@ -28,6 +28,7 @@
     "@types/yauzl-promise": "^4.0.1",
     "citty": "^0.1.6",
     "cross-env": "^7.0.3",
+    "happy-dom": "^17.1.1",
     "husky": "^9.1.7",
     "jiti": "^2.3.3",
     "marked": "^15.0.0",

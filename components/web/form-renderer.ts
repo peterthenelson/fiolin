@@ -195,27 +195,27 @@ function transformEvent<E extends Event>(ev: E, target: FiolinFormComponentId): 
       const value = ev.target && 'value' in ev.target ? (ev.target.value || '').toString() : '';
       return { type: 'INPUT', subtype: INPUT_EVENT_TYPES[i], value, ...common };
     } else {
-      console.log('Unexpected input event subtype:', ev.type);
+      throw new Error(`Unexpected input event subtype: ${ev.type}`);
     }
   } else if (ev instanceof PointerEvent) {
     const i = POINTER_EVENT_TYPES.indexOf(ev.type as FiolinFormPointerEventType);
     if (i !== -1) {
       return { type: 'POINTER', subtype: POINTER_EVENT_TYPES[i], ...extractPointer(ev), ...common };
     } else {
-      console.log('Unexpected pointer event subtype:', ev.type);
+      throw new Error(`Unexpected pointer event subtype: ${ev.type}`);
     }
   } else if (ev instanceof MouseEvent) {
     if (ev.type === 'click' || ev.type === 'dblclick') {
       return { type: 'POINTER', subtype: ev.type, ...extractPointer(ev), ...common };
     } else {
-      console.log('Unexpected mouse event subtype:', ev.type);
+      throw new Error(`Unexpected mouse event subtype: ${ev.type}`);
     }
   } else {
-    if (ev.type === 'change') {
+    if (ev.type === 'change' || ev.type === 'input') {
       const value = ev.target && 'value' in ev.target ? (ev.target.value || '').toString() : '';
-      return { type: 'INPUT', subtype: 'change', value, ...common };
+      return { type: 'INPUT', subtype: ev.type, value, ...common };
     } else {
-      console.log('Unexpected event subtype:', ev.type);
+      throw new Error(`Unexpected event subtype: ${ev.type}`);
     }
   }
 }
@@ -428,13 +428,6 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
     // Event handlers can't do anything in these cases.
     return;
   }
-  if ('oninput' in ce[0]) {
-    if (ce[0].oninput) {
-      ce[1].oninput = forwardEvent(id, state);
-    } else {
-      ce[1].oninput = ignore;
-    }
-  }
   const handled: string[] = [];
   maybeForward('pointerdown', 'onpointerdown', PointerEvent, ce[0], ce[1], id, state, handled);
   maybeForward('pointerup', 'onpointerup', PointerEvent, ce[0], ce[1], id, state, handled);
@@ -454,7 +447,8 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
 }
 
 // There's not an easy way to make this a static check, so it's dynamic. I just
-// really don't want to forget to make the lists match.
+// really don't want to forget to make the lists match. This is exercised in a
+// test, so failures shouldn't pass pre-commit checks.
 function checkExhaustive(handled: string[]) {
   const got = new Set(handled);
   const want = new Set((INPUT_EVENT_TYPES as readonly string[]).concat(POINTER_EVENT_TYPES));
@@ -476,12 +470,12 @@ function maybeForward<T extends string, E extends Event>(
     throw new Error(`Mismatched subtype and property: ${eventSubtype}, ${onEventProperty}`)
   }
   handledSubtypes.push(eventSubtype);
-  if (c.hasOwnProperty(onEventProperty)) {
+  if (onEventProperty in c) {
     const value = c[onEventProperty as keyof FiolinFormPartialComponentElement[0]];
     if (value === undefined) {
       return;
     } else if (value) {
-      elem[onEventProperty] = forwardEvent<E>(id, state)
+      elem[onEventProperty] = forwardEvent<E>(id, state);
     } else {
       elem[onEventProperty] = null;
     }

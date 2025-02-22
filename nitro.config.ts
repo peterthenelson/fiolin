@@ -60,6 +60,7 @@ const loadJs: NitroRouteConfig = {
 export default defineNitroConfig({
   srcDir: 'server',
   preset: 'cloudflare-pages-static',
+
   routeRules: {
     '/': csp(indexCsp),
     '/index.html': csp(indexCsp),
@@ -81,9 +82,12 @@ export default defineNitroConfig({
     // (This doesn't, as it ends up applying noneCsp to everything.)
     // '/**': csp(noneCsp),
   },
+
   prerender: {
     // TODO: Release third-party by rendering /third-party/
     routes: ['/', '/load-suggestions', '/playground/load-tutorial', '/doc/third-party'],
     crawlLinks: true,
-  }
+  },
+
+  compatibilityDate: '2025-02-21'
 });
