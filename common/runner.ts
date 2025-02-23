@@ -58,7 +58,7 @@ export class PyodideRunner implements FiolinRunner {
 
   constructor(options?: PyodideRunnerOptions) {
     this._shared = {
-      inputs: [], outputs: [], args: {},
+      inputs: [], outputs: [], args: {}, event: undefined,
       enqueueFormUpdate: resultify((update) => this.enqueueFormUpdate(update)),
       Array, Map, Object, Promise,
     };
@@ -171,6 +171,7 @@ export class PyodideRunner implements FiolinRunner {
     this._shared.errorLine = undefined;
     this._shared.partial = undefined;
     this._shared.args = {};
+    this._shared.event = undefined;
   }
 
   private async load() {
@@ -260,6 +261,7 @@ export class PyodideRunner implements FiolinRunner {
     this._log = [];
     this.resetShared();
     Object.assign(this._shared.args!, request.args || {});
+    this._shared.event = request.event;
     this._shared.canvases = request.canvases;
     try {
       this._formUpdates = [];

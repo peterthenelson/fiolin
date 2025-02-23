@@ -1,7 +1,7 @@
-import { FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../../common/types';
+import { FiolinFormEvent, FiolinRunRequest, FiolinRunResponse, FiolinScript } from '../../common/types';
 
 export interface FormCallbacks {
-  runScript(files: File[], args?: Record<string, string>): Promise<void>;
+  runScript(files: File[], args?: Record<string, string>, event?: FiolinFormEvent): Promise<void>;
   downloadFile(file: File): void;
 }
 

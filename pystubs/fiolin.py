@@ -10,6 +10,8 @@ def continue_with(new_state):
   pass
 def args():
   return {}
+def event():
+  return None
 def get_input_basename(suffix='', ext=''):
   return ''
 def get_input_path():

@@ -50,7 +50,7 @@ export interface FiolinScriptInterface {
   // Form presented to the user (the submitted values show up as args in the
   // FiolinRunRequest).
   form?: FiolinForm;
-  // TODO: extend w/stuff about console output, and/or canvas
+  // TODO: extend w/stuff about console output
 }
 
 // How the fiolin runner is meant to setup the environment for the script.

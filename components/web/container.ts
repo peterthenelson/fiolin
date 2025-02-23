@@ -1,7 +1,7 @@
 import { WorkerMessage } from '../../web-utils/types';
 import { Deferred } from '../../common/deferred';
 import { getErrMsg, toErr } from '../../common/errors';
-import { FiolinRunRequest, FiolinScript } from '../../common/types';
+import { FiolinFormEvent, FiolinRunRequest, FiolinScript } from '../../common/types';
 import { TypedWorker } from '../../web-utils/typed-worker';
 import type { FiolinScriptEditorModel } from '../../web-utils/monaco';
 import { DeployDialog } from '../../components/web/deploy-dialog';
@@ -113,7 +113,7 @@ export class Container {
     );
     this.deployDialog = new DeployDialog(container, { storage, downloadFile });
     const formCallbacks: FormCallbacks = {
-      runScript: (files, args) => this.runScript(files, args),
+      runScript: (files, args, event) => this.runScript(files, args, event),
       downloadFile: (file) => downloadFile(file),
     };
     this.form = new CombinedForm([
@@ -192,11 +192,11 @@ export class Container {
     }
   }
 
-  private async runScript(files: File[], args?: Record<string, string>) {
+  private async runScript(files: File[], args?: Record<string, string>, event?: FiolinFormEvent) {
     if (!this.form.reportValidity()) {
       return;
     }
-    const request: FiolinRunRequest = { inputs: files, args };
+    const request: FiolinRunRequest = { inputs: files, args, event };
     const opts: { setCanvases?: Record<string, OffscreenCanvas> } = {};
     this.form.onRun(request, opts);
     const script = await this.script;

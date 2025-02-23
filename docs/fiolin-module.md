@@ -33,6 +33,10 @@ fiolin.**errno_to_str**(code)
 
 > Translate an emscripten FS errno code to a symbolic name.
 
+fiolin.**event**()
+
+> Get the form event that triggered this run, if any.
+
 fiolin.**extract_exc**(e=None)
 
 > Extract line number from (last) exception and format stack trace.

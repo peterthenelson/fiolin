@@ -30,6 +30,12 @@ def args():
     return {}
   return dict(js.args.object_entries())
 
+def event():
+  """Get the form event that triggered this run, if any."""
+  if not js.event:
+    return None
+  return js.event.to_py()
+
 def get_input_basename(suffix='', ext=None):
   """Gets the (assumed to be single) input file basename.
   
