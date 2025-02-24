@@ -141,6 +141,9 @@ export class PyodideRunner implements FiolinRunner {
   }
 
   private extractOutputs(script: FiolinScript): File[] {
+    if (this._shared.partial) {
+      return [];
+    }
     const nOutputs = this._shared.outputs.length;
     if (script.interface.outputFiles === 'NONE' && nOutputs > 0) {
       throw new Error(`Script expected to produce no output files; got ${nOutputs}`);
