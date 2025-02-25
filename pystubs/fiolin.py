@@ -8,6 +8,8 @@ def state():
   return None
 def continue_with(new_state):
   pass
+def finish():
+  return None
 def args():
   return {}
 def event():

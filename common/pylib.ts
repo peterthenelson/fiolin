@@ -24,6 +24,12 @@ def continue_with(new_state):
   _state = new_state
   js.partial = True
 
+def finish():
+  """Reset state and don't treat this as a partial run."""
+  global _state
+  _state = None
+  js.partial = False
+
 def args():
   """Get the args dictionary."""
   if not js.args:

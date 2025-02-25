@@ -41,6 +41,10 @@ fiolin.**extract_exc**(e=None)
 
 > Extract line number from (last) exception and format stack trace.
 
+fiolin.**finish**()
+
+> Reset state and don't treat this as a partial run.
+
 fiolin.**form_set_disabled**(name, value=None, disabled=True)
 
 > Enqueue a form update to disable/enabled a given form component.

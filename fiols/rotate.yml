@@ -1,0 +1,69 @@
+meta:
+  title: Rotate Image 
+  author: Peter Nelson
+  description: >
+    Rotate an image
+  extensions:
+    - bmp
+    - gif
+    - jpg
+    - jpeg
+    - png
+    - tif
+    - tiff
+    - webp
+interface:
+  inputAccept: image/*
+  inputFiles: ANY # Can we switch to SINGLE?
+  outputFiles: SINGLE
+  form:
+    autofocusedName: input-image
+    children:
+      - type: DIV
+        dir: ROW
+        name: page-1
+        children:
+          - type: LABEL
+            text: Input Image
+            child:
+              type: FILE
+              name: input-image
+              accept: image/*
+              submit: true
+      - type: DIV
+        dir: COL
+        name: page-2
+        hidden: true
+        children:
+          - type: DIV
+            dir: ROW
+            children:
+              - type: BUTTON
+                text: Rotate Left
+                name: left
+                value: x
+              - type: BUTTON
+                text: Rotate Right
+                name: right
+                value: x
+          - type: LABEL
+            text: Preview
+            child:
+              type: CANVAS
+              name: preview
+              height: 400
+              width: 400
+          - type: DIV
+            dir: ROW
+            children:
+              - type: BUTTON
+                text: Start Over
+                name: reset
+                value: x
+              - type: BUTTON
+                text: Download
+                name: download
+                value: x
+runtime:
+  wasmModules:
+    - name: imagemagick

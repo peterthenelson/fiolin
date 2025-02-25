@@ -16,6 +16,10 @@ A not-necessarily-exhaustive list of TODOs:
 - Core functionality
   - Bug w/error propagation across js->py boundary ("return without exception
     set"). Still exists but workaround added.
+  - Minor bugs and features:
+    - Don't render both a form and a simple ui when there's a rendering error
+    - Move a bunch of relevant relevant stuff into the imagemagick wrapper
+      library (persistent read of images, blitting)
   - Emscripten modules:
     - Fix unsafe-eval issue with imagemagick
     - ffmpeg 
@@ -31,6 +35,7 @@ A not-necessarily-exhaustive list of TODOs:
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)
     - Demonstrating interactivity with controls
+    - Update the stateful example to include finish()
     - Demonstrating interactivity with canvas
   - More file-conversion scripts for real tasks
     - SVG recolor
@@ -58,6 +63,7 @@ A not-necessarily-exhaustive list of TODOs:
   - Editor:
     - Why is monaco occasionally triggering a request for clipboard permissions?
   - Controls:
+    - Figure out why file components get cleared on reruns
     - Add a "download files" component for the custom form
     - Make FILE component have a logo and text and panel and whatnot
   - Terminal:
