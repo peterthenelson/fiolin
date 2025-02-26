@@ -2,7 +2,6 @@
 import fiolin
 import os
 import sys
-from pyodide import ffi
 import imagemagick as im
 
 CANVAS_DIM = 400
@@ -29,8 +28,6 @@ async def main():
         f.write(bytes(final))
     if ctx:
       img.resize(CANVAS_DIM, CANVAS_DIM)
-      async with fiolin.callback_to_ctx(img.write, im.MagickFormat.Rgba) as rgba:
-        ctx.clearRect(0, 0, CANVAS_DIM, CANVAS_DIM)
-        w, h = img.width, img.height
-        x, y = (CANVAS_DIM - w) // 2, (CANVAS_DIM - h) // 2
-        fiolin.put_image(ctx, rgba, x, y, w, h)
+      w, h = img.width, img.height
+      x, y = (CANVAS_DIM - w) // 2, (CANVAS_DIM - h) // 2
+      await im.draw_to_canvas(ctx, img, x, y, w, h)

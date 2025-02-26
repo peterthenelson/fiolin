@@ -20,10 +20,9 @@ async def main():
       sys.exit(f'Input image not square! ({img.baseWidth}x{img.baseHeight})')
     img.resize(n, n)
     if ctx:
-      async with fiolin.callback_to_ctx(img.write, im.MagickFormat.Rgba) as rgba:
-        x = sum(SIZES[:i])
-        y = 256 - n
-        fiolin.put_image(ctx, bytes(rgba), x, y, width=n, height=n)
+      x = sum(SIZES[:i])
+      y = 256 - n
+      await im.draw_to_canvas(ctx, img, x, y, width=n, height=n)
     collection.push(img)
   async with fiolin.callback_to_ctx(img.write, im.MagickFormat.Ico) as final:
     with open(f'/output/{fiolin.get_input_basename(ext='.ico')}', 'wb') as f:

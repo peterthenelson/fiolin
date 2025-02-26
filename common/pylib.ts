@@ -250,17 +250,6 @@ def get_canvas(name):
     return getattr(js.canvases, name, None)
   return None
 
-def put_image(canvas, rgba_data, x, y, width, height):
-  if not canvas:
-    return
-  n = width * height * 4
-  if len(rgba_data) != n:
-    raise ValueError(f'Expected image data to have length {width}x{height}x4 = {n}; got {len(rgba_data)}')
-  img_data = canvas.createImageData(width, height)
-  for i in range(n):
-    img_data.data[i] = rgba_data[i]
-  canvas.putImageData(img_data, x, y)
-
 class _ValuedEvent:
   """Like an asyncio.Event but with a value inside; similar to a golang channel of size 1."""
 

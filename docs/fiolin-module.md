@@ -93,8 +93,6 @@ fiolin.**get_input_paths**()
 
 > Gets the input file paths.
 
-fiolin.**put_image**(canvas, rgba_data, x, y, width, height)
-
 fiolin.**set_output_basename**(output)
 
 > Manually sets the output file.

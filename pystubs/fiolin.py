@@ -50,8 +50,6 @@ def form_update(name, partial, value=None):
   pass
 def get_canvas(name):
   return None
-def put_image(canvas, rgba_data, x, y, width, height):
-  return None
 @contextlib.asynccontextmanager
 async def callback_to_ctx(f, *args, **kwargs):
   yield None

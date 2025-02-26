@@ -18,11 +18,9 @@ FMTS = {
 async def blit(ctx, img):
   async with fiolin.callback_to_ctx(img.clone) as copy:
     copy.resize(CANVAS_DIM, CANVAS_DIM)
-    async with fiolin.callback_to_ctx(copy.write, im.MagickFormat.Rgba) as rgba:
-      ctx.clearRect(0, 0, CANVAS_DIM, CANVAS_DIM)
-      w, h = copy.width, copy.height
-      x, y = (CANVAS_DIM - w) // 2, (CANVAS_DIM - h) // 2
-      fiolin.put_image(ctx, rgba, x, y, w, h)
+    w, h = copy.width, copy.height
+    x, y = (CANVAS_DIM - w) // 2, (CANVAS_DIM - h) // 2
+    await im.draw_to_canvas(ctx, copy, x, y, w, h)
 
 async def main():
   args = fiolin.args()
