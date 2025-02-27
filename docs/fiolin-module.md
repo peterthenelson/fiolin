@@ -21,6 +21,10 @@ fiolin.**callback_to_ctx**(f, *args, **kwargs)
 > >   # The read_and_parse call will not end until this context manager exits
 > >   print(parsed_obj)
 
+fiolin.**clear_canvas**(ctx)
+
+> Clear the entire canvas.
+
 fiolin.**continue_with**(new_state)
 
 > Set the continue bit and save state for the next run.

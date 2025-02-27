@@ -250,6 +250,12 @@ def get_canvas(name):
     return getattr(js.canvases, name, None)
   return None
 
+def clear_canvas(ctx):
+  """Clear the entire canvas."""
+  if not ctx:
+    return
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
 class _ValuedEvent:
   """Like an asyncio.Event but with a value inside; similar to a golang channel of size 1."""
 

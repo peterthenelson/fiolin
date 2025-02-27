@@ -1,6 +1,5 @@
 """Rotate an image."""
 import fiolin
-from pyodide import ffi
 import imagemagick as im
 import os
 import sys
@@ -20,6 +19,7 @@ async def blit(ctx, img):
     copy.resize(CANVAS_DIM, CANVAS_DIM)
     w, h = copy.width, copy.height
     x, y = (CANVAS_DIM - w) // 2, (CANVAS_DIM - h) // 2
+    fiolin.clear_canvas(ctx)
     await im.draw_to_canvas(ctx, copy, x, y, w, h)
 
 async def main():
@@ -32,9 +32,7 @@ async def main():
     _, ext = os.path.splitext(input_path.lower())
     if ext not in FMTS:
       sys.exit(f'Invalid format: {ext}; expected one of {FMTS.keys()}')
-    with open(input_path, 'rb') as f:
-      orig = f.read()
-    img = im.MagickImage.create(ffi.to_js(orig))
+    img = im.read_image(input_path)
     fiolin.continue_with({
       'img': img,
       'input_path': input_path,

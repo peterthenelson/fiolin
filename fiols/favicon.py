@@ -8,8 +8,7 @@ SIZES = [256, 128, 64, 32, 16]
 
 async def main():
   ctx = fiolin.get_canvas('output')
-  if ctx:
-    ctx.clearRect(0, 0, 496, 256)
+  fiolin.clear_canvas(ctx)
   with open(fiolin.get_input_path(), 'rb') as f:
     orig = f.read()
   collection = im.MagickImageCollection.new()

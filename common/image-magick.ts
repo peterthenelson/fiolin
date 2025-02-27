@@ -33,18 +33,29 @@ export class ImageMagickLoader extends FiolinWasmLoader {
     return dedent(`
       import js
       import fiolin
+      from pyodide import ffi
 
       # Re-export stuff from the wasm module
       for k, v in js.${moduleName}.object_entries():
         globals()[k] = v
 
-      async def draw_to_canvas(ctx, img, x, y, width, height, clear=True):
+      def read_image(path):
+        """Read an image from file.
+
+        This has two advantages over ImageMagick.read:
+        - The loaded image is not immediately destroyed, so you don't have to
+          fit all your logic into a callback.
+        - This accepts regular paths, without the need to account for the
+          mount point in the module.
+        """
+        with open(path, 'rb') as f:
+          return MagickImage.create(ffi.to_js(f.read()))
+
+      async def draw_to_canvas(ctx, img, x, y, width, height):
         """Draw image to canvas 2d context."""
         if not ctx:
           return
         async with fiolin.callback_to_ctx(img.write, MagickFormat.Rgba) as rgba:
-          if clear:
-            ctx.clearRect(x, y, width, height)
           n = width * height * 4
           if len(rgba) != n:
             raise ValueError(f'Expected image data to have length {width}x{height}x4 = {n}; got {len(rgba)}')

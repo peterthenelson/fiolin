@@ -30,4 +30,5 @@ async def main():
       img.resize(CANVAS_DIM, CANVAS_DIM)
       w, h = img.width, img.height
       x, y = (CANVAS_DIM - w) // 2, (CANVAS_DIM - h) // 2
+      fiolin.clear_canvas(ctx)
       await im.draw_to_canvas(ctx, img, x, y, w, h)

@@ -18,8 +18,6 @@ A not-necessarily-exhaustive list of TODOs:
     set"). Still exists but workaround added.
   - Minor bugs and features:
     - Don't render both a form and a simple ui when there's a rendering error
-    - Move more relevant stuff into the imagemagick wrapper library (e.g.,
-      persistent read of images)
   - Emscripten modules:
     - Fix unsafe-eval issue with imagemagick
     - ffmpeg 
