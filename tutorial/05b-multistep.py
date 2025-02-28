@@ -48,6 +48,9 @@ elif action == 'lamp':
   fiolin.form_set_hidden('action', 'lamp', hidden=True)
   fiolin.form_set_hidden('action', 'twiddle', hidden=True)
   fiolin.form_set_value('output', LAMP_MSG)
+  # Not technically needed, but for a real script where you want to trigger a
+  # file download, this may be needed.
+  fiolin.finish()
   sys.exit(0)
 elif action == 'twiddle':
   fiolin.form_set_hidden('action', 'twiddle', hidden=True)

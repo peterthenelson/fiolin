@@ -4,8 +4,9 @@ meta:
   description: >
     You can build scripts that have multiple user interactions before they
     produce an output. `state()` and `continue_with()` are used to retrieve and
-    store state between runs. The various `form_*()` functions can be used to
-    hide, show, or otherwise modify existing form elements.
+    store state between runs. `finish()` will reset the state and unset the flag
+    indicating a script in-progress. The various `form_*()` functions can be
+    used to hide, show, or otherwise modify existing form elements.
 interface:
   inputFiles: NONE
   outputFiles: NONE

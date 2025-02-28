@@ -33,7 +33,6 @@ A not-necessarily-exhaustive list of TODOs:
   - Playground examples
     - Demonstrating matplotlib (after I get it to work)
     - Demonstrating interactivity with controls
-    - Update the stateful example to include finish()
     - Demonstrating imagemagick in more detail
     - Demonstrating interactivity with canvas
   - More file-conversion scripts for real tasks
