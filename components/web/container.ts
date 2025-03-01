@@ -141,7 +141,13 @@ export class Container {
   private async updateUiForScript(script: FiolinScript) {
     this.scriptTitle.textContent = script.meta.title;
     this.scriptDesc.textContent = script.meta.description;
-    this.form.onLoad(script);
+    try {
+      this.form.onLoad(script);
+    } catch (e) {
+      this.container.classList.add('error');
+      this.terminal.fatal(`${e}`);
+      console.error(e);
+    }
   }
 
   private async loadScript(): Promise<FiolinScript> {

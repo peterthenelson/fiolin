@@ -55,14 +55,20 @@ export class CustomForm extends FormComponent {
   onLoad(script: FiolinScript): void {
     this.ui = script.interface;
     if (this.ui.form) {
-      this.rendered = RenderedForm.render(this.rendered.form, this.ui, (id, ev) => this.onEvent(id, ev));
-      this.rendered.form.onsubmit = (e) => {
-        e.preventDefault();
-        const files = this.getFiles();
-        const args = this.getArgs(e.submitter);
-        this.cbs.runScript(files, args);
+      try {
+        this.rendered = RenderedForm.render(this.rendered.form, this.ui, (id, ev) => this.onEvent(id, ev));
+        this.rendered.form.onsubmit = (e) => {
+          e.preventDefault();
+          const files = this.getFiles();
+          const args = this.getArgs(e.submitter);
+          this.cbs.runScript(files, args);
+        }
+        this.transferred = false;
+      } catch (e) {
+        this.rendered = RenderedForm.render(this.rendered.form);
+        this.transferred = true;
+        throw e;
       }
-      this.transferred = false;
     } else {
       this.rendered = RenderedForm.render(this.rendered.form);
       this.transferred = true;
