@@ -8,8 +8,7 @@ interface RenderedLog {
 }
 
 export class Terminal {
-  // TODO: Have actual styled rows instead of a single pre element; also add
-  // controls to filter by type or whatnot.
+  // TODO: Add controls to filter by type or whatnot.
   private readonly terminal: HTMLDivElement;
   private readonly singleMsg: HTMLDivElement;
   private readonly logs: RenderedLog[];
@@ -28,9 +27,6 @@ export class Terminal {
   }
 
   log(level: FiolinLogLevel, msg: string) {
-    if (this.logs.length === 0) {
-      this.terminal.textContent = '';
-    }
     const div = document.createElement('div');
     const levelSpan = document.createElement('div');
     levelSpan.textContent = level;
@@ -40,14 +36,28 @@ export class Terminal {
     div.replaceChildren(levelSpan, msgSpan);
     this.logs.push({level, msg, div});
     div.classList.add(this.logs.length % 2 == 0 ? 'log-even' : 'log-odd');
-    this.terminal.appendChild(div);
-    this.logs.forEach((rl) => { rl.div.style.width = `${this.terminal.scrollWidth}px` });
-    this.terminal.scroll({ top: this.terminal.scrollHeight, behavior: 'smooth' });
+    this.updateUi();
   }
 
   fatal(msg: string) {
     this.fatalMsg = msg;
-    this.terminal.replaceChildren(this.singleMsg);
     this.singleMsg.textContent = this.fatalMsg;
+    this.updateUi();
+  }
+
+  private updateUi() {
+    if (this.fatalMsg !== undefined) {
+      this.terminal.replaceChildren(this.singleMsg);
+    } else if (this.logs.length === 0) {
+      this.terminal.textContent = '';
+    } else {
+      const divs: Node[] = [];
+      for (const rl of this.logs) {
+        divs.push(rl.div);
+        rl.div.style.width = `${this.terminal.scrollWidth}px`;
+      }
+      this.terminal.replaceChildren(...divs);
+    }
+    this.terminal.scroll({ top: this.terminal.scrollHeight, behavior: 'smooth' });
   }
 }

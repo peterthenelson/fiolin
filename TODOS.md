@@ -64,4 +64,3 @@ A not-necessarily-exhaustive list of TODOs:
     - Make FILE component have a logo and text and panel and whatnot
   - Terminal:
     - Filtering in output terminal by log level
-    - Don't overwrite the fatal errors either
