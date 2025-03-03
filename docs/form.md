@@ -61,6 +61,10 @@ BUTTONs).
 
 > Common options for all form components.
 
+**title?**: _string_
+
+> Title (controls tooltip text)
+
 **hidden?**: _boolean_
 
 > Is this component (initially) hidden?

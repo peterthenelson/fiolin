@@ -424,6 +424,7 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
       ce[1].classList.remove('hidden');
     }
   }
+  updateField(ce[1], 'title', ce[0].title);
   if (!id) {
     // Event handlers can't do anything in these cases.
     return;

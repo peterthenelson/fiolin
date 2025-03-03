@@ -42,7 +42,7 @@ A not-necessarily-exhaustive list of TODOs:
       - Montage, append
       - Combine into GIF / explode out from GIF
       - Make background transparent
-      - To grayscale, invert, change colorspace, tint, blur
+      - To invert, change colorspace, tint, blur
       - Mirror or rotate
       - Image to PDF
       - Converter for DSLR raw formats

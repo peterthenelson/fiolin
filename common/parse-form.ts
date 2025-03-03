@@ -70,6 +70,7 @@ function pObjAndPartial<T extends string, U extends { type: T }>(props: { [K in 
 const pDir = pStrUnion<('ROW' | 'COL')[]>(['ROW', 'COL']);
 
 const pCommonAttrs = {
+  title: pOpt(pStr),
   hidden: pOpt(pBool),
   onpointerdown: pOpt(pBool),
   onpointerup: pOpt(pBool),

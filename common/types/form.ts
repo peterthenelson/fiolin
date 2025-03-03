@@ -56,6 +56,8 @@ export interface FiolinFormComponentId {
 
 // Common options for all form components.
 export interface FiolinFormCommon {
+  // Title (controls tooltip text)
+  title?: string;
   // Is this component (initially) hidden?
   hidden?: boolean;
   // Fire events on pointer down?

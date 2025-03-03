@@ -39,11 +39,13 @@ interface:
             dir: ROW
             children:
               - type: BUTTON
-                text: Rotate Left
+                text: ↺
+                title: Rotate Left
                 name: left
                 value: x
               - type: BUTTON
-                text: Rotate Right
+                text: ↻
+                title: Rotate Right
                 name: right
                 value: x
           - type: LABEL
