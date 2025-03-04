@@ -43,7 +43,6 @@ A not-necessarily-exhaustive list of TODOs:
       - Combine into GIF / explode out from GIF
       - Make background transparent
       - To invert, change colorspace, tint, blur
-      - Mirror or rotate
       - Image to PDF
       - Converter for DSLR raw formats
     - Extract or convert 7z, cab, jar, rar, zip

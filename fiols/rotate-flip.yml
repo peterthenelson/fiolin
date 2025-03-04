@@ -1,8 +1,8 @@
 meta:
-  title: Rotate Image 
+  title: Rotate or Flip Image 
   author: Peter Nelson
   description: >
-    Rotate an image
+    Rotate an image or flip it horizontally or vertically.
   extensions:
     - bmp
     - gif
@@ -41,13 +41,23 @@ interface:
               - type: BUTTON
                 text: ↺
                 title: Rotate Left
-                name: left
-                value: x
+                name: rotate
+                value: '270'
               - type: BUTTON
                 text: ↻
                 title: Rotate Right
-                name: right
-                value: x
+                name: rotate
+                value: '90'
+              - type: BUTTON
+                text: ↕
+                title: Flip vertically
+                name: flip
+                value: vertical
+              - type: BUTTON
+                text: ↔
+                title: Flip horizontally
+                name: flip
+                value: horizontal
           - type: LABEL
             text: Preview
             child:

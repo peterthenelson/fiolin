@@ -39,25 +39,28 @@ async def main():
       'output_path': output_path,
       'ext': ext,
     })
+    state = fiolin.state()
     fiolin.form_set_hidden('page-1', hidden=True)
     fiolin.form_set_hidden('page-2', hidden=False)
-    await blit(ctx, img)
-  elif args.get('reset', False):
+  if args.get('reset', False):
     fiolin.continue_with(False)
     fiolin.form_set_hidden('page-1', hidden=False)
     fiolin.form_set_hidden('page-2', hidden=True)
-  elif args.get('left', False):
-    img = state['img']
-    img.rotate(-90)
+    return
+  img = state['img']
+  rotate = args.get('rotate', None)
+  if rotate is not None:
+    img.rotate(int(rotate))
     fiolin.continue_with(state)
-    await blit(ctx, img)
-  elif args.get('right', False):
-    img = state['img']
-    img.rotate(90)
+  flip = args.get('flip', None)
+  if flip == 'horizontal':
+    img.flop()
     fiolin.continue_with(state)
-    await blit(ctx, img)
-  elif args.get('download', False):
-    img = state['img']
+  elif flip == 'vertical':
+    img.flip()
+    fiolin.continue_with(state)
+  await blit(ctx, img)
+  if args.get('download', False):
     ext = state['ext']
     output_path = state['output_path']
     fiolin.form_set_hidden('page-1', hidden=False)
@@ -66,5 +69,3 @@ async def main():
     async with fiolin.callback_to_ctx(img.write, FMTS[ext]) as final:
       with open(output_path, 'wb') as f:
         f.write(bytes(final))
-  else:
-    sys.exit(f'Unexpected args: {args}; state = {state}')
