@@ -28,6 +28,8 @@ async def main():
   ctx = fiolin.get_canvas('preview')
   if not state:
     input_path = fiolin.get_input_path()
+    # TODO: Figure out a good way to add useful suffixes based on degree of
+    # rotation or flipped status
     output_path = '/output/' + fiolin.get_input_basename(suffix='-rotated')
     _, ext = os.path.splitext(input_path.lower())
     if ext not in FMTS:
