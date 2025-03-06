@@ -6,16 +6,16 @@ try {
   console.error('Failed to load version file for endpoints');
   console.error(e);
 }
-import(endpoints.host || '/bundle/host.js').then((host) => {
+import(endpoints.host || '/bundle/host.js').then(async (host) => {
   const params = new URL(import.meta.url).searchParams;
   const fiol = params.get('fiol')
   const tutorialVar = params.get('tutorialVar')
   if (fiol) {
-    window.container = host.initFiolin({ type: '1P', fiol });
+    window.fiolin = await host.initFiolin({ type: '1P', fiol });
   } else if (tutorialVar) {
     const tutorials = window[tutorialVar];
     if (tutorials) {
-      host.initFiolin({ type: 'PLAYGROUND', tutorials });
+      window.fiolin = await host.initFiolin({ type: 'PLAYGROUND', tutorials });
     } else {
       console.error(`window.${tutorialVar} doesn't exist`)
     }

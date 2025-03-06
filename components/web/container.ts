@@ -213,8 +213,10 @@ export class Container {
     if ((files === null || files.length === 0) &&
         (script.interface.inputFiles !== 'NONE' &&
          script.interface.inputFiles !== 'ANY')) {
+      // TODO: Is this totally rendundant with the runner's internal check?
       this.container.classList.add('error');
       this.form.onError();
+      this.terminal.fatal('Missing required input files');
     } else {
       this.container.classList.add('running');
       this.worker.postMessage({

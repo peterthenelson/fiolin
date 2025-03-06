@@ -1,0 +1,34 @@
+meta:
+  title: 6c. Misc -- Advanced ImageMagick
+  author: Peter Nelson
+  description: >
+    More advanced features that are helpful for developing scripts that use
+    ImageMagick.
+interface:
+  inputFiles: ANY
+  outputFiles: NONE
+  inputAccept: image/*
+  form:
+    autofocusedName: input-image
+    children:
+      - type: LABEL
+        text: Input Image
+        child:
+          type: FILE
+          name: input-image
+          accept: image/*
+          submit: true
+      - type: BUTTON
+        text: Blur
+        name: blur
+        value: x
+      - type: LABEL
+        text: Preview
+        child:
+          type: CANVAS
+          name: preview
+          height: 400
+          width: 400
+runtime:
+  wasmModules:
+    - name: imagemagick

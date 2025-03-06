@@ -6,7 +6,7 @@ try {
   console.error('Failed to load version file for endpoints');
   console.error(e);
 }
-import(endpoints.host || '/bundle/host.js').then((host) => {
+import(endpoints.host || '/bundle/host.js').then(async (host) => {
   const params = new URLSearchParams(window.location.search);
   const gh = params.get('gh');
   let base = params.get('base');
@@ -19,7 +19,7 @@ import(endpoints.host || '/bundle/host.js').then((host) => {
     if (!m) {
       die(`Invalid gh parameter; ${gh}`);
     } 
-    host.initFiolin({ type: '3P', username: m[1], path: m[2], githubIoBase: base || undefined });
+    window.fiolin = await host.initFiolin({ type: '3P', username: m[1], path: m[2], githubIoBase: base || undefined });
   } else {
     host.die(`gh parameter not specified!`);
   }
