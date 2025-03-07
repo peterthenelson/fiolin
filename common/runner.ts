@@ -107,14 +107,14 @@ export class PyodideRunner implements FiolinRunner {
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present before resetFs!`)
     }
-    rmRf(this._pyodide.FS, '/input');
-    mkDir(this._pyodide.FS, '/input');
-    rmRf(this._pyodide.FS, '/output');
-    mkDir(this._pyodide.FS, '/output');
-    rmRf(this._pyodide.FS, '/tmp');
-    mkDir(this._pyodide.FS, '/tmp');
-    rmRf(this._pyodide.FS, '/home/pyodide/fiolin.py');
-    rmRf(this._pyodide.FS, '/home/pyodide/script.py');
+    rmRf(this._pyodide.FS, '/input', this._pyodide.ERRNO_CODES);
+    mkDir(this._pyodide.FS, '/input', this._pyodide.ERRNO_CODES);
+    rmRf(this._pyodide.FS, '/output', this._pyodide.ERRNO_CODES);
+    mkDir(this._pyodide.FS, '/output', this._pyodide.ERRNO_CODES);
+    rmRf(this._pyodide.FS, '/tmp', this._pyodide.ERRNO_CODES);
+    mkDir(this._pyodide.FS, '/tmp', this._pyodide.ERRNO_CODES);
+    rmRf(this._pyodide.FS, '/home/pyodide/fiolin.py', this._pyodide.ERRNO_CODES);
+    rmRf(this._pyodide.FS, '/home/pyodide/script.py', this._pyodide.ERRNO_CODES);
   }
 
   private async mountInputs(script: FiolinScript, inputs: File[]) {
@@ -133,11 +133,11 @@ export class PyodideRunner implements FiolinRunner {
     for (const input of inputs) {
       const inBytes = new Uint8Array(await input.arrayBuffer());
       this._shared.inputs.push(input.name);
-      writeFile(this._pyodide.FS, `/input/${input.name}`, inBytes);
+      writeFile(this._pyodide.FS, `/input/${input.name}`, inBytes, this._pyodide.ERRNO_CODES);
     }
     this._console.debug('Setting up python files');
-    writeFile(this._pyodide.FS, `/home/pyodide/fiolin.py`, getFiolinPy(this._pyodide));
-    writeFile(this._pyodide.FS, `/home/pyodide/script.py`, script.code.python);
+    writeFile(this._pyodide.FS, `/home/pyodide/fiolin.py`, getFiolinPy(this._pyodide), this._pyodide.ERRNO_CODES);
+    writeFile(this._pyodide.FS, `/home/pyodide/script.py`, script.code.python, this._pyodide.ERRNO_CODES);
   }
 
   private extractOutputs(script: FiolinScript): File[] {
@@ -161,7 +161,7 @@ export class PyodideRunner implements FiolinRunner {
     }
     const outFiles: File[] = [];
     for (const output of this._shared.outputs) {
-      const outBytes = readFile(this._pyodide.FS, `/output/${output}`);
+      const outBytes = readFile(this._pyodide.FS, `/output/${output}`, this._pyodide.ERRNO_CODES);
       outFiles.push(new File([new Blob([outBytes])], output));
     }
     return outFiles;
@@ -234,7 +234,7 @@ export class PyodideRunner implements FiolinRunner {
         if (mod.name in this._loaders) {
           this._console.debug(`Installing module ${mod.name}`);
           const pystub = this._loaders[mod.name].pyWrapper(mod.name);
-          writeFile(this._pyodide.FS, `/home/pyodide/${mod.name}.py`, pystub);
+          writeFile(this._pyodide.FS, `/home/pyodide/${mod.name}.py`, pystub, this._pyodide.ERRNO_CODES);
           try {
             this._shared[mod.name] = await this._loaders[mod.name].loadModule(this._pyodide);
           } catch (cause) {
@@ -292,7 +292,7 @@ export class PyodideRunner implements FiolinRunner {
         partial: this._shared.partial, formUpdates: this._formUpdates,
       };
     } catch (e) {
-      const error = toErrWithErrno(e);
+      const error = toErrWithErrno(e, this._pyodide.ERRNO_CODES);
       return {
         outputs: [], log: this._log, error,
         partial: this._shared.partial, formUpdates: this._formUpdates,

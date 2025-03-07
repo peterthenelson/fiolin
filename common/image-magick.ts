@@ -18,13 +18,16 @@ export class ImageMagickLoader extends FiolinWasmLoader {
     try {
       const _ = imfs.stat('/py');
       imfs.unmount('/py')
-      rmRf(imfs, '/py');
+      rmRf(imfs, '/py', pyodide.ERRNO_CODES);
     } catch (e) {
       if (!isNotFound(e)) {
-        throw toErrWithErrno(e, `unmount("/py") or rmRf("/py") failed`);
+        throw toErrWithErrno(e, {
+          prefix: `unmount("/py") or rmRf("/py") failed`,
+          errCodes: pyodide.ERRNO_CODES,
+        });
       }
     }
-    mkDir(imfs, '/py');
+    mkDir(imfs, '/py', pyodide.ERRNO_CODES);
     imfs.mount(pyodide.FS.filesystems.PROXYFS, { root: '/', fs: pyodide.FS }, '/py');
     return im;
   }

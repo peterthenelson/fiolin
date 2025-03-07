@@ -8,14 +8,24 @@ function pathJoin(x: string, y: string): string {
   }
 }
 
-export function toErrWithErrno(e: unknown, prefix?: string): Error {
-  if (typeof e === 'object' && e !== null && 'errno' in e) {
-    // TODO: Actually translate the errnos to human readable form
-    const s = prefix ? prefix + ': ' : '';
-    return new Error(`${s}ErrnoError(errno=${e.errno})`);
+export type ErrnoCodes = { [code: string]: number };
+
+function codeToString(errCodes: ErrnoCodes, code: number): string {
+  for (const c in errCodes) {
+    if (errCodes[c] === code) {
+      return c;
+    }
   }
-  if (prefix) {
-    return new Error(prefix, { cause: toErr(e) });
+  return 'UNKNOWN';
+}
+
+export function toErrWithErrno(e: unknown, opts?: { prefix?: string, errCodes?: ErrnoCodes }): Error {
+  if (typeof e === 'object' && e !== null && 'errno' in e) {
+    const s = opts?.prefix ? opts.prefix + ': ' : '';
+    return new Error(`${s}[${codeToString(opts?.errCodes || {}, Number(e.errno))} (errno=${e.errno})]`);
+  }
+  if (opts?.prefix) {
+    return new Error(opts.prefix, { cause: toErr(e) });
   }
   return toErr(e);
 }
@@ -24,22 +34,22 @@ export function isNotFound(e: unknown): boolean {
   return typeof e === 'object' && e !== null && 'errno' in e && e.errno === 44;
 }
 
-export function mkDir(fs: any, path: string) {
+export function mkDir(fs: any, path: string, errCodes?: ErrnoCodes) {
   try {
     fs.mkdir(path);
   } catch (e) {
-    throw toErrWithErrno(e, `mkDir("${path}") failed`);
+    throw toErrWithErrno(e, { prefix: `mkDir("${path}") failed`, errCodes });
   }
 }
 
-export function rmRf(fs: any, path: string) {
+export function rmRf(fs: any, path: string, errCodes?: ErrnoCodes) {
   try {
     const stats = fs.stat(path);
     if (fs.isDir(stats.mode)) {
       for (const f of fs.readdir(path)) {
         const filePath = path + '/' + f;
         if (filePath !== path + '/.' && filePath !== path + '/..') {
-          rmRf(fs, filePath);
+          rmRf(fs, filePath, errCodes);
         }
       }
       fs.rmdir(path);
@@ -48,27 +58,27 @@ export function rmRf(fs: any, path: string) {
     }
   } catch (e) {
     if (isNotFound(e)) return;
-    throw toErrWithErrno(e, `rmRf("${path}") failed`);
+    throw toErrWithErrno(e, { prefix: `rmRf("${path}") failed`, errCodes });
   }
 }
 
-export function readFile(fs: any, path: string): ArrayBuffer {
+export function readFile(fs: any, path: string, errCodes?: ErrnoCodes): ArrayBuffer {
   try {
     return fs.readFile(path);
   } catch (e) {
-    throw toErrWithErrno(e, `readFile("${path}") failed`);
+    throw toErrWithErrno(e, { prefix: `readFile("${path}") failed`, errCodes });
   }
 }
 
-export function writeFile(fs: any, path: string, contents: string | ArrayBuffer) {
+export function writeFile(fs: any, path: string, contents: string | ArrayBuffer, errCodes?: ErrnoCodes) {
   try {
     return fs.writeFile(path, contents);
   } catch (e) {
-    throw toErrWithErrno(e, `writeFile("${path}") failed`);
+    throw toErrWithErrno(e, { prefix: `writeFile("${path}") failed`, errCodes });
   }
 }
 
-export function listDir(fs: any, path: string, recursive?: boolean): string[] {
+export function listDir(fs: any, path: string, recursive?: boolean, errCodes?: ErrnoCodes): string[] {
   const files: string[] = [];
   const dirs: string[] = [path];
   while (dirs.length > 0) {
@@ -77,7 +87,7 @@ export function listDir(fs: any, path: string, recursive?: boolean): string[] {
     try {
       dlist = fs.readdir(path);
     } catch (e) {
-      throw toErrWithErrno(e, `readdir("${path}") failed`);
+      throw toErrWithErrno(e, { prefix: `readdir("${path}") failed`, errCodes });
     }
     for (let f of dlist) {
       if (f === '.' || f === '..') continue;
@@ -91,7 +101,7 @@ export function listDir(fs: any, path: string, recursive?: boolean): string[] {
         try {
           isDir = fs.isDir(fs.stat(f).mode);
         } catch (e) {
-          throw toErrWithErrno(e, `stat("${f}") failed`);
+          throw toErrWithErrno(e, { prefix: `stat("${f}") failed`, errCodes });
         }
         if (isDir) {
           dirs.push(f);
