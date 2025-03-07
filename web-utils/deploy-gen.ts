@@ -13,13 +13,12 @@ export interface DeployOptions {
   lang: 'SH' | 'PS1';
 }
 
-// TODO: Accept editor contents from yml file instead of just the script obj.
-export function deployScript(script: FiolinScript, opts: DeployOptions): File {
+export function deployScript(script: FiolinScript, yml: string, opts: DeployOptions): File {
   if (opts.lang === 'SH') {
-    const contents = bashScript(script, opts);
+    const contents = bashScript(script, yml, opts);
     return new File([new Blob([contents])], 'deploy-to-github.sh');
   } else if (opts.lang === 'PS1') {
-    const contents = ps1File(script, opts);
+    const contents = ps1File(script, yml, opts);
     return new File([new Blob([contents])], 'deploy-to-github.ps1');
   } else {
     throw new Error(`Unrecognized lang options: ${opts.lang}`);
@@ -31,10 +30,9 @@ function genEof(s: string): string {
   throw new Error('TODO: Generate non-colliding EOFs')
 }
 
-function bashScript(script: FiolinScript, opts: DeployOptions): string {
+function bashScript(script: FiolinScript, yml: string, opts: DeployOptions): string {
   const json = JSON.stringify(script, null, 2);
   const { code, ...scriptNoCode } = script;
-  const yml = YAML.stringify(scriptNoCode);
   return dedent(`
     #!/bin/bash
     set -euo pipefail
@@ -140,10 +138,9 @@ function bashScript(script: FiolinScript, opts: DeployOptions): string {
   `);
 }
 
-function ps1File(script: FiolinScript, opts: DeployOptions): string {
+function ps1File(script: FiolinScript, yml: string, opts: DeployOptions): string {
   const json = JSON.stringify(script, null, 2);
   const { code, ...scriptNoCode } = script;
-  const yml = YAML.stringify(scriptNoCode);
   return dedent(`
     Set-StrictMode -Version Latest
     $ErrorActionPreference = "Stop"

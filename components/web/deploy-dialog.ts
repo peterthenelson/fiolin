@@ -21,6 +21,7 @@ export class DeployDialog {
   private readonly storage: StorageLike;
   private readonly downloadFile: (file: File) => void;
   private script?: FiolinScript;
+  private yml?: string;
 
   constructor(container: HTMLElement, opts: DeployDialogOptions) {
     this.dialog = getByRelIdAs(container, 'deploy-dialog', HTMLDialogElement);
@@ -49,12 +50,13 @@ export class DeployDialog {
         scriptId: getFormValue(fd, 'script-id'),
         lang
       };
-      this.downloadFile(deployScript(this.script!, opts));
+      this.downloadFile(deployScript(this.script!, this.yml!, opts));
     };
   }
 
-  showModal(script: FiolinScript) {
+  showModal(script: FiolinScript, yml: string) {
     this.script = script;
+    this.yml = yml;
     // Give a default suggested title based on script.meta.title (but don't do
     // this for tutorials).
     const slug = script.meta.title.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-');

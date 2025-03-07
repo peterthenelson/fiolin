@@ -88,6 +88,7 @@ export class Container {
   private readonly editor: Editor;
   private readonly terminal: Terminal;
   private readonly worker: TypedWorker;
+  private yml: string;
   public script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
 
@@ -121,7 +122,7 @@ export class Container {
       new SimpleForm(container, formCallbacks),
     ]);
     this.editor = new Editor(container, {
-      update: (s, m) => this.scriptUpdated(s, m),
+      update: (s, r, m) => this.scriptUpdated(s, r, m),
       updateError: (e) => this.scriptUpdateError(e),
     })
     this.terminal = new Terminal(container);
@@ -133,6 +134,7 @@ export class Container {
     this.worker.onmessage = (msg) => {
       this.handleMessage(msg);
     }
+    this.yml = '';
     this.script = this.loadScript();
     this.setupHandlers();
     this.readyToRun = new Deferred();
@@ -178,14 +180,15 @@ export class Container {
     };
     this.deployButton.onclick = async () => {
       const script = await this.script;
-      this.deployDialog.showModal(script);
+      this.deployDialog.showModal(script, this.yml);
     };
   }
 
-  private async scriptUpdated(script: FiolinScript, model: FiolinScriptEditorModel) {
+  private async scriptUpdated(script: FiolinScript, raw: string, model: FiolinScriptEditorModel) {
     const currentScript = await this.script;
     Object.assign(currentScript, script);
     if (model === 'script.yml') {
+      this.yml = raw;
       await this.updateUiForScript(script);
     }
   }

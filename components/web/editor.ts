@@ -7,7 +7,7 @@ import YAML, { YAMLParseError } from 'yaml';
 const monaco = import('../../web-utils/monaco');
 
 export interface EditorCallbacks {
-  update(script: FiolinScript, model: FiolinScriptEditorModel): Promise<void>;
+  update(script: FiolinScript, raw: string, model: FiolinScriptEditorModel): Promise<void>;
   updateError(e: unknown): Promise<void>;
 }
 
@@ -42,13 +42,14 @@ export class Editor {
   private async handleScriptUpdate(model: FiolinScriptEditorModel, value: string) {
     if (this.script && model === 'script.py') {
       this.script.code.python = value;
+      await this.cbs.update(this.script, value, model);
     } else {
       try {
         const template = YAML.parse(value, { prettyErrors: true });
         const newScript = { code: { python: this.script?.code.python || '' }, ...template };
         this.script = parseAs(pFiolinScript, newScript);
         (await this.monacoEditor).clearErrors();
-        await this.cbs.update(this.script, model);
+        await this.cbs.update(this.script, value, model);
       } catch (e) {
         if (e instanceof YAMLParseError && e.linePos) {
           (await this.monacoEditor).setError('script.yml', e.linePos[0].line, e.message);
