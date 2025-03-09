@@ -213,22 +213,13 @@ export class Container {
     this.container.classList.remove('error');
     this.terminal.clear();
     await this.editor.clearErrors();
-    if ((files === null || files.length === 0) &&
-        (script.interface.inputFiles !== 'NONE' &&
-         script.interface.inputFiles !== 'ANY')) {
-      // TODO: Is this totally rendundant with the runner's internal check?
-      this.container.classList.add('error');
-      this.form.onError();
-      this.terminal.fatal('Missing required input files');
-    } else {
-      this.container.classList.add('running');
-      this.worker.postMessage({
-        type: 'RUN',
-        script,
-        request,
-        setCanvases: opts.setCanvases,
-      }, opts.setCanvases ? Object.values(opts.setCanvases) : undefined);
-    }
+    this.container.classList.add('running');
+    this.worker.postMessage({
+      type: 'RUN',
+      script,
+      request,
+      setCanvases: opts.setCanvases,
+    }, opts.setCanvases ? Object.values(opts.setCanvases) : undefined);
   }
 
   private async handleMessage(msg: WorkerMessage): Promise<void> {

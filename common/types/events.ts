@@ -110,13 +110,7 @@ export interface FiolinFormPointerEvent extends EventCommon {
 
 /*
 TODO: Consider these events
-beforeinput
-beforetoggle, toggle
-cancel
-various drag and drop
-blur, focus, focusin, focusout
-keydown,keypress,keyup
-wheel
+cancel, blur, focus, focusin, focusout
 */
 
 // The input event names as a value. Mostly useful for utility code, but it's
