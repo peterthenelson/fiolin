@@ -56,6 +56,17 @@ fiolin for autocomplete and other UI hints.
 
 > The arity of file (input or output) for a script.
 
+## TERMINAL_MODES = ['FATAL_ONLY', 'TEXT',
+
+> An array with the valid values for TerminalMode.
+
+## TerminalMode = (typeof
+
+> The mode for the terminal UI. FATAL_ONLY will hide it by default, displaying
+only when a fatal error happens. TEXT shows stdout (= INFO) and stderr
+(= ERROR) logs as colored text, similar to a terminal. The LOG view shows
+detailed logs in a structured way.
+
 ## FiolinScriptInterface
 
 > How the fiolin UI is meant to communicate with the embedded script.
@@ -77,6 +88,10 @@ https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file
 
 > Form presented to the user (the submitted values show up as args in the
 FiolinRunRequest).
+
+**terminal?**: _TerminalMode_
+
+> The default behavior of the terminal. Defaults to TEXT.
 
 ## FiolinScriptRuntime
 

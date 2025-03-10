@@ -38,6 +38,15 @@ export const FILE_ARITIES = ['NONE', 'SINGLE', 'MULTI', 'ANY'] as const;
 // The arity of file (input or output) for a script.
 export type FileArity = (typeof FILE_ARITIES)[number];
 
+// An array with the valid values for TerminalMode.
+export const TERMINAL_MODES = ['FATAL_ONLY', 'TEXT', 'LOG'];
+
+// The mode for the terminal UI. FATAL_ONLY will hide it by default, displaying
+// only when a fatal error happens. TEXT shows stdout (= INFO) and stderr
+// (= ERROR) logs as colored text, similar to a terminal. The LOG view shows
+// detailed logs in a structured way.
+export type TerminalMode = (typeof TERMINAL_MODES)[number];
+
 // How the fiolin UI is meant to communicate with the embedded script.
 export interface FiolinScriptInterface {
   // Does the script take 0, 1, >1, or any number of files as input?
@@ -50,7 +59,8 @@ export interface FiolinScriptInterface {
   // Form presented to the user (the submitted values show up as args in the
   // FiolinRunRequest).
   form?: FiolinForm;
-  // TODO: extend w/stuff about console output
+  // The default behavior of the terminal. Defaults to TEXT.
+  terminal?: TerminalMode;
 }
 
 // How the fiolin runner is meant to setup the environment for the script.
