@@ -7,49 +7,79 @@ interface RenderedLog {
   div: HTMLDivElement;
 }
 
+interface RenderedTerminalText {
+  text: string;
+  err: boolean;
+  span: HTMLSpanElement;
+}
+
+interface RenderedFatal {
+  text: string;
+  div: HTMLDivElement;
+}
+
 export class Terminal {
   // TODO: Add controls to filter by type or whatnot.
   private readonly terminal: HTMLDivElement;
-  private readonly singleMsg: HTMLDivElement;
+  private readonly text: HTMLDivElement;
   private readonly logs: RenderedLog[];
-  private fatalMsg?: string;
+  private readonly terminalText: RenderedTerminalText[];
+  private fatalMsg?: RenderedFatal;
 
   constructor(container: HTMLElement) {
     this.terminal = getByRelIdAs(container, 'terminal', HTMLDivElement);
-    this.singleMsg = getByRelIdAs(this.terminal, 'terminal-single-msg', HTMLDivElement);
+    this.text = getByRelIdAs(this.terminal, 'terminal-text', HTMLDivElement);
     this.logs = [];
+    this.terminalText = [];
   }
 
   clear() {
-    this.terminal.replaceChildren(this.singleMsg);
-    this.singleMsg.textContent = '';
     this.logs.length = 0;
+    this.terminalText.length = 0;
+    this.fatalMsg = undefined;
+    this.updateUi();
   }
 
   log(level: FiolinLogLevel, msg: string) {
+    // Update logs
     const div = document.createElement('div');
-    const levelSpan = document.createElement('div');
-    levelSpan.textContent = level;
-    levelSpan.classList.add('log-level');
-    const msgSpan = document.createElement('div');
-    msgSpan.textContent = msg;
-    div.replaceChildren(levelSpan, msgSpan);
+    const levelDiv = document.createElement('div');
+    levelDiv.textContent = level;
+    levelDiv.classList.add('log-level');
+    const msgDiv = document.createElement('div');
+    msgDiv.textContent = msg;
+    div.replaceChildren(levelDiv, msgDiv);
     this.logs.push({level, msg, div});
     div.classList.add(this.logs.length % 2 == 0 ? 'log-even' : 'log-odd');
+    // Update terminalText
+    if (level === 'INFO' || level === 'ERROR') {
+      const span = document.createElement('span');
+      span.textContent = msg;
+      let err = false;
+      if (level === 'ERROR') {
+        span.classList.add('terminal-stderr');
+        err = true;
+      }
+      this.terminalText.push({ text: msg, err, span });
+    }
     this.updateUi();
   }
 
   fatal(msg: string) {
-    this.fatalMsg = msg;
-    this.singleMsg.textContent = this.fatalMsg;
+    const div = document.createElement('div');
+    div.textContent = msg;
+    this.fatalMsg = { text: msg, div }
     this.updateUi();
   }
 
   private updateUi() {
     if (this.fatalMsg !== undefined) {
-      this.terminal.replaceChildren(this.singleMsg);
+      this.text.replaceChildren(this.fatalMsg.div);
+      this.terminal.replaceChildren(this.text);
     } else if (this.logs.length === 0) {
-      this.terminal.textContent = '';
+      this.text.replaceChildren();
+      this.text.textContent = '';
+      this.terminal.replaceChildren(this.text);
     } else {
       const divs: Node[] = [];
       for (const rl of this.logs) {

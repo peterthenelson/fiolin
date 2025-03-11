@@ -564,8 +564,12 @@ form button {
   box-shadow: 0 0 2.5px 1px var(--offWhite);
 }
 
-.terminal-single-msg {
+.terminal-text {
   padding: 1em;
+}
+
+.terminal-stderr {
+  color: var(--redish);
 }
 
 .log-odd {
