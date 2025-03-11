@@ -144,6 +144,7 @@ export class Container {
     this.scriptTitle.textContent = script.meta.title;
     this.scriptDesc.textContent = script.meta.description;
     try {
+      this.terminal.onLoad(script);
       this.form.onLoad(script);
     } catch (e) {
       this.container.classList.add('error');

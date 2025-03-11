@@ -1,4 +1,4 @@
-import { FiolinLogLevel } from '../../common/types';
+import { FiolinLogLevel, FiolinScript, TerminalMode } from '../../common/types';
 import { getByRelIdAs } from '../../web-utils/select-as';
 
 interface RenderedLog {
@@ -19,18 +19,25 @@ interface RenderedFatal {
 }
 
 export class Terminal {
-  // TODO: Add controls to filter by type or whatnot.
+  // TODO: Add controls to manually change mode or to filter by type in log mode 
   private readonly terminal: HTMLDivElement;
   private readonly text: HTMLDivElement;
   private readonly logs: RenderedLog[];
   private readonly terminalText: RenderedTerminalText[];
   private fatalMsg?: RenderedFatal;
+  private mode: TerminalMode;
 
   constructor(container: HTMLElement) {
     this.terminal = getByRelIdAs(container, 'terminal', HTMLDivElement);
     this.text = getByRelIdAs(this.terminal, 'terminal-text', HTMLDivElement);
     this.logs = [];
     this.terminalText = [];
+    this.mode = 'TEXT';
+  }
+
+  onLoad(script: FiolinScript) {
+    this.mode = script.interface.terminal || 'TEXT';
+    this.updateUi();
   }
 
   clear() {
@@ -54,7 +61,7 @@ export class Terminal {
     // Update terminalText
     if (level === 'INFO' || level === 'ERROR') {
       const span = document.createElement('span');
-      span.textContent = msg;
+      span.textContent = msg + '\n';
       let err = false;
       if (level === 'ERROR') {
         span.classList.add('terminal-stderr');
@@ -76,17 +83,27 @@ export class Terminal {
     if (this.fatalMsg !== undefined) {
       this.text.replaceChildren(this.fatalMsg.div);
       this.terminal.replaceChildren(this.text);
-    } else if (this.logs.length === 0) {
-      this.text.replaceChildren();
+      this.terminal.classList.remove('hidden');
+    } else if (this.mode === 'FATAL_ONLY') {
+      this.terminal.classList.add('hidden');
+    } else if (this.mode === 'TEXT') {
+      const spans: Node[] = this.terminalText.map((rt) => rt.span);
       this.text.textContent = '';
+      this.text.replaceChildren(...spans);
       this.terminal.replaceChildren(this.text);
-    } else {
+      this.terminal.classList.remove('hidden');
+    } else if (this.mode === 'LOG') {
       const divs: Node[] = [];
       for (const rl of this.logs) {
         divs.push(rl.div);
         rl.div.style.width = `${this.terminal.scrollWidth}px`;
       }
       this.terminal.replaceChildren(...divs);
+      this.terminal.classList.remove('hidden');
+    } else {
+      this.text.replaceChildren();
+      this.text.textContent = '';
+      this.terminal.replaceChildren(this.text);
     }
     this.terminal.scroll({ top: this.terminal.scrollHeight, behavior: 'smooth' });
   }

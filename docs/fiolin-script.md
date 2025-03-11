@@ -56,7 +56,7 @@ fiolin for autocomplete and other UI hints.
 
 > The arity of file (input or output) for a script.
 
-## TERMINAL_MODES = ['FATAL_ONLY', 'TEXT',
+## TERMINAL_MODES = ['FATAL_ONLY', 'TEXT', 'LOG'] as
 
 > An array with the valid values for TerminalMode.
 

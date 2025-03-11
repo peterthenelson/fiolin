@@ -39,7 +39,7 @@ export const FILE_ARITIES = ['NONE', 'SINGLE', 'MULTI', 'ANY'] as const;
 export type FileArity = (typeof FILE_ARITIES)[number];
 
 // An array with the valid values for TerminalMode.
-export const TERMINAL_MODES = ['FATAL_ONLY', 'TEXT', 'LOG'];
+export const TERMINAL_MODES = ['FATAL_ONLY', 'TEXT', 'LOG'] as const;
 
 // The mode for the terminal UI. FATAL_ONLY will hide it by default, displaying
 // only when a fatal error happens. TEXT shows stdout (= INFO) and stderr

@@ -162,11 +162,7 @@ a.plain-link:hover, a.no-style:focus {
   margin-top: .5em;
 }
 
-.hidden {
-  display: none;
-}
-
-.button.hidden {
+.hidden, .button.hidden, .terminal.hidden {
   display: none;
 }
 
