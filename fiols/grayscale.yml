@@ -6,6 +6,7 @@ meta:
 interface:
   inputFiles: SINGLE
   outputFiles: ANY #SINGLE
+  terminal: FATAL_ONLY
   form:
     autofocusedName: input-file
     children:

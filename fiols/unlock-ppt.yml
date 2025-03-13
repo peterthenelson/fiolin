@@ -10,4 +10,5 @@ interface:
   inputFiles: SINGLE
   inputAccept: .pptx
   outputFiles: SINGLE
+  terminal: FATAL_ONLY
 runtime: {}

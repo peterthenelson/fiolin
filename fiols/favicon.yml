@@ -12,6 +12,7 @@ interface:
   inputAccept: image/*
   inputFiles: SINGLE
   outputFiles: SINGLE
+  terminal: FATAL_ONLY
   form:
     autofocusedName: input
     children:

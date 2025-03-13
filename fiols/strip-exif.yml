@@ -13,4 +13,5 @@ interface:
   inputFiles: SINGLE
   inputAccept: .jpg,.jpeg,.png,.tiff,.tif
   outputFiles: SINGLE
+  terminal: TEXT
 runtime: {}
