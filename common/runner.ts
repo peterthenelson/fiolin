@@ -61,6 +61,10 @@ export class PyodideRunner implements FiolinRunner {
       inputs: [], outputs: [], args: {}, event: undefined,
       enqueueFormUpdate: resultify((update) => this.enqueueFormUpdate(update)),
       Array, Map, Object, Promise,
+      debug: (s) => { this._console.debug(s) },
+      info: (s) => { this._console.info(s) },
+      warn: (s) => { this._console.warn(s) },
+      error: (s) => { this._console.error(s) },
     };
     const innerConsole: IConsole = options?.console || console;
     this._log = [];

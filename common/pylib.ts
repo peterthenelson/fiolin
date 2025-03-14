@@ -154,6 +154,25 @@ def tree(path, file=sys.stdout, prefix=None):
     else:
       print(_gen_prefix(prefix + [is_last]) + entry, file=file)
 
+# Logging levels
+DEBUG = 'DEBUG'
+INFO = 'INFO'
+WARN = 'WARN'
+ERROR = 'ERROR'
+
+def log(level, s):
+  """Log something at the given level."""
+  if level == DEBUG:
+    js.debug(s)
+  elif level == INFO:
+    js.info(s)
+  elif level == 'WARN':
+    js.warn(s)
+  elif level == 'ERROR':
+    js.error(s)
+  else:
+    raise ValueError(f'Invalid log level: {level}')
+
 def extract_exc(e=None):
   """Extract line number from (last) exception and format stack trace."""
   if not e:

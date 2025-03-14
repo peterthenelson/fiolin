@@ -49,6 +49,12 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // be allowed.
   partial?: boolean;
 
+  // Console logging
+  debug(s: string): void;
+  info(s: string): void;
+  warn(s: string): void;
+  error(s: string): void;
+
   // Used to signal any updates to be made to the form
   // Note: Resultified callbacks due to unresolved js/py ffi issue.
   enqueueFormUpdate(update: FormUpdate): Result<void>;

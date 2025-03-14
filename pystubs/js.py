@@ -10,3 +10,11 @@ args = {}
 def enqueueFormUpdate(update):
   pass
 canvases = None
+def debug(s):
+  pass
+def info(s):
+  pass
+def warn(s):
+  pass
+def error(s):
+  pass

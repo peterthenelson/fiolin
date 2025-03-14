@@ -97,6 +97,10 @@ fiolin.**get_input_paths**()
 
 > Gets the input file paths.
 
+fiolin.**log**(level, s)
+
+> Log something at the given level.
+
 fiolin.**set_output_basename**(output)
 
 > Manually sets the output file.

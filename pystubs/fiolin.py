@@ -30,6 +30,12 @@ def smart_sort(files):
   return []
 def tree(path, file=None, prefix=None):
   pass
+DEBUG = 'DEBUG'
+INFO = 'INFO'
+WARN = 'WARN'
+ERROR = 'ERROR'
+def log(level, s):
+  pass
 def extract_exc(e=None):
   return (-1, '')
 class Errno:

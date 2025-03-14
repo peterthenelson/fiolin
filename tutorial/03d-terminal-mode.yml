@@ -1,0 +1,13 @@
+meta:
+  title: 3d. Basic UI -- Terminal Mode
+  author: Peter Nelson
+  description: >
+    So far, the pane displaying output from the program has acted much like a
+    command-line terminal, showing interleaved text from stdout and stderr. The
+    terminal can be configured in other ways.
+interface:
+  inputFiles: NONE
+  outputFiles: NONE
+  # TODO: Change this and see how it affects things
+  terminal: LOG
+runtime: {}
