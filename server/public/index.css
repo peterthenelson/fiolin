@@ -560,6 +560,32 @@ form button {
   box-shadow: 0 0 2.5px 1px var(--offWhite);
 }
 
+.terminal-log-filter {
+  position: sticky;
+  background-color: var(--darkGrey);
+  z-index: 1;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  height: 2em;
+}
+
+.terminal-log-filter label {
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+  margin: 0 1em;
+}
+
+.terminal-log-filter input {
+  margin: 0 5px;
+  padding: 0;
+}
+
 .terminal-text {
   padding: 1em;
 }

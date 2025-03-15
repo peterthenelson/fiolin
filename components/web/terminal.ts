@@ -1,5 +1,5 @@
 import { FiolinLogLevel, FiolinScript, TerminalMode } from '../../common/types';
-import { getByRelIdAs } from '../../web-utils/select-as';
+import { getByRelIdAs, selectAllAs } from '../../web-utils/select-as';
 
 interface RenderedLog {
   level: FiolinLogLevel;
@@ -18,10 +18,16 @@ interface RenderedFatal {
   div: HTMLDivElement;
 }
 
+interface RenderedLogFilter {
+  div: HTMLDivElement;
+  active: Record<FiolinLogLevel, boolean>;
+}
+
 export class Terminal {
-  // TODO: Add controls to manually change mode or to filter by type in log mode 
+  // TODO: Add controls to manually change mode
   private readonly terminal: HTMLDivElement;
   private readonly text: HTMLDivElement;
+  private readonly logFilter: RenderedLogFilter;
   private readonly logs: RenderedLog[];
   private readonly terminalText: RenderedTerminalText[];
   private fatalMsg?: RenderedFatal;
@@ -30,21 +36,36 @@ export class Terminal {
   constructor(container: HTMLElement) {
     this.terminal = getByRelIdAs(container, 'terminal', HTMLDivElement);
     this.text = getByRelIdAs(this.terminal, 'terminal-text', HTMLDivElement);
+    this.logFilter = {
+      div: getByRelIdAs(this.terminal, 'terminal-log-filter', HTMLDivElement),
+      active: { DEBUG: true, INFO: true, WARN: true, ERROR: true },
+    };
     this.logs = [];
     this.terminalText = [];
     this.mode = 'TEXT';
+    const checkboxes = selectAllAs(this.logFilter.div, 'input[type="checkbox"]', HTMLInputElement);
+    for (const c of checkboxes) {
+      c.oninput = (e) => {
+        const t = e.currentTarget;
+        if (!(t instanceof HTMLInputElement)) {
+          throw new Error(`Expected target to be <input>, got ${t}`);
+        }
+        this.logFilter.active[t.value as FiolinLogLevel] = t.checked;
+        this.updateUi(false);
+      };
+    }
   }
 
   onLoad(script: FiolinScript) {
     this.mode = script.interface.terminal || 'TEXT';
-    this.updateUi();
+    this.updateUi(true);
   }
 
   clear() {
     this.logs.length = 0;
     this.terminalText.length = 0;
     this.fatalMsg = undefined;
-    this.updateUi();
+    this.updateUi(true);
   }
 
   log(level: FiolinLogLevel, msg: string) {
@@ -69,17 +90,17 @@ export class Terminal {
       }
       this.terminalText.push({ text: msg, err, span });
     }
-    this.updateUi();
+    this.updateUi(true);
   }
 
   fatal(msg: string) {
     const div = document.createElement('div');
     div.textContent = msg;
     this.fatalMsg = { text: msg, div }
-    this.updateUi();
+    this.updateUi(true);
   }
 
-  private updateUi() {
+  private updateUi(scroll: boolean) {
     if (this.fatalMsg !== undefined) {
       this.text.replaceChildren(this.fatalMsg.div);
       this.terminal.replaceChildren(this.text);
@@ -93,10 +114,12 @@ export class Terminal {
       this.terminal.replaceChildren(this.text);
       this.terminal.classList.remove('hidden');
     } else if (this.mode === 'LOG') {
-      const divs: Node[] = [];
+      const divs: Node[] = [this.logFilter.div];
       for (const rl of this.logs) {
-        divs.push(rl.div);
-        rl.div.style.width = `${this.terminal.scrollWidth}px`;
+        if (this.logFilter.active[rl.level]) {
+          divs.push(rl.div);
+          rl.div.style.width = `${this.terminal.scrollWidth}px`;
+        }
       }
       this.terminal.replaceChildren(...divs);
       this.terminal.classList.remove('hidden');
@@ -105,6 +128,8 @@ export class Terminal {
       this.text.textContent = '';
       this.terminal.replaceChildren(this.text);
     }
-    this.terminal.scroll({ top: this.terminal.scrollHeight, behavior: 'smooth' });
+    if (scroll) {
+      this.terminal.scroll({ top: this.terminal.scrollHeight, behavior: 'smooth' });
+    }
   }
 }
