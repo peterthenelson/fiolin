@@ -554,24 +554,51 @@ form button {
   font-family: monospace;
   white-space: pre-wrap;
   background-color: var(--medGrey);
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--darkGrey) var(--medGrey);
   box-shadow: 0 0 2.5px 1px var(--offWhite);
 }
 
-.terminal-log-filter {
-  position: sticky;
+.dev-mode .terminal.hidden {
+  display: flex;
+}
+
+.terminal-controls {
   background-color: var(--darkGrey);
-  z-index: 1;
-  top: 0;
   margin: 0;
-  padding: 0;
+  padding: 0 1em;
   display: flex;
   flex-direction: row;
   justify-content: left;
   align-items: center;
   height: 2em;
+}
+
+.terminal-controls.hidden {
+  display: none;
+}
+
+.dev-mode .terminal-controls.hidden {
+  display: flex;
+}
+
+.terminal-mode {
+  display: hidden;
+  background-color: var(--medGrey);
+  color: var(--whitish);
+  border: 1px solid var(--lightGrey);
+  border-radius: 5px;
+}
+
+.dev-mode .terminal-mode {
+  display: flex;
+}
+
+.terminal-log-filter {
+  display: flex;
+  flex-direction: row;
+}
+
+.terminal-log-filter.hidden {
+  display: none;
 }
 
 .terminal-log-filter label {
@@ -586,8 +613,22 @@ form button {
   padding: 0;
 }
 
+.terminal-contents {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--darkGrey) var(--medGrey);
+  height: 10em;
+}
+
 .terminal-text {
   padding: 1em;
+  top: 0;
+}
+
+.terminal-logs {
+  top: 0;
 }
 
 .terminal-stderr {

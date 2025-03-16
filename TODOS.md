@@ -59,5 +59,3 @@ A not-necessarily-exhaustive list of TODOs:
     - Figure out why file components get cleared on reruns
     - Add a "download files" component for the custom form
     - Make FILE component have a logo and text and panel and whatnot
-  - Terminal:
-    - Filtering in output terminal by log level
