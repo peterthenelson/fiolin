@@ -26,8 +26,11 @@ export function deployScript(script: FiolinScript, yml: string, opts: DeployOpti
 }
 
 function genEof(s: string): string {
-  if (!s.includes('EOF')) return 'EOF';
-  throw new Error('TODO: Generate non-colliding EOFs')
+  let eof = 'EOF';
+  while (s.includes(eof)) {
+    eof += `${Math.floor(Math.random() * 10)}`;
+  }
+  return eof;
 }
 
 function bashScript(script: FiolinScript, yml: string, opts: DeployOptions): string {
@@ -138,6 +141,7 @@ function bashScript(script: FiolinScript, yml: string, opts: DeployOptions): str
   `);
 }
 
+// TODO: Escape @ signs in here-strings
 function ps1File(script: FiolinScript, yml: string, opts: DeployOptions): string {
   const json = JSON.stringify(script, null, 2);
   const { code, ...scriptNoCode } = script;

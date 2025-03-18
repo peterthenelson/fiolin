@@ -29,6 +29,7 @@ A not-necessarily-exhaustive list of TODOs:
   - Debug command that can trigger some kind of interactive repl
 - Scripts
   - Playground examples
+    - Demonstrating deployment
     - Demonstrating matplotlib (after I get it to work)
     - Demonstrating interactivity with canvas
   - More file-conversion scripts for real tasks
