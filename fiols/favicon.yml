@@ -10,7 +10,7 @@ meta:
     - ico
 interface:
   inputAccept: image/*
-  inputFiles: SINGLE
+  inputFiles: ANY # Can we switch to SINGLE?
   outputFiles: SINGLE
   terminal: FATAL_ONLY
   form:
@@ -19,20 +19,39 @@ interface:
       - type: DIV
         dir: ROW
         children:
-          - type: LABEL
-            text: Input Image
-            child:
-              type: FILE
-              name: input
-              submit: true
-          - type: LABEL
-            text: Preview
-            child:
-              type: CANVAS
-              name: output
-              height: 256
-              width: 496
-          # TODO: add a download component
+          - type: DIV
+            dir: COL
+            name: start
+            children:
+              - type: LABEL
+                text: Input Image
+                child:
+                  type: FILE
+                  name: input
+                  submit: true
+          - type: DIV
+            dir: COL
+            name: selected
+            hidden: true
+            children:
+              - type: DIV
+                dir: ROW
+                children:
+                  - type: BUTTON
+                    text: Start Over
+                    name: reset
+                    value: x
+                  - type: BUTTON
+                    text: Download
+                    name: download
+                    value: x
+              - type: LABEL
+                text: Preview
+                child:
+                  type: CANVAS
+                  name: preview
+                  height: 256
+                  width: 496
 runtime:
   wasmModules:
     - name: imagemagick
