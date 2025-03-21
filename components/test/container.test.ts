@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderContainer, FiolinContainerOptions } from '../server/container';
 import { dedent } from '../../common/indent';
-import { loadScript } from '../../utils/config';
+import { loadAllTutorials, loadScript } from '../../utils/config';
 
 describe('container', () => {
   describe('rendering and initialization', () => {
@@ -23,6 +23,20 @@ describe('container', () => {
       `));
       // TODO: client initialization
     });
-    // TODO: playground
+    it('works for playground', async () => {
+      const serverOpts: FiolinContainerOptions = {
+        mode: 'PLAYGROUND',
+        tutorials: await loadAllTutorials(),
+        numSpaces: 4,
+      };
+      document.write(dedent(`
+        <html>
+          <body>
+            ${renderContainer(serverOpts)}
+          </body>
+        </html>
+      `));
+      // TODO: client initialization
+    });
   });
 });
