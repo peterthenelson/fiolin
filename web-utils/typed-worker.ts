@@ -2,6 +2,12 @@ import { parseAs } from '../common/parse';
 import { pWorkerMessage } from './parse-msg';
 import { WorkerMessage } from './types';
 
+export interface ITypedWorker {
+  onmessage: ((msg: WorkerMessage) => void) | null;
+  onerror: ((ev: ErrorEvent) => void) | null;
+  postMessage(msg: WorkerMessage, transfer?: Transferable[]): void;
+}
+
 export class TypedWorker {
   private readonly worker: Worker;
   public onmessage: ((msg: WorkerMessage) => void) | null;

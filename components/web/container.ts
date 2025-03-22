@@ -2,7 +2,7 @@ import { WorkerMessage } from '../../web-utils/types';
 import { Deferred } from '../../common/deferred';
 import { getErrMsg, toErr } from '../../common/errors';
 import { FiolinFormEvent, FiolinRunRequest, FiolinScript } from '../../common/types';
-import { TypedWorker } from '../../web-utils/typed-worker';
+import { ITypedWorker, TypedWorker } from '../../web-utils/typed-worker';
 import type { FiolinScriptEditorModel } from '../../web-utils/monaco';
 import { DeployDialog } from '../../components/web/deploy-dialog';
 import { Editor } from '../../components/web/editor';
@@ -32,6 +32,10 @@ export type ContainerOpts = CommonContainerOpts & (FirstPartyContainerOpts | Thi
 export interface CommonContainerOpts {
   workerEndpoint?: string;
   storage?: StorageLike;
+  test?: {
+    worker: ITypedWorker;
+    loader: LoaderComponent;
+  }
 }
 
 export interface FirstPartyContainerOpts {
@@ -52,7 +56,9 @@ export interface PlaygroundContainerOpts {
 }
 
 function loaderFromOpts(container: HTMLElement, opts: ContainerOpts, triggerReload: () => void, setTitleAndDesc: (title: string, desc: string) => void): LoaderComponent {
-  if (opts.type === '1P') {
+  if (opts.test) {
+    return opts.test.loader;
+  } else if (opts.type === '1P') {
     return new UrlLoader({
       url: `/s/${opts.fiol}/script.json`,
     });
@@ -87,7 +93,7 @@ export class Container {
   private readonly form: FormComponent;
   private readonly editor: Editor;
   private readonly terminal: Terminal;
-  private readonly worker: TypedWorker;
+  private readonly worker: ITypedWorker;
   private yml: string;
   public script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
@@ -126,7 +132,7 @@ export class Container {
       updateError: (e) => this.scriptUpdateError(e),
     })
     this.terminal = new Terminal(container);
-    this.worker = new TypedWorker(opts.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
+    this.worker = opts?.test?.worker || new TypedWorker(opts.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
     this.worker.onerror = (e) => {
       console.error(getErrMsg(e));
       this.terminal.fatal(getErrMsg(e));
