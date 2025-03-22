@@ -1,7 +1,7 @@
 import { FiolinScript } from '../../common/types';
 import { pFiolinScript } from '../../common/parse-script';
 import { parseAs, ParseError } from '../../common/parse';
-import type { FiolinScriptEditor, FiolinScriptEditorModel } from '../../web-utils/monaco';
+import type { IFiolinScriptEditor, FiolinScriptEditor, FiolinScriptEditorModel } from '../../web-utils/monaco';
 import { getByRelIdAs } from '../../web-utils/select-as';
 import YAML, { YAMLParseError } from 'yaml';
 const monaco = import('../../web-utils/monaco');
@@ -11,18 +11,22 @@ export interface EditorCallbacks {
   updateError(e: unknown): Promise<void>;
 }
 
+async function asPromise<T>(t: T): Promise<T> {
+  return t;
+}
+
 export class Editor {
   private readonly tabsDiv: HTMLDivElement;
   private readonly editorDiv: HTMLDivElement;
   private readonly cbs: EditorCallbacks;
-  private readonly monacoEditor: Promise<FiolinScriptEditor>;
+  private readonly monacoEditor: Promise<IFiolinScriptEditor>;
   private script?: FiolinScript;
 
-  constructor(container: HTMLElement, callbacks: EditorCallbacks) {
+  constructor(container: HTMLElement, callbacks: EditorCallbacks, monacoEditor?: IFiolinScriptEditor) {
     this.tabsDiv = getByRelIdAs(container, 'script-editor-tabs', HTMLDivElement);
     this.editorDiv = getByRelIdAs(container, 'script-editor', HTMLDivElement);
     this.cbs = callbacks;
-    this.monacoEditor = this.initMonaco();
+    this.monacoEditor = monacoEditor ? asPromise(monacoEditor) : this.initMonaco();
     this.setUpTabs();
   }
 

@@ -8,7 +8,7 @@ export interface ITypedWorker {
   postMessage(msg: WorkerMessage, transfer?: Transferable[]): void;
 }
 
-export class TypedWorker {
+export class TypedWorker implements ITypedWorker {
   private readonly worker: Worker;
   public onmessage: ((msg: WorkerMessage) => void) | null;
   public onerror: ((ev: ErrorEvent) => void) | null;

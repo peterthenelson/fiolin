@@ -53,7 +53,15 @@ const narrowOpts: monaco.editor.IStandaloneEditorConstructionOptions = {
 
 export type FiolinScriptEditorModel = 'script.py' | 'script.yml';
 
-export class FiolinScriptEditor {
+export interface IFiolinScriptEditor {
+  switchTab(model: FiolinScriptEditorModel): void;
+  setScript(script: FiolinScript): void;
+  getContents(): Map<FiolinScriptEditorModel, string>;
+  clearErrors(): void;
+  setError(model: FiolinScriptEditorModel, lineno: number, msg: string): void;
+}
+
+export class FiolinScriptEditor implements IFiolinScriptEditor {
   private readonly py: monaco.editor.ITextModel;
   private pyState: monaco.editor.ICodeEditorViewState | null;
   private readonly yml: monaco.editor.ITextModel;
