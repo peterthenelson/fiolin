@@ -3,7 +3,7 @@ import { Deferred } from '../../common/deferred';
 import { getErrMsg, toErr } from '../../common/errors';
 import { FiolinFormEvent, FiolinRunRequest, FiolinScript } from '../../common/types';
 import { ITypedWorker, TypedWorker } from '../../web-utils/typed-worker';
-import type { FiolinScriptEditorModel } from '../../web-utils/monaco';
+import type { FiolinScriptEditorModel, IFiolinScriptEditor } from '../../web-utils/monaco';
 import { DeployDialog } from '../../components/web/deploy-dialog';
 import { Editor } from '../../components/web/editor';
 import { Terminal } from '../../components/web/terminal';
@@ -35,6 +35,7 @@ export interface CommonContainerOpts {
   test?: {
     worker: ITypedWorker;
     loader: LoaderComponent;
+    editor: IFiolinScriptEditor;
   }
 }
 
@@ -128,9 +129,9 @@ export class Container {
       new SimpleForm(container, formCallbacks),
     ]);
     this.editor = new Editor(container, {
-      update: (s, r, m) => this.scriptUpdated(s, r, m),
-      updateError: (e) => this.scriptUpdateError(e),
-    })
+        update: (s, r, m) => this.scriptUpdated(s, r, m),
+        updateError: (e) => this.scriptUpdateError(e),
+    }, opts?.test?.editor);
     this.terminal = new Terminal(container);
     this.worker = opts?.test?.worker || new TypedWorker(opts.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
     this.worker.onerror = (e) => {

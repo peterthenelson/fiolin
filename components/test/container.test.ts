@@ -10,6 +10,7 @@ import { WorkerMessage } from '../../web-utils/types';
 import { LoaderComponent } from '../web/loader-component';
 import { FiolinScript } from '../../common/types';
 import { Deferred } from '../../common/deferred';
+import { FiolinScriptEditorModel, IFiolinScriptEditor } from '../../web-utils/monaco';
 
 class FakeWorker {
   public messages: WorkerMessage[];
@@ -60,6 +61,33 @@ class FakeLoader extends LoaderComponent {
   }
 }
 
+class FakeEditor implements IFiolinScriptEditor {
+  public script?: FiolinScript;
+  public errors: [FiolinScriptEditorModel, number, string][];
+
+  constructor() {
+    this.errors = [];
+  }
+
+  switchTab(model: FiolinScriptEditorModel): void {}
+
+  setScript(script: FiolinScript): void {
+    this.script = script;
+  }
+
+  getContents(): Map<FiolinScriptEditorModel, string> {
+    throw new Error('Not implemented');
+  }
+
+  clearErrors(): void {
+    this.errors = [];
+  }
+
+  setError(model: FiolinScriptEditorModel, lineno: number, msg: string): void {
+    this.errors.push([model, lineno, msg]);
+  }
+}
+
 describe('container', () => {
   describe('rendering and initialization', () => {
     it('works for 1p', async () => {
@@ -75,10 +103,11 @@ describe('container', () => {
         </html>
       `));
       const worker = new FakeWorker();
+      const editor = new FakeEditor();
       const clientOpts: ContainerOpts = {
         type: '1P',
         fiol: 'extract-winmail',
-        test: { worker, loader: new FakeLoader(script) },
+        test: { worker, loader: new FakeLoader(script), editor },
       };
       const containerDiv = document.getElementById('container');
       expect(containerDiv).not.toEqual(null);
@@ -87,7 +116,7 @@ describe('container', () => {
       expect(install.type).toEqual('INSTALL_PACKAGES')
       worker.onmessage!({ type: 'LOADED' });
       worker.onmessage!({ type: 'PACKAGES_INSTALLED' });
-      // TODO: mock out editor and await container.readyToRun.promise;
+      await container.readyToRun.promise;
     });
 
     it('works for playground', async () => {
@@ -103,10 +132,11 @@ describe('container', () => {
         </html>
       `));
       const worker = new FakeWorker();
+      const editor = new FakeEditor();
       const clientOpts: ContainerOpts = {
         type: 'PLAYGROUND',
         tutorials,
-        test: { worker, loader: new FakeLoader(tutorials['01-welcome']) },
+        test: { worker, loader: new FakeLoader(tutorials['01-welcome']), editor },
       };
       const containerDiv = document.getElementById('container');
       expect(containerDiv).not.toEqual(null);
@@ -115,7 +145,7 @@ describe('container', () => {
       expect(install.type).toEqual('INSTALL_PACKAGES')
       worker.onmessage!({ type: 'LOADED' });
       worker.onmessage!({ type: 'PACKAGES_INSTALLED' });
-      // TODO: mock out editor and await container.readyToRun.promise;
+      await container.readyToRun.promise;
     });
   });
 });
