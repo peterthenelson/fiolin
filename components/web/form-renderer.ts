@@ -4,18 +4,22 @@ import { FiolinFormComponentMapImpl, idToRepr, makeId, maybeComponentToId, swapT
 import { FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentId, FiolinFormPartialComponentElement } from '../../common/types/form';
 import { setSelected } from '../../web-utils/set-selected';
 
+export type FormEventHandler = (id: FiolinFormComponentId, ev: FiolinFormEvent) => void;
+
 interface RenderState {
+  document: Document;
   form: HTMLFormElement;
   ui: FiolinScriptInterface;
   uniquelyIdentifiedElems: FiolinFormComponentMapImpl<FiolinFormComponentElement>;
-  onEvent: (id: FiolinFormComponentId, ev: FiolinFormEvent) => void,
+  onEvent?: FormEventHandler;
 }
 
 export class RenderedForm {
   private readonly state: RenderState;
 
-  private constructor(form: HTMLFormElement, ui: FiolinScriptInterface, onEvent: (id: FiolinFormComponentId, ev: FiolinFormEvent) => void) {
+  private constructor(form: HTMLFormElement, ui: FiolinScriptInterface, onEvent?: FormEventHandler, document?: Document) {
     this.state = {
+      document: document || window.document,
       form,
       ui,
       uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(),
@@ -31,10 +35,9 @@ export class RenderedForm {
     return this.state.uniquelyIdentifiedElems.get(id);
   }
 
-  static render(form: HTMLFormElement, ui?: FiolinScriptInterface, onEvent?: (id: FiolinFormComponentId, ev: FiolinFormEvent) => void): RenderedForm {
+  static render(form: HTMLFormElement, ui?: FiolinScriptInterface, onEvent?: FormEventHandler, document?: Document): RenderedForm {
     ui ||= { inputFiles: 'ANY', outputFiles: 'ANY' };
-    onEvent ||= () => {}
-    const rendered = new RenderedForm(form, ui, onEvent);
+    const rendered = new RenderedForm(form, ui, onEvent, document);
     form.replaceChildren();
     form.onsubmit = () => {};
     if (!ui.form) return rendered;
@@ -103,7 +106,7 @@ export class RenderedForm {
   }
 }
 
-function createAndPairElement(component: FiolinFormComponent): FiolinFormComponentElement {
+function createAndPairElement(document: Document, component: FiolinFormComponent): FiolinFormComponentElement {
   return typeSwitch(component, {
     'DIV': (c) => [c, document.createElement('div')],
     'LABEL': (c) => [c, document.createElement('label')],
@@ -220,14 +223,15 @@ function transformEvent<E extends Event>(ev: E, target: FiolinFormComponentId): 
   }
 }
 
-function forwardEvent<E extends Event>(id: FiolinFormComponentId, state: RenderState): (this: GlobalEventHandlers, ev: E) => any {
+function forwardEvent<E extends Event>(id: FiolinFormComponentId, onEvent: FormEventHandler): (this: GlobalEventHandlers, ev: E) => any {
   return (ev: E) => {
     const t = transformEvent(ev, id);
-    if (t) state.onEvent(id, t);
+    if (t) onEvent(id, t);
   }
 }
 
 function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState, initial: boolean, id?: FiolinFormComponentId) {
+  const document = state.document;
   ceSwitch(ce, {
     'DIV': ([component, div]) => {
       if (component.dir) div.classList.add(`flex-${component.dir.toLowerCase()}-wrap`);
@@ -425,26 +429,27 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
     }
   }
   updateField(ce[1], 'title', ce[0].title);
-  if (!id) {
+  if (id === undefined || state.onEvent === undefined) {
     // Event handlers can't do anything in these cases.
     return;
+  } else {
+    const handled: string[] = [];
+    maybeForward('pointerdown', 'onpointerdown', PointerEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('pointerup', 'onpointerup', PointerEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('pointermove', 'onpointermove', PointerEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('pointerover', 'onpointerover', PointerEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('pointerout', 'onpointerout', PointerEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('pointerenter', 'onpointerenter', PointerEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('pointerleave', 'onpointerleave', PointerEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('pointercancel', 'onpointercancel', PointerEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('gotpointercapture', 'ongotpointercapture', PointerEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('lostpointercapture', 'onlostpointercapture', PointerEvent, ce[0], ce[1], id, state.onEvent, handled)
+    maybeForward('click', 'onclick', MouseEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('dblclick', 'ondblclick', MouseEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('input', 'oninput', InputEvent, ce[0], ce[1], id, state.onEvent, handled);
+    maybeForward('change', 'onchange', Event, ce[0], ce[1], id, state.onEvent, handled);
+    checkExhaustive(handled);
   }
-  const handled: string[] = [];
-  maybeForward('pointerdown', 'onpointerdown', PointerEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('pointerup', 'onpointerup', PointerEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('pointermove', 'onpointermove', PointerEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('pointerover', 'onpointerover', PointerEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('pointerout', 'onpointerout', PointerEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('pointerenter', 'onpointerenter', PointerEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('pointerleave', 'onpointerleave', PointerEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('pointercancel', 'onpointercancel', PointerEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('gotpointercapture', 'ongotpointercapture', PointerEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('lostpointercapture', 'onlostpointercapture', PointerEvent, ce[0], ce[1], id, state, handled)
-  maybeForward('click', 'onclick', MouseEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('dblclick', 'ondblclick', MouseEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('input', 'oninput', InputEvent, ce[0], ce[1], id, state, handled);
-  maybeForward('change', 'onchange', Event, ce[0], ce[1], id, state, handled);
-  checkExhaustive(handled);
 }
 
 // There's not an easy way to make this a static check, so it's dynamic. I just
@@ -465,7 +470,7 @@ type EventHandlerHaver<T extends string, E extends Event> = Record<T, ((this: Gl
 function maybeForward<T extends string, E extends Event>(
   eventSubtype: string, onEventProperty: T, evCls: new (...args: any[]) => E,
   c: FiolinFormPartialComponentElement[0], elem: EventHandlerHaver<T, E>,
-  id: FiolinFormComponentId, state: RenderState, handledSubtypes: string[]
+  id: FiolinFormComponentId, onEvent: FormEventHandler, handledSubtypes: string[]
 ): void {
   if ('on' + eventSubtype !== onEventProperty) {
     throw new Error(`Mismatched subtype and property: ${eventSubtype}, ${onEventProperty}`)
@@ -476,7 +481,7 @@ function maybeForward<T extends string, E extends Event>(
     if (value === undefined) {
       return;
     } else if (value) {
-      elem[onEventProperty] = forwardEvent<E>(id, state);
+      elem[onEventProperty] = forwardEvent<E>(id, onEvent);
     } else {
       elem[onEventProperty] = null;
     }
@@ -485,7 +490,7 @@ function maybeForward<T extends string, E extends Event>(
 
 function renderComponent(component: FiolinFormComponent, state: RenderState): FiolinFormComponentElement {
   const id = maybeComponentToId(component);
-  const ce: FiolinFormComponentElement = createAndPairElement(component);
+  const ce: FiolinFormComponentElement = createAndPairElement(state.document, component);
   renderInPlace(ce, state, true, maybeComponentToId(ce[0]));
   const mutable = state.uniquelyIdentifiedElems as FiolinFormComponentMapImpl<FiolinFormComponentElement>;
   if (id !== undefined) {

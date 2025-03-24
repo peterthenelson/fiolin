@@ -63,6 +63,7 @@ export class CustomForm extends FormComponent {
           const args = this.getArgs(e.submitter);
           this.cbs.runScript(files, args);
         }
+        this.rendered.form.inert = false;
         this.transferred = false;
       } catch (e) {
         this.rendered = RenderedForm.render(this.rendered.form);

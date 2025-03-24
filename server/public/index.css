@@ -162,7 +162,7 @@ a.plain-link:hover, a.no-style:focus {
   margin-top: .5em;
 }
 
-.hidden, .button.hidden, .terminal.hidden {
+.hidden, .button.hidden, .terminal.hidden, .files-label.hidden {
   display: none;
 }
 

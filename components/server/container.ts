@@ -53,7 +53,7 @@ export function renderContainer(opts?: FiolinContainerOptions): string {
       </div>
       <div class="script-controls">
         ${renderCustomForm({ script: opts.script, numSpaces: ns + 4 })}
-        ${renderSimpleForm(ns + 4)}
+        ${renderSimpleForm({ script: opts.script, numSpaces: ns + 4 })}
       </div>
       <div class="script-output flex-col-wrap">
         ${renderTerminal({ script: opts.script, numSpaces: ns + 4 })}
