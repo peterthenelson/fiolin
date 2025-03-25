@@ -4,18 +4,17 @@ import { FormCallbacks, FormComponent } from './form-component';
 import { RenderedForm } from './form-renderer';
 
 export class CustomForm extends FormComponent {
-  private rendered: RenderedForm;
+  private elem: HTMLFormElement;
+  private rendered?: RenderedForm;
   private transferred: boolean;
   private readonly cbs: FormCallbacks;
   private ui?: FiolinScriptInterface;
 
   constructor(container: HTMLElement, callbacks: FormCallbacks) {
     super();
-    this.rendered = RenderedForm.render(getByRelIdAs(container, 'script-form', HTMLFormElement));
+    this.elem = getByRelIdAs(container, 'script-form', HTMLFormElement);
     this.transferred = true;
     this.cbs = callbacks;
-    // Disable it until the script is set.
-    this.rendered.form.onsubmit = (e) => e.preventDefault();
   }
 
   private isEnabled(): boolean {
@@ -23,10 +22,14 @@ export class CustomForm extends FormComponent {
   }
 
   reportValidity(): boolean {
-    return this.rendered.form.reportValidity();
+    if (this.rendered) {
+      return this.rendered.form.reportValidity();
+    }
+    return true;
   }
 
   private getFiles(): File[] {
+    if (!this.rendered) return [];
     const files: File[] = [];
     for (const fileChooser of selectAllAs(this.rendered.form, 'input[type="file"]', HTMLInputElement)) {
       if (fileChooser.files !== null) {
@@ -39,6 +42,7 @@ export class CustomForm extends FormComponent {
   }
 
   private getArgs(submitter?: HTMLElement | null): Record<string,string> {
+    if (!this.rendered) return {};
     const formData = new FormData(this.rendered.form, submitter);
     const args: Record<string, string> = {};
     for (const [k, v] of formData.entries()) {
@@ -56,7 +60,7 @@ export class CustomForm extends FormComponent {
     this.ui = script.interface;
     if (this.ui.form) {
       try {
-        this.rendered = RenderedForm.render(this.rendered.form, this.ui, (id, ev) => this.onEvent(id, ev));
+        this.rendered = RenderedForm.render(this.elem, this.ui, (id, ev) => this.onEvent(id, ev));
         this.rendered.form.onsubmit = (e) => {
           e.preventDefault();
           const files = this.getFiles();
@@ -66,12 +70,12 @@ export class CustomForm extends FormComponent {
         this.rendered.form.inert = false;
         this.transferred = false;
       } catch (e) {
-        this.rendered = RenderedForm.render(this.rendered.form);
+        this.rendered = RenderedForm.render(this.elem);
         this.transferred = true;
         throw e;
       }
     } else {
-      this.rendered = RenderedForm.render(this.rendered.form);
+      this.rendered = RenderedForm.render(this.elem);
       this.transferred = true;
     }
   }
@@ -83,6 +87,7 @@ export class CustomForm extends FormComponent {
   }
 
   onRun(request: FiolinRunRequest, opts: { setCanvases?: Record<string, OffscreenCanvas> }): void {
+    if (!this.rendered) return;
     // TODO: update request with
     // TODO: When they exist:
     // - reset file/run component values
@@ -96,6 +101,7 @@ export class CustomForm extends FormComponent {
   }
 
   onSuccess(response: FiolinRunResponse): void {
+    if (!this.rendered) return;
     // TODO: When they exist:
     // - update the output file display component.
     if (this.isEnabled() && !response.partial) {
@@ -112,6 +118,7 @@ export class CustomForm extends FormComponent {
   }
 
   onError(response?: FiolinRunResponse): void {
+    if (!this.rendered) return;
     if (response?.formUpdates) {
       for (const fu of response.formUpdates) {
         this.rendered.applyUpdate(fu);

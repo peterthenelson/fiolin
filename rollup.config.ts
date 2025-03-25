@@ -1,7 +1,7 @@
 import { RollupOptions, Plugin } from 'rollup';
 import css from 'rollup-plugin-import-css';
 import copy from 'rollup-plugin-copy';
-import terser from '@rollup/plugin-terser';
+import terser, { Options } from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import path from 'node:path';
@@ -53,6 +53,10 @@ function updateVersions(file: string): Plugin {
   }
 }
 
+let terserOpts: Options = {
+  compress: { drop_debugger: false },
+}
+
 const config: RollupOptions[] = [
   monacoWorker('editor/editor.worker.js'),
   // NOTE: I'm leaving out language/{css,html,json,typescript}/{css,html,json,ts}.worker.js
@@ -68,7 +72,7 @@ const config: RollupOptions[] = [
       directCopies(),
       typescript(),
       nodeResolve(),
-      terser(),
+      terser(terserOpts),
       updateVersions('host.js'),
     ]
   },
@@ -85,7 +89,7 @@ const config: RollupOptions[] = [
         pyodide: pyodideImportStub
       },
     },
-    plugins: [typescript(), nodeResolve(), terser(), updateVersions('worker.js')],
+    plugins: [typescript(), nodeResolve(), terser(terserOpts), updateVersions('worker.js')],
   },
 ];
 

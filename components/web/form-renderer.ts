@@ -38,11 +38,14 @@ export class RenderedForm {
   static render(form: HTMLFormElement, ui?: FiolinScriptInterface, onEvent?: FormEventHandler, document?: Document): RenderedForm {
     ui ||= { inputFiles: 'ANY', outputFiles: 'ANY' };
     const rendered = new RenderedForm(form, ui, onEvent, document);
-    form.replaceChildren();
     form.onsubmit = () => {};
-    if (!ui.form) return rendered;
+    const newChildren: HTMLElement[] = [];
+    if (!ui.form) {
+      form.replaceChildren(...newChildren);
+      return rendered;
+    }
     for (const c of ui.form.children) {
-      rendered.state.form.append(renderComponent(c, rendered.state)[1]);
+      newChildren.push(renderComponent(c, rendered.state)[1]);
     }
     if (ui.form.autofocusedName) {
       const id = makeId(ui.form.autofocusedName, ui.form.autofocusedValue);
@@ -53,6 +56,7 @@ export class RenderedForm {
         throw new Error(`Could not find element to autofocus (${idToRepr(id)})`);
       }
     }
+    form.replaceChildren(...newChildren);
     return rendered;
   }
 
