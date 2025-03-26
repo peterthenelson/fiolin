@@ -318,7 +318,6 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
         input.onchange = () => {
           // TODO: Update the text part
           state.form.requestSubmit();
-          input.value = '';
         }
       }
       updateField(input, 'disabled', component.disabled);
