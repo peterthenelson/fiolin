@@ -68,6 +68,7 @@ export class CustomForm extends FormComponent {
           this.cbs.runScript(files, args);
         }
         this.rendered.form.inert = false;
+        this.rendered.form.classList.remove('hidden');
         this.transferred = false;
       } catch (e) {
         this.rendered = RenderedForm.render(this.elem);
@@ -76,6 +77,7 @@ export class CustomForm extends FormComponent {
       }
     } else {
       this.rendered = RenderedForm.render(this.elem);
+        this.rendered.form.classList.add('hidden');
       this.transferred = true;
     }
   }
