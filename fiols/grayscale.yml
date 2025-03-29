@@ -5,7 +5,7 @@ meta:
   author: Peter Nelson
 interface:
   inputFiles: SINGLE
-  outputFiles: ANY #SINGLE
+  outputFiles: SINGLE
   terminal: FATAL_ONLY
   form:
     autofocusedName: input-file

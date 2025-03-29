@@ -5,7 +5,7 @@ meta:
     More advanced features that are helpful for developing scripts that use
     ImageMagick.
 interface:
-  inputFiles: ANY
+  inputFiles: SINGLE
   outputFiles: NONE
   inputAccept: image/*
   form:

@@ -10,7 +10,7 @@ meta:
     - ico
 interface:
   inputAccept: image/*
-  inputFiles: ANY # Can we switch to SINGLE?
+  inputFiles: SINGLE
   outputFiles: SINGLE
   terminal: FATAL_ONLY
   form:

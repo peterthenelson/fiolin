@@ -312,12 +312,15 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
       if (accept) input.accept = accept;
       if (component.submit) {
         input.oncancel = () => {
-          input.value = '';
-          state.form.requestSubmit();
+          if (state.ui && (state.ui.inputFiles === 'NONE' || state.ui.inputFiles === 'ANY')) {
+            state.form.requestSubmit();
+          }
         }
         input.onchange = () => {
           // TODO: Update the text part
-          state.form.requestSubmit();
+          if (input.value || (state.ui && (state.ui.inputFiles === 'NONE' || state.ui.inputFiles === 'ANY'))) {
+            state.form.requestSubmit();
+          }
         }
       }
       updateField(input, 'disabled', component.disabled);
