@@ -141,7 +141,10 @@ function bashScript(script: FiolinScript, yml: string, opts: DeployOptions): str
   `);
 }
 
-// TODO: Escape @ signs in here-strings
+function escAt(s: string): string {
+  return s.replaceAll(/@/g, '`@');
+}
+
 function ps1File(script: FiolinScript, yml: string, opts: DeployOptions): string {
   const json = JSON.stringify(script, null, 2);
   const { code, ...scriptNoCode } = script;
@@ -234,10 +237,10 @@ function ps1File(script: FiolinScript, yml: string, opts: DeployOptions): string
     $fiolYmlPath = "fiols\\$FIOLID.yml"
     $fiolPyPath = "fiols\\$FIOLID.py"
     @"
-    ${indent(yml, '    ')}
+    ${escAt(indent(yml, '    '))}
     "@ | Set-Content -Path $fiolYmlPath
     @"
-    ${indent(code.python, '    ')}
+    ${escAt(indent(code.python, '    '))}
     "@ | Set-Content -Path $fiolPyPath
     Invoke-Strict git add .
     git_commit_p "Add $FIOLID yml/py to repository"
@@ -248,7 +251,7 @@ function ps1File(script: FiolinScript, yml: string, opts: DeployOptions): string
     Invoke-Strict git ls-files | Where-Object {$_ -notmatch '\.json$'} | ForEach-Object { Invoke-Strict git rm $_ }
     $fiolJsonPath = "$FIOLID.json"
     @"
-    ${indent(json, '    ')}
+    ${escAt(indent(json, '    '))}
     "@ | Set-Content -Path $fiolJsonPath
     Invoke-Strict git add .
     git_commit_p "Publish $FIOLID.json to gh-pages"
