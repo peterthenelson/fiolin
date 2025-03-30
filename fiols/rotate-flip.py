@@ -14,6 +14,16 @@ FMTS = {
   '.webp': im.MagickFormat.WebP,
 }
 
+def gen_output_name(state):
+  suffix = ''
+  if state['degs']:
+    suffix += f'-rot{state['degs']}'
+  if state['flipped']:
+    suffix += '-flipped'
+  if state['flopped']:
+    suffix += '-flopped'
+  return '/output/' + fiolin.get_input_basename(suffix=suffix)
+
 async def blit(ctx, img):
   async with fiolin.callback_to_ctx(img.clone) as copy:
     copy.resize(CANVAS_DIM, CANVAS_DIM)
@@ -28,9 +38,6 @@ async def main():
   ctx = fiolin.get_canvas('preview')
   if not state:
     input_path = fiolin.get_input_path()
-    # TODO: Figure out a good way to add useful suffixes based on degree of
-    # rotation or flipped status
-    output_path = '/output/' + fiolin.get_input_basename(suffix='-rotated')
     _, ext = os.path.splitext(input_path.lower())
     if ext not in FMTS:
       sys.exit(f'Invalid format: {ext}; expected one of {FMTS.keys()}')
@@ -38,7 +45,9 @@ async def main():
     fiolin.continue_with({
       'img': img,
       'input_path': input_path,
-      'output_path': output_path,
+      'flipped': False,
+      'flopped': False,
+      'degs': 0,
       'ext': ext,
     })
     state = fiolin.state()
@@ -52,19 +61,23 @@ async def main():
   img = state['img']
   rotate = args.get('rotate', None)
   if rotate is not None:
-    img.rotate(int(rotate))
+    degs = int(rotate)
+    img.rotate(degs)
+    state['degs'] = (state['degs'] + degs) % 360
     fiolin.continue_with(state)
   flip = args.get('flip', None)
   if flip == 'horizontal':
     img.flop()
+    state['flopped'] = not state['flopped']
     fiolin.continue_with(state)
   elif flip == 'vertical':
     img.flip()
+    state['flipped'] = not state['flipped']
     fiolin.continue_with(state)
   await blit(ctx, img)
   if args.get('download', False):
     ext = state['ext']
-    output_path = state['output_path']
+    output_path = gen_output_name(state)
     fiolin.form_set_hidden('page-1', hidden=False)
     fiolin.form_set_hidden('page-2', hidden=True)
     fiolin.finish()

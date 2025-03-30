@@ -18,8 +18,8 @@ describe('rotate-flip', () => {
     const runner = new NodeFiolinRunner('rotate-flip', output.path);
     const outputs = await runner.runWithLocalFs(
       [inputPath], { args: { 'rotate': '180', 'download': 'true' } });
-    expect(outputs).toEqual(['phone-rotated.jpg']);
-    expect(fileSha256(path.join(output.path, 'phone-rotated.jpg'))).not.toEqual(
+    expect(outputs).toEqual(['phone-rot180.jpg']);
+    expect(fileSha256(path.join(output.path, 'phone-rot180.jpg'))).not.toEqual(
       inputHash);
   });
 
@@ -27,8 +27,8 @@ describe('rotate-flip', () => {
     const runner = new NodeFiolinRunner('rotate-flip', output.path);
     const outputs = await runner.runWithLocalFs(
       [inputPath], { args: { 'flip': 'vertical', 'download': 'true' } });
-    expect(outputs).toEqual(['phone-rotated.jpg']);
-    expect(fileSha256(path.join(output.path, 'phone-rotated.jpg'))).not.toEqual(
+    expect(outputs).toEqual(['phone-flipped.jpg']);
+    expect(fileSha256(path.join(output.path, 'phone-flipped.jpg'))).not.toEqual(
       inputHash);
   });
 });
