@@ -83,6 +83,17 @@ export class InstallPkgsError extends Error {
   }
 }
 
+export abstract class OutputValidator {
+  abstract validate(file: File): void;
+}
+
+export class ValidateOutputError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'ValidateOutputError';
+  }
+}
+
 export interface FiolinRunner {
   // Install any necessary external packages to run the script. If the runner
   // has previously installed packages, then compares the requested packages to

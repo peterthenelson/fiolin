@@ -51,7 +51,6 @@ A not-necessarily-exhaustive list of TODOs:
 - Frontend
   - Add some transition animations for the buttons to invite interaction.
   - Third party:
-    - Filter output file types
     - Release publicly by updating prerendering
   - Editor:
     - Why is monaco occasionally triggering a request for clipboard permissions?
