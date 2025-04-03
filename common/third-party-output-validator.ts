@@ -1,9 +1,8 @@
 import { OutputValidator, ValidateOutputError } from './types';
 
-// TODO: Figure out a good list
-const BANNED_EXTENSIONS = ['exe', 'com', 'bat', 'ps1', 'dmg', 'iso', 'sh'];
+// TODO: Consider scanning zip files too
+const BANNED_EXTENSIONS = ['exe', 'com', 'bat', 'ps1', 'dmg', 'iso', 'sh', 'vbs'];
 
-// TODO: Wire into runner and test
 export class ThirdPartyOutputValidator extends OutputValidator {
   constructor() { super(); }
 
