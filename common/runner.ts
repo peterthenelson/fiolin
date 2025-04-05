@@ -1,5 +1,5 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule, FormUpdate, ICanvasRenderingContext2D, InstallPkgsError, OutputValidator } from './types';
+import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule, FormUpdate, InstallPkgsError, PostProcessor } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
 import { getFiolinPy, getWrapperPy } from './pylib';
 import { cmpSet } from './cmp';
@@ -20,7 +20,7 @@ export interface PyodideRunnerOptions {
   console?: IConsole;
   indexUrl?: string;
   loaders?: Record<string, FiolinWasmLoader>;
-  outputValidator?: OutputValidator;
+  postProcessors?: PostProcessor[];
 }
 
 function pyPkgKey(v: FiolinPyPackage): any[] {
@@ -55,7 +55,7 @@ export class PyodideRunner implements FiolinRunner {
   private _formUpdates: FormUpdate[];
   private _formIds: FiolinFormComponentMap<FiolinFormComponent>;
   private _loaders: Record<string, FiolinWasmLoader>;
-  private _validator?: OutputValidator;
+  private _postProcessors: PostProcessor[];
   public loaded: Promise<void>;
 
   constructor(options?: PyodideRunnerOptions) {
@@ -92,7 +92,7 @@ export class PyodideRunner implements FiolinRunner {
     };
     this._indexUrl = options?.indexUrl;
     this._loaders = options?.loaders || {};
-    this._validator = options?.outputValidator;
+    this._postProcessors = options?.postProcessors || [];
     this.loaded = this.load();
   }
 
@@ -170,9 +170,6 @@ export class PyodideRunner implements FiolinRunner {
     for (const output of this._shared.outputs) {
       const outBytes = readFile(this._pyodide.FS, `/output/${output}`, this._pyodide.ERRNO_CODES);
       const f = new File([new Blob([outBytes])], output);
-      if (this._validator) {
-        this._validator.validate(f);
-      }
       outFiles.push(f);
     }
     return outFiles;
@@ -298,10 +295,14 @@ export class PyodideRunner implements FiolinRunner {
         };
       }
       const outputs = this.extractOutputs(script);
-      return {
+      const response: FiolinRunResponse = {
         outputs, log: this._log,
         partial: this._shared.partial, formUpdates: this._formUpdates,
       };
+      for (const pp of this._postProcessors) {
+        pp.postProcess(response);
+      }
+      return response;
     } catch (e) {
       const error = toErrWithErrno(e, this._pyodide.ERRNO_CODES);
       return {

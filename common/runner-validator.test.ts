@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { mkRunner, mkScript } from './runner-test-util';
-import { ThirdPartyOutputValidator } from './third-party-output-validator';
+import { ThirdPartyPostProcessor } from './third-party-post-processor';
 
 describe('PyodideRunner output validation', () => {
   it('blocks dangerous extensions when enabled', async () => {
-    const runner = mkRunner({ outputValidator: new ThirdPartyOutputValidator() });
+    const runner = mkRunner({ postProcessors: [new ThirdPartyPostProcessor() ] });
     const script = mkScript(`
       import fiolin
       with open('/output/foo.exe', 'w') as f:
@@ -17,7 +17,7 @@ describe('PyodideRunner output validation', () => {
     expect(response.outputs.length).toEqual(0);
   });
   it ('allows normal extensions when enabled', async () => {
-    const runner = mkRunner({ outputValidator: new ThirdPartyOutputValidator() });
+    const runner = mkRunner({ postProcessors: [new ThirdPartyPostProcessor() ] });
     const script = mkScript(`
       import fiolin
       with open('/output/foo.txt', 'w') as f:

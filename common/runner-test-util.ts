@@ -2,7 +2,7 @@ import { expect } from 'vitest';
 import { ImageMagickLoader } from './image-magick';
 import { dedent } from './indent';
 import { IConsole, PyodideRunner } from './runner';
-import { FiolinForm, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, OutputValidator } from './types';
+import { FiolinForm, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, PostProcessor } from './types';
 import { readFileSync } from 'node:fs';
 
 export interface mkScriptOptions {
@@ -64,7 +64,7 @@ const defaultLoaders: Record<string, FiolinWasmLoader> = (() => {
 export interface mkRunnerOptions {
   loaderOverrides?: Record<string, FiolinWasmLoader>;
   console?: IConsole;
-  outputValidator?: OutputValidator;
+  postProcessors?: PostProcessor[];
 }
 
 export function mkRunner(opts?: mkRunnerOptions): PyodideRunner {
@@ -73,7 +73,7 @@ export function mkRunner(opts?: mkRunnerOptions): PyodideRunner {
     indexUrl,
     loaders,
     console: opts?.console,
-    outputValidator: opts?.outputValidator,
+    postProcessors: opts?.postProcessors,
   });
 }
 

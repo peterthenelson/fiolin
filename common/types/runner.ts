@@ -83,15 +83,8 @@ export class InstallPkgsError extends Error {
   }
 }
 
-export abstract class OutputValidator {
-  abstract validate(file: File): void;
-}
-
-export class ValidateOutputError extends Error {
-  constructor(message: string, options?: ErrorOptions) {
-    super(message, options);
-    this.name = 'ValidateOutputError';
-  }
+export abstract class PostProcessor {
+  abstract postProcess(output: FiolinRunResponse): void;
 }
 
 export interface FiolinRunner {
