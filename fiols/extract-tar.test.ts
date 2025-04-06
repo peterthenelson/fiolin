@@ -1,14 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { listZip, FiolinTmpDir } from './test-util';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
+import { listZip, FiolinTmpDir } from '../common/test-util';
 import { NodeFiolinRunner } from '../utils/runner';
 import { readdirSync } from 'node:fs';
 import { pkgPath } from '../utils/pkg-path';
 
 describe('extract-tar', () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
-
-  beforeEach(() => { output = new FiolinTmpDir(); });
-  afterEach(() => { output.cleanUp(); });
+  beforeEach(() => { output = new FiolinTmpDir(onTestFinished); });
 
   async function extractTar(testFile: string): Promise<string[]> {
     const runner = new NodeFiolinRunner('extract-tar', output.path);

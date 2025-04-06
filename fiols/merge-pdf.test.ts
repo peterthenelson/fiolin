@@ -1,14 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { fileSha256, FiolinTmpDir } from './test-util';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
+import { fileSha256, FiolinTmpDir } from '../common/test-util';
 import { NodeFiolinRunner } from '../utils/runner';
 import path from 'node:path';
 import { pkgPath } from '../utils/pkg-path';
 
 describe('merge-pdf', () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
-
-  beforeEach(() => { output = new FiolinTmpDir(); });
-  afterEach(() => { output.cleanUp(); });
+  beforeEach(() => { output = new FiolinTmpDir(onTestFinished); });
 
   it('merges pdfs', async () => {
     const runner = new NodeFiolinRunner('merge-pdf', output.path);

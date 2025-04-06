@@ -1,33 +1,21 @@
 import { zipFiles } from './zip';
-import { beforeEach, afterEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
 import { mkFile } from './runner-test-util';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
+import { FiolinTmpDir, listZip } from './test-util';
+import { writeFileSync } from 'node:fs';
 
-// TODO: Reorganize test utilities and move all this failure-awareness for tmp
-// directory cleanup into the tmp dir class.
 describe('zip', () => {
-  let tmpDir: string = '';
-
-  beforeEach(() => {
-    tmpDir = mkdtempSync(path.join(tmpdir(), 'zip-test-'));
-  });
-
-  afterEach((ctx) => {
-    if (ctx.task.result?.state == 'fail') {
-      console.log('Temp files for failed test run can be found here: ', tmpDir);
-    } else {
-      rmSync(tmpDir, { force: true, recursive: true });
-    }
-  });
+  let output = new FiolinTmpDir();
+  beforeEach(() => { output = new FiolinTmpDir(onTestFinished); });
 
   it('zips multiple files into a single file', async () => {
     const foo = mkFile('foo.txt', 'foo');
     const bar = mkFile('bar.txt', 'bar');
     const baz = mkFile('baz.txt', 'baz');
     const zip = await zipFiles([foo, bar, baz]);
-    writeFileSync(`${tmpDir}/${zip.name}`, Buffer.from(await zip.arrayBuffer()));
-    // TODO: Add expectations that the zip file has what it should
+    writeFileSync(`${output.path}/${zip.name}`, Buffer.from(await zip.arrayBuffer()));
+    const files = await listZip(`${output.path}/${zip.name}`);
+    files.sort();
+    expect(files).toEqual(['bar.txt', 'baz.txt', 'foo.txt']);
   });
 });

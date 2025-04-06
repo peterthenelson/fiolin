@@ -1,13 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { FiolinTmpDir } from './test-util';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
+import { FiolinTmpDir } from '../common/test-util';
 import { NodeFiolinRunner } from '../utils/runner';
 import { pkgPath } from '../utils/pkg-path';
 
 describe('favicon', () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
-
-  beforeEach(() => { output = new FiolinTmpDir(); });
-  afterEach(() => { output.cleanUp(); });
+  beforeEach(() => { output = new FiolinTmpDir(onTestFinished); });
 
   it('creates icon files', async () => {
     const runner = new NodeFiolinRunner('favicon', output.path);

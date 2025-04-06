@@ -3,16 +3,24 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import yauzl from 'yauzl-promise';
+import type { OnTestFinishedHandler, RunnerTaskResult } from 'vitest';
 
 export class FiolinTmpDir {
   public readonly path: string;
 
-  constructor() {
+  constructor(onTestFinished?: (cb: OnTestFinishedHandler) => void) {
     this.path = mkdtempSync(path.join(tmpdir(), 'fiol-test-'));
+    if (onTestFinished) {
+      onTestFinished((ctx) => this.cleanUp(ctx));
+    }
   }
 
-  cleanUp() {
-    rmSync(this.path, { force: true, recursive: true });
+  cleanUp(ctx?: RunnerTaskResult) {
+    if (ctx?.state == 'fail') {
+      console.log('Temp files for failed test run can be found here: ', this.path);
+    } else {
+      rmSync(this.path, { force: true, recursive: true });
+    }
   }
 }
 

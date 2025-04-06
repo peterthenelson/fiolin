@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { readFromZip, FiolinTmpDir } from './test-util';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
+import { readFromZip, FiolinTmpDir } from '../common/test-util';
 import { NodeFiolinRunner } from '../utils/runner';
 import { pkgPath } from '../utils/pkg-path';
 import path from 'node:path';
@@ -7,9 +7,7 @@ import xmlFormat from 'xml-formatter';
 
 describe('unlock-pptx', () => {
   let output: FiolinTmpDir = new FiolinTmpDir();
-
-  beforeEach(() => { output = new FiolinTmpDir(); });
-  afterEach(() => { output.cleanUp(); });
+  beforeEach(() => { output = new FiolinTmpDir(onTestFinished); });
 
   it('unlocks ppts', async () => {
     const runner = new NodeFiolinRunner('unlock-ppt', output.path);

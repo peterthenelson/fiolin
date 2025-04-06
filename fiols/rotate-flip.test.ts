@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { fileSha256, FiolinTmpDir } from './test-util';
+import { beforeEach, describe, expect, it, onTestFinished } from 'vitest';
+import { fileSha256, FiolinTmpDir } from '../common/test-util';
 import { NodeFiolinRunner } from '../utils/runner';
 import { pkgPath } from '../utils/pkg-path';
 import path from 'node:path';
@@ -11,8 +11,7 @@ describe('rotate-flip', () => {
   let inputHash = fileSha256(inputPath);
   let output: FiolinTmpDir = new FiolinTmpDir();
 
-  beforeEach(() => { output = new FiolinTmpDir(); });
-  afterEach(() => { output.cleanUp(); });
+  beforeEach(() => { output = new FiolinTmpDir(onTestFinished); });
 
   it('writes rotated', async () => {
     const runner = new NodeFiolinRunner('rotate-flip', output.path);
