@@ -1,27 +1,44 @@
-import JSZip from 'jszip';
+import { zip, AsyncZipOptions, AsyncZippable }  from 'fflate';
 
-function folders(paths: string[]): string[] {
-  const dirs = new Set<string>();
-  for (const path of paths) {
-    const parts = path.split('/');
-    for (let i = 0; i < parts.length - 1; i++) {
-      const dirPath = parts.slice(0, i + 1).join('/');
-      dirs.add(dirPath);
+async function toZippable(pathAndContents: [string, ArrayBuffer | Promise<ArrayBuffer>][]): Promise<AsyncZippable> {
+  const root: AsyncZippable = {};
+  for (const [path, content] of pathAndContents) {
+    let bytes: Uint8Array;
+    if (content instanceof Promise) {
+      bytes = new Uint8Array(await content);
+    } else {
+      bytes = new Uint8Array(content);
     }
-  };
-  return Array.from(dirs);
+    const parts = path.split('/');
+    let currentDir = root;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const part = parts[i];
+      if (!(part in currentDir)) {
+        currentDir[part] = {};
+      }
+      currentDir = currentDir[part] as AsyncZippable;
+    }
+    const fileName = parts[parts.length - 1];
+    currentDir[fileName] = bytes;
+  }
+  return root;
+}
+
+function zipAsync(data: AsyncZippable, opts: AsyncZipOptions): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    zip(data, opts, (err, data) => {
+      if (err !== null) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
 }
 
 export async function zipFilesRaw(pathAndContents: [string, ArrayBuffer | Promise<ArrayBuffer>][]): Promise<File> {
-  const zip = new JSZip();
-  for (const dir of folders(pathAndContents.map((x) => x[0]))) {
-    zip.folder(dir);
-  }
-  for (const [path, bufPromise] of pathAndContents) {
-    zip.file(path, bufPromise)
-  }
-  const blob = await zip.generateAsync({ type: 'blob' });
-  return new File([blob], 'output.zip');
+  const bytes = await zipAsync(await toZippable(pathAndContents), {});
+  return new File([bytes], 'output.zip');
 }
 
 export async function zipFiles(files: File[]): Promise<File> {

@@ -89,7 +89,7 @@ def set_output_basenames(outputs=None):
       path = os.path.join(dirpath, f)
       if dirpath != '/output':
         if js.zipOutputs:
-          f = path.removeprefix('/output')
+          f = path.removeprefix('/output/')
         else:
           sys.exit(
             f'When zipping of outputs has not been requested, /output must '
