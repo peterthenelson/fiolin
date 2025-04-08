@@ -2,6 +2,7 @@
 # a javascript object (surprise!) that is provided by the host for Pyodide.
 inputs = []
 outputs = []
+zipOutputs = False
 event = None
 errorMsg = None
 errorLine = None

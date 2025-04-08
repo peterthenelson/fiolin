@@ -12,7 +12,7 @@ function folders(paths: string[]): string[] {
   return Array.from(dirs);
 }
 
-export async function zipFilesRaw(pathAndContents: [string, Promise<ArrayBuffer>][]): Promise<File> {
+export async function zipFilesRaw(pathAndContents: [string, ArrayBuffer | Promise<ArrayBuffer>][]): Promise<File> {
   const zip = new JSZip();
   for (const dir of folders(pathAndContents.map((x) => x[0]))) {
     zip.folder(dir);

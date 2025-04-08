@@ -26,6 +26,8 @@ def set_output_basename(output):
   pass
 def set_output_basenames(outputs=None):
   pass
+def zip_outputs():
+  pass
 def smart_sort(files):
   return []
 def tree(path, file=None, prefix=None):

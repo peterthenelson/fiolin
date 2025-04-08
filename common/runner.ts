@@ -8,6 +8,7 @@ import { FiolinFormComponent, FiolinFormComponentMap } from './types/form';
 import { parseAs } from './parse';
 import { pFormUpdate } from './parse-run';
 import { resultify } from './resultify';
+import { zipFilesRaw } from './zip';
 
 export interface IConsole {
   debug(s: string): void;
@@ -60,7 +61,7 @@ export class PyodideRunner implements FiolinRunner {
 
   constructor(options?: PyodideRunnerOptions) {
     this._shared = {
-      inputs: [], outputs: [], args: {}, event: undefined,
+      inputs: [], outputs: [], zipOutputs: false, args: {}, event: undefined,
       enqueueFormUpdate: resultify((update) => this.enqueueFormUpdate(update)),
       Array, Map, Object, Promise,
       debug: (s) => { this._console.debug(s) },
@@ -147,11 +148,14 @@ export class PyodideRunner implements FiolinRunner {
     writeFile(this._pyodide.FS, `/home/pyodide/script.py`, script.code.python, this._pyodide.ERRNO_CODES);
   }
 
-  private extractOutputs(script: FiolinScript): File[] {
+  private async extractOutputs(script: FiolinScript): Promise<File[]> {
     if (this._shared.partial) {
       return [];
     }
-    const nOutputs = this._shared.outputs.length;
+    let nOutputs = this._shared.outputs.length;
+    if (this._shared.zipOutputs && nOutputs > 0) {
+      nOutputs = 1;
+    }
     if (script.interface.outputFiles === 'NONE' && nOutputs > 0) {
       throw new Error(`Script expected to produce no output files; got ${nOutputs}`);
     } else if (script.interface.outputFiles === 'SINGLE' && nOutputs !== 1) {
@@ -166,18 +170,24 @@ export class PyodideRunner implements FiolinRunner {
     if (!this._pyodide) {
       throw new Error(`this._pyodide should be present before resetFs!`)
     }
-    const outFiles: File[] = [];
+    const outFiles: [string, ArrayBuffer][] = [];
     for (const output of this._shared.outputs) {
       const outBytes = readFile(this._pyodide.FS, `/output/${output}`, this._pyodide.ERRNO_CODES);
-      const f = new File([new Blob([outBytes])], output);
-      outFiles.push(f);
+      outFiles.push([output, outBytes]);
     }
-    return outFiles;
+    if (this._shared.zipOutputs) {
+      return [await zipFilesRaw(outFiles)];
+    } else {
+      return outFiles.map(([relPath, outBytes]) => {
+        return new File([new Blob([outBytes])], relPath);
+      });
+    }
   }
 
   private resetShared() {
     this._shared.inputs = [];
     this._shared.outputs = [];
+    this._shared.zipOutputs = false;
     this._shared.errorMsg = undefined;
     this._shared.errorLine = undefined;
     this._shared.partial = undefined;
@@ -294,7 +304,7 @@ export class PyodideRunner implements FiolinRunner {
           partial: this._shared.partial, formUpdates: this._formUpdates,
         };
       }
-      const outputs = this.extractOutputs(script);
+      const outputs = await this.extractOutputs(script);
       const response: FiolinRunResponse = {
         outputs, log: this._log,
         partial: this._shared.partial, formUpdates: this._formUpdates,

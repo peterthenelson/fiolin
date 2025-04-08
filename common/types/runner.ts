@@ -40,6 +40,9 @@ export type FiolinJsGlobal = Omit<FiolinRunRequest, 'inputs'> & {
   // objects.
   inputs: string[];
   outputs: string[];
+  
+  // Should the runner zip the outputs up into a single file?
+  zipOutputs?: boolean;
 
   // Used to pass exceptions back to the host
   errorMsg?: string;

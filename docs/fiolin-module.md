@@ -121,6 +121,10 @@ fiolin.**tree**(path, file=<_io.TextIOWrapper name='<stdout>' mode='w' encoding=
 
 > Like the tree command-line utility; helpful for debugging.
 
+fiolin.**zip_outputs**()
+
+> Zip up all the output files.
+
 ## Classes
 
 class fiolin.**Errno**

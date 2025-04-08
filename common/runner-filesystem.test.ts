@@ -132,4 +132,60 @@ describe('PyodideRunner file system', () => {
       }
     });
   });
+
+  describe('autozipping', () => {
+    it('allows directories in output', async () => {
+      const runner = mkRunner();
+      const multiOut = mkScript(`
+        import fiolin
+        import os
+        os.makedirs('/output/dir1')
+        os.makedirs('/output/dir2')
+        with open(f'/output/dir1/a.txt', 'w') as f:
+          f.write('a')
+        with open(f'/output/dir1/b.txt', 'w') as f:
+          f.write('b')
+        with open(f'/output/dir2/c.txt', 'w') as f:
+          f.write('c')
+        fiolin.zip_outputs()
+      `);
+      multiOut.interface = { inputFiles: 'NONE', outputFiles: 'SINGLE' };
+      const response = await runner.run(multiOut, { inputs: [], args: {} });
+      expect(response.error).toBeUndefined();
+      expect(response.outputs.map((f) => f.name)).toEqual(['output.zip']);
+    });
+
+    it('disallows directories in output when not set', async () => {
+      const runner = mkRunner();
+      const multiOut = mkScript(`
+        import fiolin
+        import os
+        os.makedirs('/output/dir1')
+        os.makedirs('/output/dir2')
+        with open(f'/output/dir1/a.txt', 'w') as f:
+          f.write('a')
+        with open(f'/output/dir1/b.txt', 'w') as f:
+          f.write('b')
+        with open(f'/output/dir2/c.txt', 'w') as f:
+          f.write('c')
+      `);
+      multiOut.interface = { inputFiles: 'NONE', outputFiles: 'SINGLE' };
+      const response = await runner.run(multiOut, { inputs: [], args: {} });
+      expect(response.error).not.toBeUndefined();
+      expect(response.error?.message).toMatch(/must only have files/);
+    });
+
+    it('fails when no outputs exist', async () => {
+      const runner = mkRunner();
+      const multiOut = mkScript(`
+        import fiolin
+        fiolin.zip_outputs()
+      `);
+      multiOut.interface = { inputFiles: 'NONE', outputFiles: 'SINGLE' };
+      const response = await runner.run(multiOut, { inputs: [], args: {} });
+      expect(response.outputs.map((f) => f.name)).toEqual([]);
+      expect(response.error).not.toBeUndefined();
+      expect(response.error?.message).toMatch(/one output file; got 0/);
+    });
+  });
 });

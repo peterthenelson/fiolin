@@ -78,20 +78,28 @@ def set_output_basenames(outputs=None):
   """Sets the outputs; if not specified, adds all matching /output/*."""
   # Respect manual attempts to set outputs
   if outputs is not None:
-    js.outputs = outputs
+    js.outputs = ffi.to_js(outputs, create_pyproxies=False)
     return
   # If js.outputs has already been set, don't override it.
   if js.outputs:
     return
-  js.outputs = []
+  outputs = []
   for dirpath, _, filenames in os.walk('/output'):
     for f in filenames:
       path = os.path.join(dirpath, f)
       if dirpath != '/output':
-        print(f'/output must only have files, not directories; found {path}',
-              file=sys.stderr)
-      elif f:
-        js.outputs.append(f)
+        if js.zipOutputs:
+          f = path.removeprefix('/output')
+        else:
+          sys.exit(
+            f'When zipping of outputs has not been requested, /output must '
+            f'only have files, not directories; found {path}')
+      outputs.append(f)
+  js.outputs = ffi.to_js(outputs, create_pyproxies=False)
+
+def zip_outputs():
+  """Zip up all the output files."""
+  js.zipOutputs = True
 
 def _strip_common_prefix(a, b):
   p_len = len(os.path.commonprefix([a, b]))
