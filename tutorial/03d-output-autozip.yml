@@ -1,0 +1,11 @@
+meta:
+  title: 3d. Basic UI -- Autozipping Output Files
+  author: Peter Nelson
+  description: >
+    To output multiple files, preserving directory structure, you need to
+    combine them into a single zip file. While you can do this manually, fiolin
+    can do it for you.
+interface:
+  inputFiles: NONE
+  outputFiles: SINGLE
+runtime: {}

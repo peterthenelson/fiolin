@@ -16,7 +16,7 @@ with open(f'/input/{infile}') as f:
 # Whatever files you write to the /output directory will be downloaded when the
 # script finishes. However, this won't work for subdirectories. If you want to
 # store a whole hierarchy of files and folders, you should compress them into a
-# single output zip file.
+# single output zip file (see the autozip tutorial for an easy way to do this).
 # TODO: Try rewriting the script to break up binary files into chunks instead.
 print(f'Breaking input file into 10 chunks')
 size = len(contents) / 10
