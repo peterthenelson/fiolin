@@ -86,8 +86,15 @@ export class InstallPkgsError extends Error {
   }
 }
 
-export abstract class PostProcessor {
-  abstract postProcess(output: FiolinRunResponse): void;
+export abstract class OutputValidator {
+  abstract validate(outputs: File[]): void;
+}
+
+export class OutputValidationError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'OutputValidationError';
+  }
 }
 
 export interface FiolinRunner {

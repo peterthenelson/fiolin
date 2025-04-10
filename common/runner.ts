@@ -1,5 +1,5 @@
 import { loadPyodide, PyodideInterface } from 'pyodide';
-import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule, FormUpdate, InstallPkgsError, PostProcessor } from './types';
+import { FiolinJsGlobal, FiolinLogLevel, FiolinPyPackage, FiolinRunner, FiolinRunRequest, FiolinRunResponse, FiolinScript, FiolinScriptRuntime, FiolinWasmLoader, FiolinWasmModule, FormUpdate, InstallPkgsError, OutputValidator } from './types';
 import { mkDir, readFile, rmRf, toErrWithErrno, writeFile } from './emscripten-fs';
 import { getFiolinPy, getWrapperPy } from './pylib';
 import { cmpSet } from './cmp';
@@ -21,7 +21,7 @@ export interface PyodideRunnerOptions {
   console?: IConsole;
   indexUrl?: string;
   loaders?: Record<string, FiolinWasmLoader>;
-  postProcessors?: PostProcessor[];
+  validators?: OutputValidator[];
 }
 
 function pyPkgKey(v: FiolinPyPackage): any[] {
@@ -56,7 +56,7 @@ export class PyodideRunner implements FiolinRunner {
   private _formUpdates: FormUpdate[];
   private _formIds: FiolinFormComponentMap<FiolinFormComponent>;
   private _loaders: Record<string, FiolinWasmLoader>;
-  private _postProcessors: PostProcessor[];
+  private _validators: OutputValidator[];
   public loaded: Promise<void>;
 
   constructor(options?: PyodideRunnerOptions) {
@@ -93,7 +93,7 @@ export class PyodideRunner implements FiolinRunner {
     };
     this._indexUrl = options?.indexUrl;
     this._loaders = options?.loaders || {};
-    this._postProcessors = options?.postProcessors || [];
+    this._validators = options?.validators || [];
     this.loaded = this.load();
   }
 
@@ -175,12 +175,14 @@ export class PyodideRunner implements FiolinRunner {
       const outBytes = readFile(this._pyodide.FS, `/output/${output}`, this._pyodide.ERRNO_CODES);
       outFiles.push([output, outBytes]);
     }
+    const outputs = outFiles.map(([relPath, outBytes]) => {
+      return new File([new Blob([outBytes])], relPath);
+    });
+    for (const v of this._validators) { v.validate(outputs); }
     if (this._shared.zipOutputs) {
       return [await zipFilesRaw(outFiles)];
     } else {
-      return outFiles.map(([relPath, outBytes]) => {
-        return new File([new Blob([outBytes])], relPath);
-      });
+      return outputs;
     }
   }
 
@@ -305,13 +307,11 @@ export class PyodideRunner implements FiolinRunner {
         };
       }
       const outputs = await this.extractOutputs(script);
+      // TODO
       const response: FiolinRunResponse = {
         outputs, log: this._log,
         partial: this._shared.partial, formUpdates: this._formUpdates,
       };
-      for (const pp of this._postProcessors) {
-        pp.postProcess(response);
-      }
       return response;
     } catch (e) {
       const error = toErrWithErrno(e, this._pyodide.ERRNO_CODES);
