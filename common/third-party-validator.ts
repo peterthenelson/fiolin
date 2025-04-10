@@ -1,7 +1,30 @@
 import { OutputValidator, OutputValidationError } from './types';
 
-// TODO: Consider scanning zip files too
-const BANNED_EXTENSIONS = ['exe', 'com', 'bat', 'ps1', 'dmg', 'iso', 'sh', 'vbs'];
+const BANNED_EXTENSIONS = [
+  '7z',
+  'apk',
+  'app',
+  'bat',
+  'bz2',
+  'cab',
+  'com',
+  'dll',
+  'dmg',
+  'elf',
+  'exe',
+  'gz',
+  'iso',
+  'msi',
+  'ocx',
+  'ps1',
+  'rar',
+  'scr',
+  'sh',
+  'so',
+  'tgz',
+  'vbs',
+  'zip',
+];
 
 export class ThirdPartyValidator extends OutputValidator {
   constructor() { super(); }
