@@ -82,6 +82,16 @@ function loaderFromOpts(container: HTMLElement, opts: ContainerOpts, triggerRelo
   }
 }
 
+function mkWorker(opts: ContainerOpts): ITypedWorker {
+  if (opts.test?.worker) {
+    return opts.test.worker;
+  }
+  let endpoint = opts.workerEndpoint || '/bundle/worker.js';
+  const joiner = endpoint.includes('?') ? '&' : '?';
+  endpoint += joiner + 'type=' + opts.type;
+  return new TypedWorker(endpoint, { type: 'classic' });
+}
+
 export class Container {
   private readonly container: HTMLElement;
   private readonly scriptTitle: HTMLDivElement;
@@ -133,7 +143,7 @@ export class Container {
         updateError: (e) => this.scriptUpdateError(e),
     }, opts?.test?.editor);
     this.terminal = new Terminal(container);
-    this.worker = opts?.test?.worker || new TypedWorker(opts.workerEndpoint || '/bundle/worker.js', { type: 'classic' });
+    this.worker = mkWorker(opts);
     this.worker.onerror = (e) => {
       console.error(getErrMsg(e));
       this.terminal.fatal(getErrMsg(e));

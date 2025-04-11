@@ -50,8 +50,6 @@ A not-necessarily-exhaustive list of TODOs:
     - Convert video?
 - Frontend
   - Add some transition animations for the buttons to invite interaction.
-  - Third party:
-    - Add autozipping as an option and disallow archives
   - Editor:
     - Why is monaco occasionally triggering a request for clipboard permissions?
   - Controls:

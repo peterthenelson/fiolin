@@ -1,9 +1,10 @@
 import { PyodideRunner } from '../common/runner';
+import { ThirdPartyValidator } from '../common/third-party-validator';
 import { parseAs } from '../common/parse';
 import { mkErrorMessage, InstallPackagesMessage, RunMessage, WorkerMessage } from '../web-utils/types';
 import { onlineWasmLoaders } from '../web-utils/loaders';
 import { pWorkerMessage } from '../web-utils/parse-msg';
-import { FiolinScript, ICanvasRenderingContext2D } from '../common/types';
+import { FiolinScript, ICanvasRenderingContext2D, OutputValidator } from '../common/types';
 
 // Typed messaging
 const _rawPost = self.postMessage;
@@ -23,6 +24,13 @@ self.onmessage = async (e) => {
 let runner: PyodideRunner | undefined = undefined;
 async function load(): Promise<void> {
   try {
+    const type = new URLSearchParams(self.location.search).get('type');
+    let validators: OutputValidator[] = [];
+    if (type === '3P') {
+      validators.push(new ThirdPartyValidator());
+    } else if (type !== '1P' && type !== 'PLAYGROUND') {
+      throw new Error(`Worker must be given a valid type parameter in URL; got ${type}`);
+    }
     const tmp = new PyodideRunner({
       console: {
         debug: (s) => postMessage({ type: 'LOG', level: 'DEBUG', value: s }),
@@ -31,6 +39,7 @@ async function load(): Promise<void> {
         error: (s) => postMessage({ type: 'LOG', level: 'ERROR', value: s }),
       },
       loaders: onlineWasmLoaders(),
+      validators,
     });
     await tmp.loaded;
     runner = tmp;
