@@ -33,6 +33,7 @@ export function renderTerminal(opts?: { script?: FiolinScript, numSpaces?: numbe
       <div class="terminal-contents" data-rel-id="terminal-contents">
         <div class="terminal-text" data-rel-id="terminal-text">Loading...</div>
         <div class="terminal-logs hidden" data-rel-id="terminal-logs"></div>
+      </div>
     </div>
   `, ' '.repeat(opts?.numSpaces || 0));
 }

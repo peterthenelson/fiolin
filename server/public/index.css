@@ -20,6 +20,7 @@
   --lightGreenish: #304627;
   --buttonColor: var(--blueish);
   --fuzzSvg: url(/fuzz.svg);
+  --dlSvg: url(/download.svg);
   --tabHeight: 26px;
 }
 
@@ -541,6 +542,52 @@ form button {
   top: 0;
   bottom: 0;
   width: 100%;
+}
+
+.download-container {
+  display: flex;
+  flex-direction: column;
+  width: 10em;
+  padding: 0.5em;
+  background-color: var(--medGrey);
+  border: 1px solid var(--lightGrey);
+  border-radius: 5px;
+}
+
+.download-button {
+  background-color: var(--blueish);
+  mask: var(--dlSvg);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.download-button:hover {
+  filter: blur(0.2px) saturate(2);
+}
+
+.download-list {
+  background-color: var(--darkGrey);
+  font-family: monospace;
+  white-space: pre-wrap;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--darkGrey) var(--medGrey);
+  margin-top: 0.3em;
+  min-height: 2em;
+  max-height: 12em;
+}
+
+.download-item {
+  padding-left: 0.5em;
+}
+
+.download-item:hover {
+  color: var(--darkerGrey);
+  background-color: var(--lightGrey);
 }
 
 .terminal {
