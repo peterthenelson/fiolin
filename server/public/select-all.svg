@@ -1,0 +1,47 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1.5em"
+  height="1em"
+  viewBox="0 0 150 100"
+>
+  <line
+    x1="20" y1="15"
+    x2="20" y2="95"
+    stroke="currentColor" stroke-width="8" stroke-linecap="round"
+  />
+  <line
+    x1="20" y1="95"
+    x2="100" y2="95"
+    stroke="currentColor" stroke-width="8" stroke-linecap="round"
+  />
+  <line
+    x1="100" y1="95"
+    x2="100" y2="15"
+    stroke="currentColor" stroke-width="8" stroke-linecap="round"
+  />
+  <line
+    x1="100" y1="15"
+    x2="20" y2="15"
+    stroke="currentColor" stroke-width="8" stroke-linecap="round"
+  />
+  <line
+    x1="25" y1="3"
+    x2="112" y2="3"
+    stroke="currentColor" stroke-width="6" stroke-linecap="round"
+  />
+  <line
+    x1="112" y1="3"
+    x2="112" y2="90"
+    stroke="currentColor" stroke-width="6" stroke-linecap="round"
+  />
+  <line
+    x1="40" y1="55"
+    x2="55" y2="70"
+    stroke="currentColor" stroke-width="8" stroke-linecap="round"
+  />
+  <line
+    x1="55" y1="70"
+    x2="80" y2="40"
+    stroke="currentColor" stroke-width="8" stroke-linecap="round"
+  />
+</svg>

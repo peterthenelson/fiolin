@@ -21,6 +21,7 @@
   --buttonColor: var(--blueish);
   --fuzzSvg: url(/fuzz.svg);
   --dlSvg: url(/download.svg);
+  --saSvg: url(/select-all.svg);
   --tabHeight: 26px;
 }
 
@@ -552,6 +553,19 @@ form button {
   background-color: var(--medGrey);
   border: 1px solid var(--lightGrey);
   border-radius: 5px;
+}
+
+.select-button {
+  background-color: var(--blueish);
+  mask: var(--saSvg);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.select-button:hover {
+  filter: blur(0.2px) saturate(2);
 }
 
 .download-button {
