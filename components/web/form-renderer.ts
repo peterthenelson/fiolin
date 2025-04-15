@@ -3,6 +3,8 @@ import { FiolinFormEvent, FiolinFormInputEventType, FiolinFormPointerEventType, 
 import { FiolinFormComponentMapImpl, idToRepr, makeId, maybeComponentToId, swapToPartial } from '../../common/form-utils';
 import { FiolinFormComponent, FiolinFormComponentElement, FiolinFormComponentId, FiolinFormPartialComponentElement } from '../../common/types/form';
 import { setSelected } from '../../web-utils/set-selected';
+import { maybeGetByRelIdAs } from '../../web-utils/select-as';
+import { DownloadComponent } from './download-component';
 
 export type FormEventHandler = (id: FiolinFormComponentId, ev: FiolinFormEvent) => void;
 
@@ -131,6 +133,7 @@ function createAndPairElement(document: Document, component: FiolinFormComponent
     'BUTTON': (c) => [c, document.createElement('button')],
     'OUTPUT': (c) => [c, document.createElement('output')],
     'CANVAS': (c) => [c, document.createElement('canvas')],
+    'DOWNLOAD': (c) => [c, document.createElement('div')],
   });
 }
 
@@ -425,6 +428,34 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
       output.classList.add('canvas');
       updateField(output, 'height', component.height);
       updateField(output, 'width', component.width);
+    },
+    'DOWNLOAD': ([component, output]) => {
+      output.className = 'download-container';
+      const header = document.createElement('div');
+      header.className = 'download-header';
+      const headerText = document.createElement('span');
+      const oldText = maybeGetByRelIdAs(output, 'download-text', HTMLSpanElement)?.innerText;
+      headerText.className = 'download-text';
+      headerText.dataset['relId'] = 'download-text';
+      headerText.innerText = component.text || oldText || 'Outputs';
+      const selectButton = document.createElement('div');
+      selectButton.className = 'select-button';
+      selectButton.dataset['relId'] = 'select-button';
+      selectButton.title = 'Select All Files';
+      const downloadButton = document.createElement('div');
+      downloadButton.className = 'download-button';
+      downloadButton.dataset['relId'] = 'download-button';
+      downloadButton.title = 'Download Selected Files';
+      header.replaceChildren(headerText, selectButton, downloadButton);
+      const list = document.createElement('div');
+      list.className = 'download-list';
+      list.dataset['relId'] = 'download-list';
+      output.replaceChildren(header, list);
+      // TODO: Plumb in downloading callback and plumb out access to the
+      // download component (for updating the file list)
+      const _ = new DownloadComponent(
+        output, [new File([], 'abc.txt'), new File([], '123.txt')],
+        (f) => { console.log(`TODO: download ${f.name}`)});
     },
   });
   if (ce[0].hidden !== undefined) {

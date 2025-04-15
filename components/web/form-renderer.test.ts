@@ -59,4 +59,17 @@ describe('form renderer', () => {
       ],
     ]);
   });
+
+  it('renders download component', () => {
+    const formElem = document.createElement('form');
+    const ui: FiolinScriptInterface = {
+      inputFiles: 'ANY', outputFiles: 'ANY',
+      form: {
+        children: [
+          { type: 'DOWNLOAD', text: 'Outputs' },
+        ],
+      }
+    };
+    const form = RenderedForm.render(formElem, ui, () => {});
+  });
 });

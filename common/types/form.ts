@@ -26,7 +26,7 @@ export type FiolinFormComponentElement = (
   [FiolinFormText, HTMLInputElement] | [FiolinFormTime, HTMLInputElement] |
   [FiolinFormUrl, HTMLInputElement] | [FiolinFormSelect, HTMLSelectElement] |
   [FiolinFormButton, HTMLButtonElement] | [FiolinFormOutput, HTMLOutputElement] |
-  [FiolinFormCanvas, HTMLCanvasElement]
+  [FiolinFormCanvas, HTMLCanvasElement] | [FiolinFormDownload, HTMLDivElement]
 );
 
 // Type assertion helper
@@ -419,4 +419,14 @@ export interface FiolinFormCanvas extends FiolinFormCommon {
   width: number;
   // Is this component (initially) hidden?
   hidden?: boolean;
+}
+
+// A download selector (as an alternative to automatically downloading files)
+export interface FiolinFormDownload extends FiolinFormCommon {
+  // Type id
+  type: 'DOWNLOAD';
+  // The name (used only to identify the component)
+  name?: string;
+  // The text in the header of the component
+  text?: string;
 }

@@ -8,7 +8,6 @@ import { renderCustomForm } from '../../components/server/custom-form';
 import { renderSimpleForm } from '../../components/server/simple-form';
 import { renderTutorialLoader } from './tutorial-loader';
 import { renderThirdParty } from './third-party';
-import { renderDownloadDemo } from './download-demo';
 
 export interface FiolinContainerOptions {
   // Whether this is a first-party, third-party, or playground/tutorial layout.
@@ -31,8 +30,6 @@ export function renderContainer(opts?: FiolinContainerOptions): string {
   const title = opts.script?.meta?.title || '';
   const desc = opts.script?.meta?.description || 'Loading...';
   const ns = opts.numSpaces || 0;
-  // TODO: Finish the download component and then remove
-  const dlDemo = renderDownloadDemo({ numSpaces: ns + 2 });
   return redent(`
     <div id="${idPrefix}container" class="container ${opts.mode === 'PLAYGROUND' ? 'dev-mode' : ''}">
       <div class="script-header flex-row-wrap">
@@ -66,7 +63,6 @@ export function renderContainer(opts?: FiolinContainerOptions): string {
         <span>&nbsp;</span>
         <a href="https://github.com/peterthenelson/fiolin/issues/new">Report Bug</a>
       </div>
-      ${false ? dlDemo : ''}
     </div>
   `, ' '.repeat(ns));
 }

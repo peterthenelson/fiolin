@@ -682,3 +682,19 @@ submission).
 
 > Is this component (initially) hidden?
 
+## FiolinFormDownload extends FiolinFormCommon
+
+> A download selector (as an alternative to automatically downloading files)
+
+**type**: _'DOWNLOAD'_
+
+> Type id
+
+**name?**: _string_
+
+> The name (used only to identify the component)
+
+**text?**: _string_
+
+> The text in the header of the component
+

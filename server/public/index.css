@@ -555,6 +555,13 @@ form button {
   border-radius: 5px;
 }
 
+.download-header {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  align-items: center;
+}
+
 .select-button {
   background-color: var(--blueish);
   mask: var(--saSvg);
