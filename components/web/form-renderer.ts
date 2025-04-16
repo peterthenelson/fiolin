@@ -7,25 +7,36 @@ import { maybeGetByRelIdAs } from '../../web-utils/select-as';
 import { DownloadComponent } from './download-component';
 
 export type FormEventHandler = (id: FiolinFormComponentId, ev: FiolinFormEvent) => void;
+export type FileDownloader = (file: File) => void;
 
 interface RenderState {
   document: Document;
   form: HTMLFormElement;
   ui: FiolinScriptInterface;
   uniquelyIdentifiedElems: FiolinFormComponentMapImpl<FiolinFormComponentElement>;
+  downloadComponents: DownloadComponent[];
   onEvent?: FormEventHandler;
+  downloadFile?: FileDownloader;
+}
+
+export interface RenderOpts {
+  onEvent?: FormEventHandler;
+  downloadFile?: FileDownloader;
+  document?: Document;
 }
 
 export class RenderedForm {
   private readonly state: RenderState;
 
-  private constructor(form: HTMLFormElement, ui: FiolinScriptInterface, onEvent?: FormEventHandler, document?: Document) {
+  private constructor(form: HTMLFormElement, ui: FiolinScriptInterface, opts?: RenderOpts) {
     this.state = {
-      document: document || window.document,
+      document: opts?.document || window.document,
       form,
       ui,
       uniquelyIdentifiedElems: new FiolinFormComponentMapImpl(),
-      onEvent,
+      downloadComponents: [],
+      onEvent: opts?.onEvent,
+      downloadFile: opts?.downloadFile,
     }
   }
 
@@ -37,9 +48,9 @@ export class RenderedForm {
     return this.state.uniquelyIdentifiedElems.get(id);
   }
 
-  static render(form: HTMLFormElement, ui?: FiolinScriptInterface, onEvent?: FormEventHandler, document?: Document): RenderedForm {
+  static render(form: HTMLFormElement, ui?: FiolinScriptInterface, opts?: RenderOpts): RenderedForm {
     ui ||= { inputFiles: 'ANY', outputFiles: 'ANY' };
-    const rendered = new RenderedForm(form, ui, onEvent, document);
+    const rendered = new RenderedForm(form, ui, opts);
     form.onsubmit = () => {};
     const newChildren: HTMLElement[] = [];
     if (!ui.form) {
@@ -99,6 +110,16 @@ export class RenderedForm {
         renderInPlace(update, this.state, false, formUpdate.id);
       }
     })
+  }
+
+  shouldAutoDownload(): boolean {
+    return this.state.downloadComponents.length === 0;
+  }
+
+  setOutputFiles(files: File[]): void {
+    for (const d of this.state.downloadComponents) {
+      d.setFiles(files);
+    }
   }
 
   transferCanvases(): Record<string, OffscreenCanvas> {
@@ -451,11 +472,8 @@ function renderInPlace(ce: FiolinFormPartialComponentElement, state: RenderState
       list.className = 'download-list';
       list.dataset['relId'] = 'download-list';
       output.replaceChildren(header, list);
-      // TODO: Plumb in downloading callback and plumb out access to the
-      // download component (for updating the file list)
-      const _ = new DownloadComponent(
-        output, [new File([], 'abc.txt'), new File([], '123.txt')],
-        (f) => { console.log(`TODO: download ${f.name}`)});
+      state.downloadComponents.push(new DownloadComponent(
+        output, [], state.downloadFile));
     },
   });
   if (ce[0].hidden !== undefined) {

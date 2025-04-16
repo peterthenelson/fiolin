@@ -60,7 +60,10 @@ export class CustomForm extends FormComponent {
     this.ui = script.interface;
     if (this.ui.form) {
       try {
-        this.rendered = RenderedForm.render(this.elem, this.ui, (id, ev) => this.onEvent(id, ev));
+        this.rendered = RenderedForm.render(this.elem, this.ui, {
+          onEvent: (id, ev) => this.onEvent(id, ev),
+          downloadFile: (f) => this.cbs.downloadFile(f),
+        });
         this.rendered.form.onsubmit = (e) => {
           e.preventDefault();
           const files = this.getFiles();
@@ -104,9 +107,10 @@ export class CustomForm extends FormComponent {
 
   onSuccess(response: FiolinRunResponse): void {
     if (!this.rendered) return;
+    this.rendered.setOutputFiles(response.outputs);
     // TODO: When they exist:
     // - update the output file display component.
-    if (this.isEnabled() && !response.partial) {
+    if (this.isEnabled() && !response.partial && this.rendered.shouldAutoDownload()) {
       for (const f of response.outputs) {
         this.cbs.downloadFile(f);
       }

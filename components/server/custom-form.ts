@@ -17,8 +17,7 @@ export function renderCustomForm(opts?: { script?: FiolinScript, numSpaces?: num
     const rf = RenderedForm.render(
       (form as unknown) as HTMLFormElement,
       opts.script.interface,
-      undefined,
-      (document as unknown) as Document
+      { document: (document as unknown) as Document },
     );
     return redent(rf.form.outerHTML, ' '.repeat(opts?.numSpaces || 0));
   } else {

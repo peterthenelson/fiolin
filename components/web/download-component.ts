@@ -2,10 +2,10 @@ import { getByRelIdAs } from '../../web-utils/select-as';
 
 export class DownloadComponent {
   private readonly list: HTMLDivElement;
-  private readonly downloadFile: (file: File) => void;
+  private readonly downloadFile?: (file: File) => void;
   private items: [HTMLDivElement, File][];
 
-  constructor(root: HTMLDivElement, files: File[], downloadFile: (file: File) => void) {
+  constructor(root: HTMLDivElement, files: File[], downloadFile?: (file: File) => void) {
     this.list = getByRelIdAs(root, 'download-list', HTMLDivElement);
     this.downloadFile = downloadFile;
     this.items = [];
@@ -41,10 +41,13 @@ export class DownloadComponent {
         }
       }
     };
-    downloadButton.onclick = () => {
-      for (const i of this.items.filter((i) => i[0].classList.contains('selected'))) {
-        this.downloadFile(i[1]);
-      }
-    };
+    if (this.downloadFile) {
+      const df = this.downloadFile;
+      downloadButton.onclick = () => {
+        for (const i of this.items.filter((i) => i[0].classList.contains('selected'))) {
+          df(i[1]);
+        }
+      };
+    }
   }
 }

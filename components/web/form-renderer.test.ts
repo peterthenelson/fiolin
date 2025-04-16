@@ -18,10 +18,10 @@ describe('form renderer', () => {
       }
     };
     const events: [FiolinFormComponentId, FiolinFormEvent][] = [];
-    const handler = (id: FiolinFormComponentId, ev: FiolinFormEvent) => {
+    const onEvent = (id: FiolinFormComponentId, ev: FiolinFormEvent) => {
       events.push([id, ev]);
     }
-    const _ = RenderedForm.render(formElem, ui, handler);
+    const _ = RenderedForm.render(formElem, ui, { onEvent });
     expect(formElem.childElementCount).toEqual(2);
     const nameRaw = formElem.childNodes.item(0);
     expect(nameRaw).toBeInstanceOf(HTMLInputElement);
@@ -70,6 +70,11 @@ describe('form renderer', () => {
         ],
       }
     };
-    const form = RenderedForm.render(formElem, ui, () => {});
+    const files: File[] = [];
+    const downloadFile = (file: File) => {
+      files.push(file);
+    }
+    const form = RenderedForm.render(formElem, ui, { downloadFile });
+    // TODO: Dispatch a click event to it
   });
 });
