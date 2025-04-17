@@ -53,5 +53,5 @@ A not-necessarily-exhaustive list of TODOs:
   - Editor:
     - Why is monaco occasionally triggering a request for clipboard permissions?
   - Controls:
-    - Add a "download files" component for the custom form
+    - Use the new "download files" component for the custom form as appropriate
     - Make FILE component have a logo and text and panel and whatnot

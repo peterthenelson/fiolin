@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { RenderedForm } from './form-renderer';
 import { FiolinFormComponentId, FiolinFormEvent, FiolinScriptInterface } from '../../common/types';
+import { getByRelIdAs } from '../../web-utils/select-as';
 
 describe('form renderer', () => {
   it('handles all event handler types', () => {
@@ -75,6 +76,11 @@ describe('form renderer', () => {
       files.push(file);
     }
     const form = RenderedForm.render(formElem, ui, { downloadFile });
-    // TODO: Dispatch a click event to it
+    form.setOutputFiles([new File([], 'abc.txt'), new File([], '123.txt')]);
+    const selectButton = getByRelIdAs(form.form, 'select-button', HTMLElement);
+    const downloadButton = getByRelIdAs(form.form, 'download-button', HTMLElement);
+    selectButton.dispatchEvent(new Event('click'));
+    downloadButton.dispatchEvent(new Event('click'));
+    expect(files.map((f) => f.name)).toEqual(['abc.txt', '123.txt']);
   });
 });
