@@ -22,7 +22,7 @@ export async function renderCatalog(numSpaces?: number) {
       <a href="/" class="plain-link"><h1>ƒ<span class="home-io">ɪᴏ</span>ʟɪɴ</h1></a>
       <div class="home-subtitle">Your files belong to you.</div>
       <div class="home-text">
-        Easily convert between file formats, combine PDFs, and more.
+        Easily convert between file formats, merge PDFs, and more.
         Unlike other websites, your files stay on your computer!
       </div>
       <div class="catalog flex-col-wrap">
