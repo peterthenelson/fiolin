@@ -1,5 +1,6 @@
 import { getByRelIdAs, selectAs } from '../../web-utils/select-as';
 import { StorageLike } from '../../web-utils/types';
+import { sendEvent } from '../../web-utils/analytics';
 
 export interface ThirdPartOpts {
   username: string;
@@ -37,9 +38,13 @@ export class ThirdParty {
           event.submitter.value === 'cancel') {
         // Go home on cancel
         window.location.replace(window.location.origin);
+        return;
       }
       if ((new FormData(this.form)).get('remember') === 'on') {
         this.saveApproval();
+      }
+      if (this.opts) {
+        sendEvent(`3p/${this.opts.username}/${this.opts.path}/approve`);
       }
     };
   }

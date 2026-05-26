@@ -17,6 +17,7 @@ import { TutorialLoader } from './tutorial-loader';
 import { UrlLoader } from './url-loader';
 import { LoaderComponent } from './loader-component';
 import { ThirdParty } from './third-party';
+import { sendEvent } from '../../web-utils/analytics';
 
 function downloadFile(f: File) {
   const elem = document.createElement('a');
@@ -105,11 +106,14 @@ export class Container {
   private readonly editor: Editor;
   private readonly terminal: Terminal;
   private readonly worker: ITypedWorker;
+  private readonly opts: ContainerOpts;
+  private loadedScript?: FiolinScript;
   private yml: string;
   public script: Promise<FiolinScript>;
   public readonly readyToRun: Deferred<void>;
 
   constructor(container: HTMLElement, opts: ContainerOpts) {
+    this.opts = opts;
     this.container = container;
     this.scriptTitle = getByRelIdAs(container, 'script-title', HTMLDivElement);
     this.modeButton = getByRelIdAs(container, 'dev-mode-button', HTMLDivElement);
@@ -157,6 +161,22 @@ export class Container {
     this.readyToRun = new Deferred();
   }
 
+  // Returns the analytics event prefix for the current script, e.g. "s/my-script"
+  // or "3p/user/path" or "t/hello-world". Pass the loaded script for PLAYGROUND
+  // (where the identity is per-tutorial), or omit to use the last known script.
+  private analyticsPrefix(script?: FiolinScript): string {
+    const s = script ?? this.loadedScript;
+    if (this.opts.type === '1P') {
+      return `s/${this.opts.fiol}`;
+    } else if (this.opts.type === '3P') {
+      return `3p/${this.opts.username}/${this.opts.path}`;
+    } else {
+      const title = s?.meta?.title ?? 'unknown';
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return `t/${slug}`;
+    }
+  }
+
   private async updateUiForScript(script: FiolinScript) {
     this.scriptTitle.textContent = script.meta.title;
     this.scriptDesc.textContent = script.meta.description;
@@ -182,12 +202,15 @@ export class Container {
       this.worker.postMessage({ type: 'INSTALL_PACKAGES', script });
       this.updateUiForScript(script);
       await this.editor.setScript(script);
+      this.loadedScript = script;
+      sendEvent(`${this.analyticsPrefix(script)}/load/ok`);
       return script;
     } catch (e) {
       console.log('Failed to load script!');
       const err = toErr(e);
       console.error(err);
       this.scriptDesc.textContent = `Failed to load script:\n${err.message}`;
+      sendEvent(`${this.analyticsPrefix()}/load/err`);
       throw e;
     }
   }
@@ -251,10 +274,12 @@ export class Container {
     } else if (msg.type === 'SUCCESS') {
       this.form.onSuccess(msg.response);
       this.container.classList.remove('running');
+      sendEvent(`${this.analyticsPrefix()}/run/ok`);
     } else if (msg.type === 'ERROR') {
       this.form.onError(msg.response);
       this.container.classList.add('error');
       this.container.classList.remove('running');
+      sendEvent(`${this.analyticsPrefix()}/run/err`);
       if (typeof msg.lineno !== 'undefined') {
         console.warn(msg.error.message);
         await this.editor.setError('script.py', msg.lineno, msg.error.message);

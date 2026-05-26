@@ -28,6 +28,7 @@ use the node-based offline toolchain.
 * [Further Reading](#more)
   * [Design Document](./design.md)
   * [Example First-Party Fiolin Scripts][examples]
+  * [Privacy Policy](./privacy.md)
 
 ## Python API <a name="python-api"></a>
 
@@ -217,6 +218,7 @@ Fiolin repository.
 
 * [Design Document](./design.md)
 * [Example First-Party Fiolin Scripts][examples]
+* [Privacy Policy](./privacy.md)
 
 [examples]: https://github.com/peterthenelson/fiolin/blob/main/fiols/
 [fiolin-tmpl]: https://github.com/peterthenelson/fiolin-template

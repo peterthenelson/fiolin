@@ -62,6 +62,8 @@ export function renderContainer(opts?: FiolinContainerOptions): string {
         <a href="/">Return Home</a>
         <span>&nbsp;</span>
         <a href="https://github.com/peterthenelson/fiolin/issues/new">Report Bug</a>
+        <span>&nbsp;</span>
+        <a href="/doc/privacy">Privacy</a>
       </div>
     </div>
   `, ' '.repeat(ns));
