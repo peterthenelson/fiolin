@@ -15,11 +15,11 @@ const commonCsp = [
 ];
 
 // The host/UI page and code use this CSP.
-// Note: cloudflare analytics
+// Note: cloudflare analytics; wasm-unsafe-eval for /analytics/checksum.wasm
 const indexCsp = commonCsp.concat([
   // Cloudflare for analytics.
   "connect-src 'self' https://cloudflareinsights.com/cdn-cgi/rum",
-  "script-src 'self' https://static.cloudflareinsights.com/beacon.min.js",
+  "script-src 'self' 'wasm-unsafe-eval' https://static.cloudflareinsights.com/beacon.min.js",
   // Note: base64 images used by monaco.
   "img-src 'self' data:",
 ]);
@@ -29,7 +29,7 @@ const indexCsp = commonCsp.concat([
 const thirdPartyCsp = commonCsp.concat([
   // Cloudflare for analytics, localhost for testing, github.io for 3p scripts.
   "connect-src 'self' https://*.github.io http://localhost:3001 https://cloudflareinsights.com/cdn-cgi/rum",
-  "script-src 'self' https://static.cloudflareinsights.com/beacon.min.js",
+  "script-src 'self' 'wasm-unsafe-eval' https://static.cloudflareinsights.com/beacon.min.js",
   // Note: base64 images used by monaco, github for gravatars.
   "img-src 'self' data: https://github.com https://avatars.githubusercontent.com",
 ]);
