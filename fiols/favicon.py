@@ -1,4 +1,4 @@
-"""Transform a square image into a multi-resolution .ico file."""
+"""Transform a square image into favicon files."""
 import fiolin
 import sys
 from pyodide import ffi
@@ -28,7 +28,7 @@ async def main():
       collection.push(img)
     state = {
       'collection': collection,
-      'output_path': f'/output/{fiolin.get_input_basename(ext='.ico')}',
+      'basename': fiolin.get_input_basename(ext=''),
     }
     fiolin.continue_with(state)
     fiolin.form_set_hidden('start', hidden=True)
@@ -41,6 +41,16 @@ async def main():
     fiolin.form_set_hidden('start', hidden=False)
     fiolin.form_set_hidden('selected', hidden=True)
     fiolin.finish()
-    async with fiolin.callback_to_ctx(state['collection'].write, im.MagickFormat.Ico) as final:
-      with open(state['output_path'], 'wb') as f:
-        f.write(bytes(final))
+    single_ico = args.get('output_format', 'ico') == 'ico'
+    if single_ico:
+      output_path = f'/output/{state["basename"]}.ico'
+      async with fiolin.callback_to_ctx(state['collection'].write, im.MagickFormat.Ico) as final:
+        with open(output_path, 'wb') as f:
+          f.write(bytes(final))
+    else:
+      for i, n in enumerate(SIZES):
+        img = state['collection'][i]
+        output_path = f'/output/{state["basename"]}-{n}.png'
+        async with fiolin.callback_to_ctx(img.write, im.MagickFormat.Png) as final:
+          with open(output_path, 'wb') as f:
+            f.write(bytes(final))

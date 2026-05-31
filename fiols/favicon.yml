@@ -2,16 +2,17 @@ meta:
   title: Image to Favicon
   author: Peter Nelson
   description: >
-    Create a multi-resolution icon file from a square image. The script will
-    create an icon file with 256x256, 128x128, 64x64, 32x32, and 16x16
-    scaled versions of the original image. (Browsers choose the appropriate
-    size version automatically.)
+    Create icon files from a square image. By default, creates a single
+    multi-resolution .ico file with 256x256, 128x128, 64x64, 32x32, and
+    16x16 versions (browsers choose the appropriate size automatically).
+    You can also export them as separate .pngs instead.
   extensions:
     - ico
+    - png
 interface:
   inputAccept: image/*
   inputFiles: SINGLE
-  outputFiles: SINGLE
+  outputFiles: ANY
   terminal: FATAL_ONLY
   form:
     autofocusedName: input
@@ -34,6 +35,17 @@ interface:
             name: selected
             hidden: true
             children:
+              - type: LABEL
+                text: Output Format
+                child:
+                  type: SELECT
+                  name: output_format
+                  options:
+                    - text: Single .ico file
+                      value: ico
+                      selected: true
+                    - text: Separate .png files
+                      value: png
               - type: DIV
                 dir: ROW
                 children:
